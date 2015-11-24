@@ -6,6 +6,9 @@ BOOL WINAPI DllMain(HINSTANCE hInstDLL, DWORD fdwReason, LPVOID lpvReserved)
     switch (fdwReason)
     {
     case DLL_PROCESS_ATTACH:
+		/* Temporary Code for import test.
+		   This will be removed later.
+		*/
 		_wsetlocale(LC_ALL, L"Korean");
 		break;
 
