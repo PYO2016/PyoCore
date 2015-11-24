@@ -1,0 +1,70 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PyoCore", "PyoCore\PyoCore.vcxproj", "{4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{95C39446-C44B-417E-BEFE-F2E0746DE459}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cpp-Import", "examples\Cpp-Import\Cpp-Import.vcxproj", "{56E9C9CF-DA43-4A11-B26A-3FF6604A7FEB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8} = {4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Csharp-Import", "examples\Csharp-Import\Csharp-Import.csproj", "{C2281CD3-2CDF-4FAF-BEB6-A28CEF822AF4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8} = {4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8}.Debug|x64.ActiveCfg = Debug|x64
+		{4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8}.Debug|x64.Build.0 = Debug|x64
+		{4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8}.Debug|x86.ActiveCfg = Debug|Win32
+		{4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8}.Debug|x86.Build.0 = Debug|Win32
+		{4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8}.Release|Any CPU.ActiveCfg = Release|Win32
+		{4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8}.Release|x64.ActiveCfg = Release|x64
+		{4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8}.Release|x64.Build.0 = Release|x64
+		{4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8}.Release|x86.ActiveCfg = Release|Win32
+		{4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8}.Release|x86.Build.0 = Release|Win32
+		{56E9C9CF-DA43-4A11-B26A-3FF6604A7FEB}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{56E9C9CF-DA43-4A11-B26A-3FF6604A7FEB}.Debug|x64.ActiveCfg = Debug|x64
+		{56E9C9CF-DA43-4A11-B26A-3FF6604A7FEB}.Debug|x64.Build.0 = Debug|x64
+		{56E9C9CF-DA43-4A11-B26A-3FF6604A7FEB}.Debug|x86.ActiveCfg = Debug|Win32
+		{56E9C9CF-DA43-4A11-B26A-3FF6604A7FEB}.Debug|x86.Build.0 = Debug|Win32
+		{56E9C9CF-DA43-4A11-B26A-3FF6604A7FEB}.Release|Any CPU.ActiveCfg = Release|Win32
+		{56E9C9CF-DA43-4A11-B26A-3FF6604A7FEB}.Release|x64.ActiveCfg = Release|x64
+		{56E9C9CF-DA43-4A11-B26A-3FF6604A7FEB}.Release|x64.Build.0 = Release|x64
+		{56E9C9CF-DA43-4A11-B26A-3FF6604A7FEB}.Release|x86.ActiveCfg = Release|Win32
+		{56E9C9CF-DA43-4A11-B26A-3FF6604A7FEB}.Release|x86.Build.0 = Release|Win32
+		{C2281CD3-2CDF-4FAF-BEB6-A28CEF822AF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2281CD3-2CDF-4FAF-BEB6-A28CEF822AF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2281CD3-2CDF-4FAF-BEB6-A28CEF822AF4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C2281CD3-2CDF-4FAF-BEB6-A28CEF822AF4}.Debug|x64.Build.0 = Debug|Any CPU
+		{C2281CD3-2CDF-4FAF-BEB6-A28CEF822AF4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C2281CD3-2CDF-4FAF-BEB6-A28CEF822AF4}.Debug|x86.Build.0 = Debug|Any CPU
+		{C2281CD3-2CDF-4FAF-BEB6-A28CEF822AF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2281CD3-2CDF-4FAF-BEB6-A28CEF822AF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2281CD3-2CDF-4FAF-BEB6-A28CEF822AF4}.Release|x64.ActiveCfg = Release|Any CPU
+		{C2281CD3-2CDF-4FAF-BEB6-A28CEF822AF4}.Release|x64.Build.0 = Release|Any CPU
+		{C2281CD3-2CDF-4FAF-BEB6-A28CEF822AF4}.Release|x86.ActiveCfg = Release|Any CPU
+		{C2281CD3-2CDF-4FAF-BEB6-A28CEF822AF4}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{56E9C9CF-DA43-4A11-B26A-3FF6604A7FEB} = {95C39446-C44B-417E-BEFE-F2E0746DE459}
+		{C2281CD3-2CDF-4FAF-BEB6-A28CEF822AF4} = {95C39446-C44B-417E-BEFE-F2E0746DE459}
+	EndGlobalSection
+EndGlobal
