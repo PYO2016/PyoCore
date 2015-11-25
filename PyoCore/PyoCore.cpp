@@ -20,7 +20,7 @@ BOOL PyoCore::processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileTy
 	/* Temporary Code for test. */
 	wprintf(L"processImageFileW() called!\n");
 	wprintf(L"Arg : %s / %d\n", imageFileName, imageFileType);
-	wcscpy(outputFileName, L"WIDE Copy");
+	wcscpy(outputFileName, L"WIDE Copy 와이드 카피");
 
 	return TRUE;
 }
@@ -28,9 +28,9 @@ BOOL PyoCore::processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileTy
 BOOL PyoCore::processImageFileA(LPCSTR imageFileName, ImageFileType imageFileType, LPSTR outputFileName)
 {
 	/* Temporary Code for test. */
-	printf("processImageFileW() called!\n");
+	printf("processImageFileA() called!\n");
 	printf("Arg : %s / %d\n", imageFileName, imageFileType);
-	strcpy(outputFileName, "ANSI Copy");
+	strcpy(outputFileName, "ANSI Copy 안시 카피");
 
 	return TRUE;
 
