@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PyoCore", "PyoCore\PyoCore.vcxproj", "{4B8C68F8-D3F2-477E-A7BE-96E4DFDCFAF8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{95C39446-C44B-417E-BEFE-F2E0746DE459}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{95C39446-C44B-417E-BEFE-F2E0746DE459}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cpp-Import", "examples\Cpp-Import\Cpp-Import.vcxproj", "{56E9C9CF-DA43-4A11-B26A-3FF6604A7FEB}"
 	ProjectSection(ProjectDependencies) = postProject
