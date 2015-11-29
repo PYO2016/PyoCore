@@ -27,10 +27,28 @@
     <ClCompile Include="PyoCore.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Preprocessing\Preprocessor.cpp">
+      <Filter>소스 파일\Preprocessing</Filter>
+    </ClCompile>
+    <ClCompile Include="TableDetection\TableDetector.cpp">
+      <Filter>소스 파일\TableDetection</Filter>
+    </ClCompile>
+    <ClCompile Include="TableDetection\HistogramManager.cpp">
+      <Filter>소스 파일\TableDetection</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PyoCore.h">
       <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Preprocessing\Preprocessor.h">
+      <Filter>소스 파일\Preprocessing</Filter>
+    </ClInclude>
+    <ClInclude Include="TableDetection\TableDetector.h">
+      <Filter>소스 파일\TableDetection</Filter>
+    </ClInclude>
+    <ClInclude Include="TableDetection\HistogramManager.h">
+      <Filter>소스 파일\TableDetection</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

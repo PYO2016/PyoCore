@@ -2,15 +2,14 @@
 
 namespace TableDetection
 {
-	class TableDectector
+	class TableExporter
 	{
 		/*
 		Attributes List...
 			...etc...
 
 		Method List...
-			detectTable
-			...etc...
+			exportTable
 		*/
 	};
 }
