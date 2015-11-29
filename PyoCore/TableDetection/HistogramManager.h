@@ -18,10 +18,15 @@ namespace TableDetection
 		Method List...
 			...etc...
 		*/
+		
 	};
 
 	class HistogramManager
 	{
+	private:
+		//the pixels are now in the vector "image", 4 bytes per pixel, ordered RGBARGBA.
+		std::vector<unsigned char> image; //the raw pixels
+		unsigned areaWidth, areaHeight;
 		/*
 		Attributes List...
 			areaWidth		// width of area
@@ -31,13 +36,15 @@ namespace TableDetection
 			...etc...
 
 		Method List...
-			initialize
+			initialize(const char*)
 			makeHistogram
 			applyMedianFilter
 			filterExtremum
 			applyKmeans
 			...etc...
 		*/
+	public:
+		bool initialize(const char*);
 	};
 }
 
