@@ -40,3 +40,12 @@ namespace TableDetection
 		*/
 	};
 }
+
+/*
+	광민이 해야할 것 (G)---------------
+	1. Png To 자료구조
+
+
+	태국이 해야할 것 (T)---------------
+	1. makeHistogram (dependency : G-1)
+*/

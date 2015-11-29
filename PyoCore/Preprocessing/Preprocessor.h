@@ -15,3 +15,26 @@ namespace Preprocessing
 		*/
 	};
 }
+
+/*
+
+class SparseBlock {
+public:
+	inline int getTop();
+	inline int getLeft();
+	inline int getRight();
+	inline int getBottom();
+
+	inline int getWidth();
+	inline int getHeight();
+
+private:
+	int top;
+	int left;
+	int right;
+	int bottom;
+};
+
+vector<SparseBlock> asdf;
+
+*/
