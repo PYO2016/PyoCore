@@ -142,7 +142,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Common\Image.cpp" />
+    <ClCompile Include="Common\PngImage.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Lodepng\lodepng.cpp" />
     <ClCompile Include="Preprocessing\Preprocessor.cpp" />
@@ -152,7 +152,7 @@
     <ClCompile Include="TableDetection\TableExporter.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Common\Image.h" />
+    <ClInclude Include="Common\PngImage.h" />
     <ClInclude Include="Lodepng\lodepng.h" />
     <ClInclude Include="Preprocessing\Preprocessor.h" />
     <ClInclude Include="PyoCore.h" />

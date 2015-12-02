@@ -45,11 +45,11 @@
     <ClCompile Include="TableDetection\TableExporter.cpp">
       <Filter>소스 파일\TableDetection</Filter>
     </ClCompile>
-    <ClCompile Include="Common\Image.cpp">
-      <Filter>소스 파일\Common</Filter>
-    </ClCompile>
     <ClCompile Include="Lodepng\lodepng.cpp">
       <Filter>소스 파일\Loadpng</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\PngImage.cpp">
+      <Filter>소스 파일\Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -68,11 +68,11 @@
     <ClInclude Include="TableDetection\TableExporter.h">
       <Filter>소스 파일\TableDetection</Filter>
     </ClInclude>
-    <ClInclude Include="Common\Image.h">
-      <Filter>소스 파일\Common</Filter>
-    </ClInclude>
     <ClInclude Include="Lodepng\lodepng.h">
       <Filter>소스 파일\Loadpng</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\PngImage.h">
+      <Filter>소스 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

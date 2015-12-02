@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Common/Image.h"
+#include "../Common/PngImage.h"
 
 namespace TableDetection
 {
@@ -13,7 +13,7 @@ namespace TableDetection
 	class Histogram
 	{
 	public:
-		Histogram(HistogramType type, const Common::Image& image, int length, int valLimit);
+		Histogram(HistogramType type, const Common::PngImage& image, int length, int valLimit);
 		Histogram(const Histogram& h);
 		~Histogram();
 
@@ -22,7 +22,7 @@ namespace TableDetection
 	private:
 		// histogram type ( represents whether x-coordinate or y-coordinate )
 		HistogramType type;
-		const Common::Image& image;
+		const Common::PngImage& image;
 		int* values;
 		int length, valLimit;
 	};
@@ -30,7 +30,7 @@ namespace TableDetection
 	class HistogramManager
 	{	
 	public:
-		HistogramManager(const Common::Image& image);
+		HistogramManager(const Common::PngImage& image);
 		HistogramManager(const HistogramManager& h);
 		~HistogramManager();
 
@@ -43,7 +43,7 @@ namespace TableDetection
 		/* etc... */
 
 	private:
-		const Common::Image& image;
+		const Common::PngImage& image;
 		unsigned areaWidth, areaHeight;
 		Histogram *histogramX, *histogramY;
 	};

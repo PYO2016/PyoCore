@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Common/Image.h"
+#include "../Common/PngImage.h"
 
 namespace TableDetection
 {
@@ -20,6 +20,6 @@ namespace TableDetection
 		/* etc... */
 
 	private:
-		Common::Image* image;
+		Common::PngImage* image;
 	};
 }

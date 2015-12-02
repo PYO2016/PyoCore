@@ -19,15 +19,15 @@ namespace Common
 		const Pixel& operator[] (int idx) const;
 	};
 	
-	class Image
+	class PngImage
 	{
 	private:
 		// only create image by loadImage().
-		Image();
-		Image(const Image& image);
+		PngImage();
+		PngImage(const PngImage& image);
 
 	public:
-		static Image* loadImage(const char *filename);
+		static PngImage* loadImage(const char *filename);
 
 		PixelArray& operator[] (int idx);
 		const PixelArray& operator[] (int idx) const;

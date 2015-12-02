@@ -9,7 +9,7 @@ namespace TableDetection
 
 	/* Histogram */
 
-	Histogram::Histogram(HistogramType type, const Common::Image& image, int length, int valLimit)
+	Histogram::Histogram(HistogramType type, const Common::PngImage& image, int length, int valLimit)
 		:type(type), image(image), length(length), valLimit(valLimit)
 	{
 		values = new int[length];
@@ -54,7 +54,7 @@ namespace TableDetection
 
 	/* HistogramManager */
 
-	HistogramManager::HistogramManager(const Common::Image& image)
+	HistogramManager::HistogramManager(const Common::PngImage& image)
 		:image(image), areaWidth(image.getWidth()), areaHeight(image.getHeight()),
 			histogramX(NULL), histogramY(NULL)
 	{
