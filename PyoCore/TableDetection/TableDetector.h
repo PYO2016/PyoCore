@@ -1,16 +1,25 @@
 #pragma once
 
+#include "../Common/Image.h"
+
 namespace TableDetection
 {
-	class TableDectector
+	class TableDetector
 	{
-		/*
-		Attributes List...
-			...etc...
+	public:
+		TableDetector();
 
-		Method List...
-			detectTable
-			...etc...
-		*/
+		void cleanup();
+
+		bool process(const char *imageFile);
+
+	private:
+		bool registerImage(const char *imageFile);
+		bool preprocess(void);
+		bool makeHistogram(void);
+		/* etc... */
+
+	private:
+		Common::Image* image;
 	};
 }
