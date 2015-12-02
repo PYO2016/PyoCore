@@ -142,17 +142,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Common\Image.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Lodepng\lodepng.cpp" />
     <ClCompile Include="Preprocessing\Preprocessor.cpp" />
     <ClCompile Include="PyoCore.cpp" />
     <ClCompile Include="TableDetection\HistogramManager.cpp" />
     <ClCompile Include="TableDetection\TableDetector.cpp" />
+    <ClCompile Include="TableDetection\TableExporter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Common\Image.h" />
+    <ClInclude Include="Lodepng\lodepng.h" />
     <ClInclude Include="Preprocessing\Preprocessor.h" />
     <ClInclude Include="PyoCore.h" />
     <ClInclude Include="TableDetection\HistogramManager.h" />
     <ClInclude Include="TableDetection\TableDetector.h" />
+    <ClInclude Include="TableDetection\TableExporter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
