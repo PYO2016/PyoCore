@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -14,7 +15,7 @@ class PixelArray
 public:
 	Pixel& operator[] (int idx)
 	{
-		return ((Pixel*)this)[idx];
+		return reinterpret_cast<Pixel*>(this)[idx];
 	}
 };
 
@@ -22,7 +23,7 @@ int main()
 {
 	unsigned char arr[12] = { '0','1','2','3','4','5','6','7','8','9','A','B' };
 
-	PixelArray& pixels = *(PixelArray*) &arr[0];
+	PixelArray& pixels = *reinterpret_cast<PixelArray*>(&arr[0]);
 
 	cout << pixels[0].R << " " << pixels[0].G << " " << pixels[0].A<< " " << endl
 		<< pixels[1].R << " " << pixels[1].G << " " << pixels[1].A << " " << endl

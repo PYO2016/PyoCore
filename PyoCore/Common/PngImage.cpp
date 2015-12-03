@@ -7,12 +7,12 @@ namespace Common
 
 	Pixel& PixelArray::operator[] (int idx)
 	{
-		return ((Pixel*)this)[idx];
+		return reinterpret_cast<Pixel*>(this)[idx];
 	}
 
 	const Pixel& PixelArray::operator[] (int idx) const
 	{
-		return ((const Pixel*)this)[idx];
+		return reinterpret_cast<const Pixel*>(this)[idx];
 	}
 
 
@@ -42,12 +42,12 @@ namespace Common
 
 	PixelArray& PngImage::operator[] (int idx)
 	{
-		return *(PixelArray*)data[idx * width];
+		return *reinterpret_cast<PixelArray*>(&data[idx * width]);
 	}
 
 	const PixelArray& PngImage::operator[] (int idx) const
 	{
-		return *(const PixelArray*)data[idx * width];
+		return *reinterpret_cast<const PixelArray*>(&data[idx * width]);
 	}
 
 	std::string PngImage::getFileName() const
