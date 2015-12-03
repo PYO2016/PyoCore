@@ -2,6 +2,9 @@
 
 #include <iostream>
 #include <vector>
+#include <utility>
+#include <functional>
+#include <algorithm>
 #include "../Lodepng/lodepng.h"
 
 namespace TableDetection
@@ -46,6 +49,52 @@ namespace TableDetection
 				}
 				if (v == 0) ++values[i];
 			}
+		}
+
+		return true;
+	}
+
+	bool Histogram::applyMedianFilter()
+	{
+		const int range = 5;	// must be odd number.
+		const int halfRange = range / 2;
+		std::vector<std::pair<int, int> > valVector;	// val, idx
+
+		if (length < halfRange || range < 3) {
+			// nothing to do for median filter.
+			return true;	// return value is true or false?? 
+		}
+
+		for (int i = 0; i < halfRange; ++i) {
+			valVector.push_back(std::make_pair(values[i], i));
+		}
+
+		for (int i = 0; i < length; ++i) {
+			// In case of right corner of histogram,
+			if (i + halfRange >= length) {
+				auto iter = std::find_if(valVector.begin(), valVector.end(),
+					[i, halfRange](const std::pair<int, int>& v) {
+					return v.second == i - halfRange - 1;
+				}
+				);
+				valVector.erase(iter);
+			}
+			// In case of most positions of histogram,
+			else if (valVector.size() == range) {
+				auto iter = std::find_if(valVector.begin(), valVector.end(),
+					[i, halfRange](const std::pair<int, int>& v) {
+					return v.second == i - halfRange - 1;
+				}
+				);
+				*iter = std::make_pair(values[i + halfRange], i + halfRange);
+			}
+			// In case of left corner of histogram,
+			else {
+				valVector.push_back(std::make_pair(values[i + halfRange], i + halfRange));
+			}
+
+			std::sort(valVector.begin(), valVector.end());
+			values[i] = valVector[valVector.size() / 2].first;
 		}
 
 		return true;
@@ -99,6 +148,24 @@ namespace TableDetection
 			histogramY = new Histogram(type,image,  areaHeight, areaWidth);
 			if (!(success = histogramY->calculateValues()))
 				delete histogramY;
+			break;
+		}
+
+		return success;
+	}
+
+	bool HistogramManager::applyMedianFilter(HistogramType type)
+	{
+		bool success;
+
+		switch (type)
+		{
+		case HistogramType::TYPE_X:
+			success = histogramX->applyMedianFilter();
+			break;
+
+		case HistogramType::TYPE_Y:
+			success = histogramY->applyMedianFilter();
 			break;
 		}
 

@@ -17,7 +17,8 @@ namespace TableDetection
 		Histogram(const Histogram& h);
 		~Histogram();
 
-		bool calculateValues();
+		bool calculateValues();		// not tested...
+		bool applyMedianFilter();	// test pass!
 
 	private:
 		// histogram type ( represents whether x-coordinate or y-coordinate )
@@ -37,7 +38,7 @@ namespace TableDetection
 		void cleanup();
 
 		bool makeHistogram(HistogramType type);
-		bool applyMedianFilter();	// not yet implemented...
+		bool applyMedianFilter(HistogramType type);
 		bool filterExtremum();		// not yet implemented...
 		bool applyKmeans();			// not yet implemented...
 		/* etc... */
