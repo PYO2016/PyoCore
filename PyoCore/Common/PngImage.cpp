@@ -20,7 +20,7 @@ namespace Common
 
 	PngImage::PngImage() {}
 
-	PngImage* PngImage::loadImage(const char* filename)	// static member function
+	PngImage* PngImage::LoadImage(const char* filename)	// static member function
 	{
 		PngImage *image = new PngImage();
 		//decode

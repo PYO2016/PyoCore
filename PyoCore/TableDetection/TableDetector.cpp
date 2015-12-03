@@ -36,7 +36,7 @@ namespace TableDetection
 	bool TableDetector::registerImage(const char *imageFile)
 	{
 		cleanup();
-		return (image = Common::PngImage::loadImage(imageFile)) != NULL;
+		return (image = Common::PngImage::LoadImage(imageFile)) != NULL;
 	}
 
 	bool TableDetector::preprocess(void)

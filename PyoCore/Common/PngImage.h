@@ -22,12 +22,13 @@ namespace Common
 	class PngImage
 	{
 	private:
-		// only create image by loadImage().
+		// only create image by LoadImage().
 		PngImage();
 		PngImage(const PngImage& image);
 
 	public:
-		static PngImage* loadImage(const char *filename);
+		// only create image by LoadImage().
+		static PngImage* LoadImage(const char *filename);
 
 		PixelArray& operator[] (int idx);
 		const PixelArray& operator[] (int idx) const;
