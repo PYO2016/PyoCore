@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <list>
 #include <utility>
 #include <functional>
 #include <algorithm>
@@ -100,8 +101,10 @@ namespace TableDetection
 
 	bool Histogram::initFilterExtremum()
 	{
-		std::vector<std::pair<int, ExtremumType>> v;
+		// find minmax value
+		std::list<std::pair<int, ExtremumType>> eList;
 		TableDetection::ExtremumType currentState, nextState;
+		auto eListMaxV = values[0];
 		if (length < 2) 
 		{
 			//I think it can not process
@@ -114,8 +117,41 @@ namespace TableDetection
 			if (currentState != nextState)
 			{
 				//state changed
-				v.emplace_back(i - 1, currentState);
+				if (eListMaxV < values[i - 1])
+				{
+					eListMaxV = values[i - 1];
+				}
+				eList.emplace_back(i - 1, currentState);
 				currentState = nextState;
+			}
+		}
+
+		// remove non-reasonable value
+		eListMaxV = static_cast<int>(ceil(static_cast<double>(eListMaxV) * 0.2));
+		for (auto currItr = begin(eList); currItr != end(eList); ++currItr)
+		{
+			auto nextItr = next(currItr, 1);
+			if (nextItr == end(eList))
+				continue;
+			if (abs(values[nextItr->first] - values[currItr->first]) < eListMaxV)
+			{
+				eList.erase(nextItr);
+			}
+		}
+		// data align
+		for (auto currItr = begin(eList); currItr != end(eList); ++currItr)
+		{
+			auto nextItr = next(currItr, 1);
+			while (currItr->second == nextItr->second)
+			{
+				if (currItr->second == ExtremumType::TYPE_MAX)
+					if (values[currItr->first] < values[nextItr->first])
+						currItr->first = nextItr->first;
+				else
+					if (values[nextItr->first] < values[currItr->first])
+						currItr->first = nextItr->first;
+				eList.erase(nextItr);
+				nextItr = next(currItr, 1);
 			}
 		}
 		return true;
