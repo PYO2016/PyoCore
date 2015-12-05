@@ -7,8 +7,13 @@ namespace TableDetection
 	/* TableDetector */
 
 	TableDetector::TableDetector()
-		:image(NULL)
+		:image(NULL), hm(NULL)
 	{
+	}
+
+	TableDetector::~TableDetector()
+	{
+		cleanup();
 	}
 
 	void TableDetector::cleanup()
@@ -16,6 +21,10 @@ namespace TableDetection
 		if (!image) {
 			delete image;
 			image = NULL;
+		}
+		if (!hm) {
+			delete hm;
+			hm = NULL;
 		}
 	}
 
@@ -42,18 +51,26 @@ namespace TableDetection
 	bool TableDetector::preprocess(void)
 	{
 		/* do something. */
+
+		/* not yet implemented */
 		return false;
 	}
 
 	bool TableDetector::makeHistogram(void)
 	{
-		HistogramManager hm(*image);
+		HistogramManager *hm = new HistogramManager(*image);
 
-		hm.makeHistogram(HistogramType::TYPE_X);
-		hm.makeHistogram(HistogramType::TYPE_Y);
+		hm->makeHistogram(HistogramType::TYPE_X);
+		hm->makeHistogram(HistogramType::TYPE_Y);
+
+		hm->applyMedianFilter(HistogramType::TYPE_X);
+		hm->applyMedianFilter(HistogramType::TYPE_Y);
 
 		/* do more things. */
 
+		// this->hm = hm;
+
+		/* not yet implemented */
 		return false;
 	}
 

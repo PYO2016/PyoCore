@@ -46,7 +46,8 @@ namespace TableDetection
 		bool makeHistogram(HistogramType type);
 		bool applyMedianFilter(HistogramType type);
 		bool filterExtremum(HistogramType type);
-		//bool applyKmeans();			// not yet implemented...
+		//bool applyKmeans(HistogramType type);			// not yet implemented...
+		// 
 		/* etc... */
 
 	private:
@@ -55,29 +56,3 @@ namespace TableDetection
 		Histogram *histogramX, *histogramY;
 	};
 }
-
-/*
-Attributes List...
-areaWidth		// width of area
-areaHeight		// height of area
-histogramX		// histogram to x-coordinate
-histogramY		// histogram to y-coordinate
-...etc...
-
-Method List...
-initialize(const char*)
-makeHistogram
-applyMedianFilter
-filterExtremum
-applyKmeans
-...etc...
-*/
-
-/*
-	광민이 해야할 것 (G)---------------
-	1. Png To 자료구조	v
-
-
-	태국이 해야할 것 (T)---------------
-	1. makeHistogram (dependency : G-1)	v
-*/

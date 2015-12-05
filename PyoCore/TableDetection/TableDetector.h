@@ -8,6 +8,7 @@ namespace TableDetection
 	{
 	public:
 		TableDetector();
+		~TableDetector();
 
 		void cleanup();
 
@@ -21,5 +22,6 @@ namespace TableDetection
 
 	private:
 		Common::PngImage* image;
+		HistogramManager* hm;
 	};
 }
