@@ -100,6 +100,29 @@ namespace TableDetection
 		return true;
 	}
 
+	bool Histogram::initFilterExtremum()
+	{
+		std::vector<std::pair<int, ExtrememType>> v;
+		TableDetection::ExtrememType currentState, nextState;
+		if (length < 2) 
+		{
+			//I think it can not process
+			return true;
+		}
+		currentState = ((values[1] - values[0]) > 0) ? ExtrememType::TYPE_MAX: ExtrememType::TYPE_MIN;
+		for (int i = 2; i < length; ++i)
+		{
+			nextState = ((values[i] - values[i - 1]) > 0) ? ExtrememType::TYPE_MAX : ExtrememType::TYPE_MIN;
+			if (currentState != nextState)
+			{
+				//state changed
+				v.emplace_back(i - 1, currentState);
+				currentState = nextState;
+			}
+		}
+		return true;
+	}
+
 
 	/* HistogramManager */
 
@@ -166,6 +189,24 @@ namespace TableDetection
 
 		case HistogramType::TYPE_Y:
 			success = histogramY->applyMedianFilter();
+			break;
+		}
+
+		return success;
+	}
+	bool HistogramManager::filterExtremum(HistogramType type)
+	{
+
+		bool success;
+
+		switch (type)
+		{
+		case HistogramType::TYPE_X:
+			success = histogramX->initFilterExtremum();
+			break;
+
+		case HistogramType::TYPE_Y:
+			success = histogramY->initFilterExtremum();
 			break;
 		}
 

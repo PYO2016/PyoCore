@@ -9,6 +9,11 @@ namespace TableDetection
 		TYPE_X = 0,
 		TYPE_Y
 	};
+	enum class ExtrememType : int
+	{
+		TYPE_MIN = 0,
+		TYPE_MAX	
+	};
 
 	class Histogram
 	{
@@ -19,6 +24,7 @@ namespace TableDetection
 
 		bool calculateValues();		// not tested...
 		bool applyMedianFilter();	// test pass!
+		bool initFilterExtremum();	// not tested
 
 	private:
 		// histogram type ( represents whether x-coordinate or y-coordinate )
@@ -39,8 +45,8 @@ namespace TableDetection
 
 		bool makeHistogram(HistogramType type);
 		bool applyMedianFilter(HistogramType type);
-		bool filterExtremum();		// not yet implemented...
-		bool applyKmeans();			// not yet implemented...
+		bool filterExtremum(HistogramType type);
+		//bool applyKmeans();			// not yet implemented...
 		/* etc... */
 
 	private:
