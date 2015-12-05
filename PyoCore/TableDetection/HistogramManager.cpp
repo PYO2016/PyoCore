@@ -13,7 +13,7 @@ namespace TableDetection
 	/* Histogram */
 
 	Histogram::Histogram(HistogramType type, const Common::PngImage& image, int length, int valLimit)
-		:type(type), image(image), values(std::vector<int>(length)), length(length), valLimit(valLimit)
+		:type(type), image(image), values(length), length(length), valLimit(valLimit)
 	{
 	}
 
