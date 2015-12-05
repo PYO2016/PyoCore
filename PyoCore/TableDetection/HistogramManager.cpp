@@ -142,6 +142,8 @@ namespace TableDetection
 		for (auto currItr = begin(eList); currItr != end(eList); ++currItr)
 		{
 			auto nextItr = next(currItr, 1);
+			if (nextItr == end(eList))
+				continue;
 			while (currItr->second == nextItr->second)
 			{
 				if (currItr->second == ExtremumType::TYPE_MAX)
