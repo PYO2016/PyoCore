@@ -27,7 +27,6 @@ namespace TableDetection
 
 	Histogram::~Histogram()
 	{
-		delete[] values;
 	}
 
 	bool Histogram::calculateValues()
@@ -102,17 +101,17 @@ namespace TableDetection
 
 	bool Histogram::initFilterExtremum()
 	{
-		std::vector<std::pair<int, ExtrememType>> v;
-		TableDetection::ExtrememType currentState, nextState;
+		std::vector<std::pair<int, ExtremumType>> v;
+		TableDetection::ExtremumType currentState, nextState;
 		if (length < 2) 
 		{
 			//I think it can not process
 			return true;
 		}
-		currentState = ((values[1] - values[0]) > 0) ? ExtrememType::TYPE_MAX: ExtrememType::TYPE_MIN;
+		currentState = ((values[1] - values[0]) > 0) ? ExtremumType::TYPE_MAX: ExtremumType::TYPE_MIN;
 		for (int i = 2; i < length; ++i)
 		{
-			nextState = ((values[i] - values[i - 1]) > 0) ? ExtrememType::TYPE_MAX : ExtrememType::TYPE_MIN;
+			nextState = ((values[i] - values[i - 1]) > 0) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN;
 			if (currentState != nextState)
 			{
 				//state changed

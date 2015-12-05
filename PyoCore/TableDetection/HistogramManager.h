@@ -9,7 +9,7 @@ namespace TableDetection
 		TYPE_X = 0,
 		TYPE_Y
 	};
-	enum class ExtrememType : int
+	enum class ExtremumType : int
 	{
 		TYPE_MIN = 0,
 		TYPE_MAX	
