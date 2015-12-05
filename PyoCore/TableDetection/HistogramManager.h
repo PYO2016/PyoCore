@@ -30,7 +30,7 @@ namespace TableDetection
 		// histogram type ( represents whether x-coordinate or y-coordinate )
 		HistogramType type;
 		const Common::PngImage& image;
-		int* values;
+		std::vector<int> values;
 		int length, valLimit;
 	};
 

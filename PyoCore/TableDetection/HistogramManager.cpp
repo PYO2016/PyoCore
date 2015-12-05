@@ -13,9 +13,8 @@ namespace TableDetection
 	/* Histogram */
 
 	Histogram::Histogram(HistogramType type, const Common::PngImage& image, int length, int valLimit)
-		:type(type), image(image), length(length), valLimit(valLimit)
+		:type(type), image(image), values(std::vector<int>(length)), length(length), valLimit(valLimit)
 	{
-		values = new int[length];
 	}
 
 	Histogram::Histogram(const Histogram& h)
@@ -65,7 +64,7 @@ namespace TableDetection
 		}
 
 		for (int i = 0; i < halfRange; ++i) {
-			valVector.push_back(std::make_pair(values[i], i));
+			valVector.emplace_back(values[i], i);
 		}
 
 		for (int i = 0; i < length; ++i) {
@@ -89,7 +88,7 @@ namespace TableDetection
 			}
 			// In case of left corner of histogram,
 			else {
-				valVector.push_back(std::make_pair(values[i + halfRange], i + halfRange));
+				valVector.emplace_back(values[i + halfRange], i + halfRange);
 			}
 
 			std::sort(valVector.begin(), valVector.end());
