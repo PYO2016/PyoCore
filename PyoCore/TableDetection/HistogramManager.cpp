@@ -71,7 +71,7 @@ namespace TableDetection
 		for (int i = 0; i < length; ++i) {
 			// In case of right corner of histogram,
 			if (i + halfRange >= length) {
-				auto iter = std::find_if(valVector.begin(), valVector.end(),
+				auto iter = std::find_if(begin(valVector), end(valVector),
 					[i, halfRange](const std::pair<int, int>& v) {
 					return v.second == i - halfRange - 1;
 				}
@@ -80,7 +80,7 @@ namespace TableDetection
 			}
 			// In case of most positions of histogram,
 			else if (valVector.size() == range) {
-				auto iter = std::find_if(valVector.begin(), valVector.end(),
+				auto iter = std::find_if(begin(valVector), end(valVector),
 					[i, halfRange](const std::pair<int, int>& v) {
 					return v.second == i - halfRange - 1;
 				}
@@ -92,7 +92,7 @@ namespace TableDetection
 				valVector.emplace_back(values[i + halfRange], i + halfRange);
 			}
 
-			std::sort(valVector.begin(), valVector.end());
+			std::sort(begin(valVector), end(valVector));
 			values[i] = valVector[valVector.size() / 2].first;
 		}
 

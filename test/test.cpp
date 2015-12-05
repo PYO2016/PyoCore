@@ -51,13 +51,13 @@ void testMedianFilter(void)
 	cout << endl;
 
 	for (int i = 0; i < halfRange; ++i) {
-		valVector.push_back(std::make_pair(values[i], i));
+		valVector.emplace_back(values[i], i);
 	}
 
 	for (int i = 0; i < length; ++i) {
 		// In case of right corner of histogram,
 		if (i + halfRange >= length) {
-			auto iter = std::find_if(valVector.begin(), valVector.end(),
+			auto iter = std::find_if(begin(valVector), end(valVector),
 				[i, halfRange](const std::pair<int, int>& v) {
 				return v.second == i - halfRange - 1;
 			}
@@ -66,7 +66,7 @@ void testMedianFilter(void)
 		}
 		// In case of most positions of histogram,
 		else if (valVector.size() == range) {
-			auto iter = std::find_if(valVector.begin(), valVector.end(),
+			auto iter = std::find_if(begin(valVector), end(valVector),
 				[i, halfRange](const std::pair<int, int>& v) {
 				return v.second == i - halfRange - 1;
 			}
@@ -75,16 +75,15 @@ void testMedianFilter(void)
 		}
 		// In case of left corner of histogram,
 		else {
-			valVector.push_back(std::make_pair(values[i + halfRange], i + halfRange));
+			valVector.emplace_back(values[i + halfRange], i + halfRange);
 		}
 
-		std::sort(valVector.begin(), valVector.end());
-		
 		printf("[*%d] %d\n", i, valVector.size());
 		for (auto &v : valVector)
 			printf("%d ", v.first);
 		printf("\n");
-		
+
+		std::sort(begin(valVector), end(valVector));
 		values[i] = valVector[valVector.size() / 2].first;
 	}
 
