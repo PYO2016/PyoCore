@@ -1,6 +1,8 @@
 #pragma once
 
+#include <string>
 #include "../Common/PngImage.h"
+#include "HistogramManager.h"
 
 namespace TableDetection
 {
@@ -12,10 +14,10 @@ namespace TableDetection
 
 		void cleanup();
 
-		bool process(const char *imageFile);
+		bool process(std::string imageFile);
 
 	private:
-		bool registerImage(const char *imageFile);
+		bool registerImage(std::string imageFile);
 		bool preprocess(void);
 		bool makeHistogram(void);
 		/* etc... */

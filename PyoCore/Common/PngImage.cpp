@@ -18,11 +18,18 @@ namespace Common
 
 	/* Image */
 
-	PngImage::PngImage() {}
+	PngImage::PngImage() { }
 
-	PngImage* PngImage::LoadImage(const char* filename)	// static member function
+	PngImage::PngImage(const PngImage& image)
+		:isCopy(true), filename(image.filename), width(image.width), height(image.height), 
+			data(image.data)
+	{
+	}
+
+	PngImage* PngImage::LoadImage(const std::string& filename)	// static member function
 	{
 		PngImage *image = new PngImage();
+		image->isCopy = false;
 		//decode
 		//the pixels are now in the vector "image", 4 bytes per pixel, ordered RGBARGBA.
 		unsigned error = lodepng::decode(image->data, image->width, image->height, filename);
@@ -49,6 +56,14 @@ namespace Common
 	{
 		return *reinterpret_cast<const PixelArray*>(&data[idx * width]);
 	}
+
+	bool PngImage::storeToFile(const std::string& targetFilename)
+	{
+		return lodepng::save_file(data, targetFilename) == 0 ? true : false;
+	}
+
+	bool PngImage::getIsCopy() const
+	{ return isCopy; }
 
 	std::string PngImage::getFileName() const
 	{ return filename; }

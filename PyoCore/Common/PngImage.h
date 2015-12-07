@@ -22,17 +22,19 @@ namespace Common
 	class PngImage
 	{
 	private:
-		// only create image by LoadImage().
 		PngImage();
-		PngImage(const PngImage& image);
 
 	public:
-		// only create image by LoadImage().
-		static PngImage* LoadImage(const char *filename);
+		// only create image by LoadImage() or copy constructor.
+		PngImage(const PngImage& image);
+		static PngImage* LoadImage(const std::string& filename);
 
 		PixelArray& operator[] (int idx);
 		const PixelArray& operator[] (int idx) const;
 
+		bool storeToFile(const std::string& targetFilename);
+
+		bool getIsCopy() const;
 		std::string getFileName() const;
 		unsigned int getWidth() const;
 		unsigned int getHeight() const;
@@ -40,6 +42,7 @@ namespace Common
 		unsigned char* getDataRefAsByteArray();
 
 	private:
+		bool isCopy;	// true if created by copy constructor.
 		std::string filename;
 		unsigned int width, height;		// width and height of image.
 		std::vector<unsigned char> data;
