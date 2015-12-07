@@ -39,19 +39,20 @@ namespace PyoCore
 
 	/************** Processing image file **************/
 
-	BOOL processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileType, LPCWSTR outputFileName)
+	BOOL processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileType, LPCWSTR outputFileName, BOOL isDebug)
 	{
 		TableDetection::TableDetector tableDectector;
 
-		return tableDectector.process(imageFileName, outputFileName);
+		return tableDectector.process(imageFileName, outputFileName, static_cast<bool>(isDebug));
 	}
 
-	BOOL processImageFileA(LPCSTR imageFileName, ImageFileType imageFileType, LPCSTR outputFileName)
+	BOOL processImageFileA(LPCSTR imageFileName, ImageFileType imageFileType, LPCSTR outputFileName, BOOL isDebug)
 	{
 		return processImageFileW(
 			Common::EncodingConverter::s2ws(imageFileName).c_str(),
 			imageFileType,
-			Common::EncodingConverter::s2ws(outputFileName).c_str());
+			Common::EncodingConverter::s2ws(outputFileName).c_str(),
+			isDebug);
 	}
 
 

@@ -51,8 +51,8 @@ namespace PyoCore
 	PYOCORE_API BOOL importTestW(LPCWSTR imageFileName, ImageFileType imageFileType, LPWSTR outputFileName);
 	PYOCORE_API BOOL importTestA(LPCSTR imageFileName, ImageFileType imageFileType, LPSTR outputFileName);
 
-	PYOCORE_API BOOL processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileType, LPCWSTR outputFileName);
-	PYOCORE_API BOOL processImageFileA(LPCSTR imageFileName, ImageFileType imageFileType, LPCSTR outputFileName);
+	PYOCORE_API BOOL processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileType, LPCWSTR outputFileName, BOOL isDebug);
+	PYOCORE_API BOOL processImageFileA(LPCSTR imageFileName, ImageFileType imageFileType, LPCSTR outputFileName, BOOL isDebug);
 
 
 	/************** Handling Error **************/

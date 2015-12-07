@@ -1,5 +1,14 @@
 #include "TableDetector.h"
 #include "HistogramManager.h"
+#include <iostream>
+
+#define DEBUG_MSG(STR) if(isDebug) { \
+	std::cout << "[Debug] " STR << std::endl; \
+}
+
+#define DEBUG_ACTION(ACT) if(isDebug) { \
+	ACT;	\
+}
 
 namespace TableDetection
 {
@@ -28,16 +37,56 @@ namespace TableDetection
 		}
 	}
 
-	bool TableDetector::process(std::wstring imageFile, std::wstring outputFile)
+	bool TableDetector::process(const std::wstring& imageFile, const std::wstring& outputFile, bool isDebug)
 	{
+		DEBUG_MSG("process() start!!");
+
+		/* cleanup and parameter recognition */
+
+		cleanup();
+
+		this->imageFile = imageFile;
+		this->outputFile = outputFile;
+		this->isDebug = isDebug;
+
+		/* real process!! */
+		return process();
+	}
+
+	bool TableDetector::process()
+	{
+		DEBUG_MSG("(real) process() start!!");
+
+		DEBUG_MSG("registerImage() start!!");
+
+		/////// registerImage()
 		if (!registerImage(imageFile))
 			return false;
 
+		DEBUG_MSG("registerImage() finish!!");
+
+		DEBUG_MSG("preprocess() start!!");
+
+		/////// preprocess()
 		if (!preprocess())
 			return false;
 
+		DEBUG_MSG("preprocess() finish!!");
+
+		DEBUG_MSG("After preprocessing, store image file");
+		DEBUG_ACTION(image->storeToFile(imageFile + L"_after_preprocessing.png"));
+
+		DEBUG_MSG("makeHistogram() start!!");
+
+		/////// makeHistogram()
 		if (!makeHistogram())
 			return false;
+
+		DEBUG_MSG("makeHistogram() finish!!");
+
+		/* Do more things */
+
+		DEBUG_MSG("(real) process() finish!!");
 
 		return true;
 	}

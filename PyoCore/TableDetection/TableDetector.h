@@ -14,15 +14,18 @@ namespace TableDetection
 
 		void cleanup();
 
-		bool process(std::wstring imageFile, std::wstring outputFile);
+		bool process(const std::wstring& imageFile, const std::wstring& outputFile, bool isDebug);
 
 	private:
+		bool process();		// real process function!
 		bool registerImage(std::wstring imageFile);
 		bool preprocess(void);
 		bool makeHistogram(void);
 		/* etc... */
 
 	private:
+		std::wstring imageFile, outputFile;
+		bool isDebug;
 		Common::PngImage* image;
 		HistogramManager* hm;
 	};

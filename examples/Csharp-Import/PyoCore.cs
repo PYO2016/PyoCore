@@ -39,7 +39,9 @@ namespace PyoCore
             [param: MarshalAs(UnmanagedType.I4)]
             ImageFileType imageFileType,
             [param: MarshalAs(UnmanagedType.LPWStr)]
-            String outputFileName
+            String outputFileName,
+            [param: MarshalAs(UnmanagedType.Bool)]
+            Boolean isDebug
             );
         
         [DllImport("PyoCore.dll")]
@@ -49,7 +51,9 @@ namespace PyoCore
             [param: MarshalAs(UnmanagedType.I4)]
             ImageFileType imageFileType,
             [param: MarshalAs(UnmanagedType.LPStr)]
-            String outputFileName
+            String outputFileName,
+            [param: MarshalAs(UnmanagedType.Bool)]
+            Boolean isDebug
             );
 
         [DllImport("PyoCore.dll")]
