@@ -13,13 +13,15 @@ namespace TableDetection
 
 	/* Histogram */
 
-	Histogram::Histogram(HistogramType type, const Common::PngImage& image, int length, int valLimit)
-		:type(type), image(image), values(length), length(length), valLimit(valLimit)
+	Histogram::Histogram(HistogramType type, const Common::PngImage& image, 
+		unsigned offsetWidth, unsigned offsetHeight, int length, int valLimit)
+		: type(type), image(image), offsetWidth(offsetWidth), offsetHeight(offsetHeight), 
+			values(length), length(length), valLimit(valLimit)
 	{
 	}
 
 	Histogram::Histogram(const Histogram& h)
-		:type(h.type), image(h.image), length(h.length), valLimit(h.valLimit)
+		: type(h.type), image(h.image), length(h.length), valLimit(h.valLimit)
 	{
 		for (int i = 0; i < length; ++i)
 			values[i] = h.values[i];
@@ -31,6 +33,9 @@ namespace TableDetection
 
 	bool Histogram::calculateValues()
 	{
+		const unsigned& ow = offsetWidth;
+		const unsigned& oh = offsetHeight;
+
 		for (int i = 0; i < length; ++i) {
 			values[i] = 0;
 			for (int j = 0; j < valLimit; ++j) {
@@ -38,10 +43,10 @@ namespace TableDetection
 				switch (type)
 				{
 				case HistogramType::TYPE_X: 
-					v = image[j][i].R;
+					v = image[ow + j][oh + i].R;
 					break;
 				case HistogramType::TYPE_Y:
-					v = image[i][j].R;
+					v = image[ow + i][oh + j].R;
 					break;
 				default:
 					return false;	// return.
@@ -163,14 +168,19 @@ namespace TableDetection
 	/* HistogramManager */
 
 	HistogramManager::HistogramManager(const Common::PngImage& image)
-		:image(image), areaWidth(image.getWidth()), areaHeight(image.getHeight()),
-			histogramX(NULL), histogramY(NULL)
+		: HistogramManager(image, image.getWidth(), image.getHeight(), 0, 0)
+	{
+	}
+
+	HistogramManager::HistogramManager(const Common::PngImage& image,
+		unsigned areaWidth, unsigned areaHeight, unsigned offsetWidth, unsigned offsetHeight)
+		: image(image), areaWidth(areaWidth), areaHeight(areaHeight), 
+			offsetWidth(offsetWidth), offsetHeight(offsetHeight), histogramX(NULL), histogramY(NULL)
 	{
 	}
 
 	HistogramManager::HistogramManager(const HistogramManager& h)
-		: image(h.image), areaWidth(h.image.getWidth()), areaHeight(h.image.getHeight()),
-		histogramX(h.histogramX), histogramY(h.histogramY)
+		: HistogramManager(h.image, h.areaWidth, h.areaHeight, h.offsetWidth, h.offsetHeight)
 	{
 	}
 
@@ -198,13 +208,13 @@ namespace TableDetection
 		switch (type)
 		{
 		case HistogramType::TYPE_X:
-			histogramX = new Histogram(type, image, areaWidth, areaHeight);
+			histogramX = new Histogram(type, image, offsetWidth, offsetHeight, areaWidth, areaHeight);
 			if (!(success = histogramX->calculateValues()))
 				delete histogramX;
 			break;
 			
 		case HistogramType::TYPE_Y:
-			histogramY = new Histogram(type,image,  areaHeight, areaWidth);
+			histogramY = new Histogram(type, image, offsetWidth, offsetHeight, areaHeight, areaWidth);
 			if (!(success = histogramY->calculateValues()))
 				delete histogramY;
 			break;

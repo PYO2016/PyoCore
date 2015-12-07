@@ -18,7 +18,8 @@ namespace TableDetection
 	class Histogram
 	{
 	public:
-		Histogram(HistogramType type, const Common::PngImage& image, int length, int valLimit);
+		Histogram(HistogramType type, const Common::PngImage& image, 
+			unsigned offsetWidth, unsigned offsetHeight, int length, int valLimit);
 		Histogram(const Histogram& h);
 		~Histogram();
 
@@ -30,6 +31,7 @@ namespace TableDetection
 		// histogram type ( represents whether x-coordinate or y-coordinate )
 		HistogramType type;
 		const Common::PngImage& image;
+		unsigned offsetWidth, offsetHeight;
 		std::vector<int> values;
 		int length, valLimit;
 	};
@@ -38,6 +40,8 @@ namespace TableDetection
 	{	
 	public:
 		HistogramManager(const Common::PngImage& image);
+		HistogramManager(const Common::PngImage& image, unsigned areaWidth, unsigned areaHeight, 
+			unsigned offsetWidth, unsigned offsetHeight);
 		HistogramManager(const HistogramManager& h);
 		~HistogramManager();
 
@@ -53,6 +57,7 @@ namespace TableDetection
 	private:
 		const Common::PngImage& image;
 		unsigned areaWidth, areaHeight;
+		unsigned offsetWidth, offsetHeight;
 		Histogram *histogramX, *histogramY;
 	};
 }
