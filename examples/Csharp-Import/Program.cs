@@ -16,11 +16,11 @@ namespace Csharp_Import
             Console.WriteLine();
 
             StringBuilder str1 = new StringBuilder();
-            PyoCore.PyoCore.processImageFileA("ANSI-test-안시-테스트", PyoCore.ImageFileType.IMAGE_FILE_TYPE_PNG, str1);
+            PyoCore.PyoCore.importTestA("ANSI-test-안시-테스트", PyoCore.ImageFileType.IMAGE_FILE_TYPE_PNG, str1);
             Console.WriteLine(str1 + "\n");
 
             StringBuilder str2 = new StringBuilder();
-            PyoCore.PyoCore.processImageFileW("WIDE-test-와이드-테스트", PyoCore.ImageFileType.IMAGE_FILE_TYPE_PNG, str2);
+            PyoCore.PyoCore.importTestW("WIDE-test-와이드-테스트", PyoCore.ImageFileType.IMAGE_FILE_TYPE_PNG, str2);
             Console.WriteLine(str2 + "\n");
 
             int errorCode = PyoCore.PyoCore.getErrorCode();

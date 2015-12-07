@@ -28,7 +28,7 @@ namespace TableDetection
 		}
 	}
 
-	bool TableDetector::process(std::string imageFile)
+	bool TableDetector::process(std::wstring imageFile, std::wstring outputFile)
 	{
 		if (!registerImage(imageFile))
 			return false;
@@ -42,7 +42,7 @@ namespace TableDetection
 		return true;
 	}
 
-	bool TableDetector::registerImage(std::string imageFile)
+	bool TableDetector::registerImage(std::wstring imageFile)
 	{
 		cleanup();
 		return (image = Common::PngImage::LoadImage(imageFile)) != NULL;

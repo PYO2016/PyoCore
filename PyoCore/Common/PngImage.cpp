@@ -1,4 +1,5 @@
 #include "PngImage.h"
+#include "EncodingConverter.h"
 #include "../Lodepng/lodepng.h"
 
 namespace Common
@@ -15,7 +16,6 @@ namespace Common
 		return reinterpret_cast<const Pixel*>(this)[idx];
 	}
 
-
 	/* Image */
 
 	PngImage::PngImage() { }
@@ -26,13 +26,14 @@ namespace Common
 	{
 	}
 
-	PngImage* PngImage::LoadImage(const std::string& filename)	// static member function
+	PngImage* PngImage::LoadImage(const std::wstring& filename)	// static member function
 	{
 		PngImage *image = new PngImage();
 		image->isCopy = false;
 		//decode
 		//the pixels are now in the vector "image", 4 bytes per pixel, ordered RGBARGBA.
-		unsigned error = lodepng::decode(image->data, image->width, image->height, filename);
+		unsigned error = lodepng::decode(image->data, image->width, image->height, 
+			EncodingConverter::ws2s(filename));
 
 		//if there's an error, display it
 		//if (error) std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
@@ -57,15 +58,15 @@ namespace Common
 		return *reinterpret_cast<const PixelArray*>(&data[idx * width]);
 	}
 
-	bool PngImage::storeToFile(const std::string& targetFilename)
+	bool PngImage::storeToFile(const std::wstring& targetFilename)
 	{
-		return lodepng::save_file(data, targetFilename) == 0 ? true : false;
+		return lodepng::save_file(data, EncodingConverter::ws2s(targetFilename)) == 0 ? true : false;
 	}
 
 	bool PngImage::getIsCopy() const
 	{ return isCopy; }
 
-	std::string PngImage::getFileName() const
+	std::wstring PngImage::getFileName() const
 	{ return filename; }
 
 	unsigned int PngImage::getWidth() const

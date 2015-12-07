@@ -13,13 +13,33 @@ namespace PyoCore
         public static extern void helloWorld();
 
         [DllImport("PyoCore.dll")]
-        public static extern int processImageFileW (
+        public static extern int importTestW(
             [param: MarshalAs(UnmanagedType.LPWStr)]
             String imageFileName,
             [param: MarshalAs(UnmanagedType.I4)]
             ImageFileType imageFileType,
             [param: MarshalAs(UnmanagedType.LPWStr)]
             StringBuilder outputFileName
+            );
+
+        [DllImport("PyoCore.dll")]
+        public static extern int importTestA(
+            [param: MarshalAs(UnmanagedType.LPStr)]
+            String imageFileName,
+            [param: MarshalAs(UnmanagedType.I4)]
+            ImageFileType imageFileType,
+            [param: MarshalAs(UnmanagedType.LPStr)]
+            StringBuilder outputFileName
+            );
+
+        [DllImport("PyoCore.dll")]
+        public static extern int processImageFileW (
+            [param: MarshalAs(UnmanagedType.LPWStr)]
+            String imageFileName,
+            [param: MarshalAs(UnmanagedType.I4)]
+            ImageFileType imageFileType,
+            [param: MarshalAs(UnmanagedType.LPWStr)]
+            String outputFileName
             );
         
         [DllImport("PyoCore.dll")]
@@ -29,7 +49,7 @@ namespace PyoCore
             [param: MarshalAs(UnmanagedType.I4)]
             ImageFileType imageFileType,
             [param: MarshalAs(UnmanagedType.LPStr)]
-            StringBuilder outputFileName
+            String outputFileName
             );
 
         [DllImport("PyoCore.dll")]

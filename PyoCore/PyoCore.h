@@ -42,12 +42,17 @@ namespace PyoCore
 	 * Description *
 	 */
 #ifdef UNICODE
+#define importTest importTestW
 #define processImageFile processImageFileW
 #else
+#define importTest importTestA
 #define processImageFile processImageFileA
 #endif
-	PYOCORE_API BOOL processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileType, LPWSTR outputFileName);
-	PYOCORE_API BOOL processImageFileA(LPCSTR imageFileName, ImageFileType imageFileType, LPSTR outputFileName);
+	PYOCORE_API BOOL importTestW(LPCWSTR imageFileName, ImageFileType imageFileType, LPWSTR outputFileName);
+	PYOCORE_API BOOL importTestA(LPCSTR imageFileName, ImageFileType imageFileType, LPSTR outputFileName);
+
+	PYOCORE_API BOOL processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileType, LPCWSTR outputFileName);
+	PYOCORE_API BOOL processImageFileA(LPCSTR imageFileName, ImageFileType imageFileType, LPCSTR outputFileName);
 
 
 	/************** Handling Error **************/

@@ -14,10 +14,10 @@ namespace TableDetection
 
 		void cleanup();
 
-		bool process(std::string imageFile);
+		bool process(std::wstring imageFile, std::wstring outputFile);
 
 	private:
-		bool registerImage(std::string imageFile);
+		bool registerImage(std::wstring imageFile);
 		bool preprocess(void);
 		bool makeHistogram(void);
 		/* etc... */

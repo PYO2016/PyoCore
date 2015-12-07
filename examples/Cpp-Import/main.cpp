@@ -10,11 +10,11 @@ int main(void)
 	printf("\n");
 
 	CHAR str1[10000];
-	PyoCore::processImageFileA("ANSI-test", PyoCore::IMAGE_FILE_TYPE_PNG, str1);
+	PyoCore::importTestA("ANSI-test", PyoCore::IMAGE_FILE_TYPE_PNG, str1);
 	printf("%s\n\n", str1);
 
 	WCHAR str2[10000];
-	PyoCore::processImageFileW(L"WIDE-test", PyoCore::IMAGE_FILE_TYPE_PNG, str2);
+	PyoCore::importTestW(L"WIDE-test", PyoCore::IMAGE_FILE_TYPE_PNG, str2);
 	wprintf(L"%s\n\n", str2);
 
 	int errorCode = PyoCore::getErrorCode();

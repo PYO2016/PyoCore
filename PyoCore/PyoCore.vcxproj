@@ -142,6 +142,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Common\EncodingConverter.cpp" />
     <ClCompile Include="Common\PngImage.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Lodepng\lodepng.cpp" />
@@ -152,6 +153,7 @@
     <ClCompile Include="TableDetection\TableExporter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Common\EncodingConverter.h" />
     <ClInclude Include="Common\PngImage.h" />
     <ClInclude Include="Lodepng\lodepng.h" />
     <ClInclude Include="Preprocessing\Preprocessor.h" />

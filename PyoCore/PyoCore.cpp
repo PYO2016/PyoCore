@@ -4,45 +4,64 @@
 #include <cstdio>
 #include <cstring>
 
-/************** Import Test **************/
+#include "TableDetection/TableDetector.h"
+#include "Common/EncodingConverter.h"
 
-void PyoCore::helloWorld(void)
+namespace PyoCore
 {
-	printf("hello, world! 안녕, 세상아!\n");
-	wprintf(L"I'm 태국!\n");
-}
+
+	/************** Import Test **************/
+
+	void helloWorld(void)
+	{
+		printf("hello, world! 안녕, 세상아!\n");
+		wprintf(L"I'm 태국!\n");
+	}
+
+	BOOL importTestW(LPCWSTR imageFileName, ImageFileType imageFileType, LPWSTR outputFileName)
+	{
+		wprintf(L"importTestW() called!\n");
+		wprintf(L"Arg : %s / %d\n", imageFileName, imageFileType);
+		wcscpy(outputFileName, L"WIDE Copy 와이드 카피");
+
+		return TRUE;
+	}
+
+	BOOL importTestA(LPCSTR imageFileName, ImageFileType imageFileType, LPSTR outputFileName)
+	{
+		printf("importTestA() called!\n");
+		printf("Arg : %s / %d\n", imageFileName, imageFileType);
+		strcpy(outputFileName, "ANSI Copy 안시 카피");
+
+		return TRUE;
+	}
 
 
-/************** Processing image file **************/
+	/************** Processing image file **************/
 
-BOOL PyoCore::processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileType, LPWSTR outputFileName)
-{
-	/* Temporary Code for test. */
-	wprintf(L"processImageFileW() called!\n");
-	wprintf(L"Arg : %s / %d\n", imageFileName, imageFileType);
-	wcscpy(outputFileName, L"WIDE Copy 와이드 카피");
+	BOOL processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileType, LPCWSTR outputFileName)
+	{
+		TableDetection::TableDetector tableDectector;
 
-	return TRUE;
-}
+		return tableDectector.process(imageFileName, outputFileName);
+	}
 
-BOOL PyoCore::processImageFileA(LPCSTR imageFileName, ImageFileType imageFileType, LPSTR outputFileName)
-{
-	/* Temporary Code for test. */
-	printf("processImageFileA() called!\n");
-	printf("Arg : %s / %d\n", imageFileName, imageFileType);
-	strcpy(outputFileName, "ANSI Copy 안시 카피");
-
-	return TRUE;
-
-	/* internally call TableDetection::processImageFileW after MultiByteToWideChar. */
-}
+	BOOL processImageFileA(LPCSTR imageFileName, ImageFileType imageFileType, LPCSTR outputFileName)
+	{
+		return processImageFileW(
+			Common::EncodingConverter::s2ws(imageFileName).c_str(),
+			imageFileType,
+			Common::EncodingConverter::s2ws(outputFileName).c_str());
+	}
 
 
-/************** Handling Error **************/
+	/************** Handling Error **************/
 
-int errorCode;
+	int errorCode;
 
-int PyoCore::getErrorCode(void)
-{
-	return errorCode;
+	int getErrorCode(void)
+	{
+		return errorCode;
+	}
+
 }

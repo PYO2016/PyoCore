@@ -9,7 +9,7 @@ BOOL WINAPI DllMain(HINSTANCE hInstDLL, DWORD fdwReason, LPVOID lpvReserved)
 		/* Temporary Code for import test.
 		   This will be removed later.
 		*/
-		_wsetlocale(LC_ALL, L"Korean");
+		_wsetlocale(LC_ALL, L"");
 		break;
 
     case DLL_THREAD_ATTACH:
