@@ -1,40 +1,24 @@
 #pragma once
 
+#include <vector>
+#include "../Common/PngImage.h"
+
+using namespace std;
+using namespace Common;
+
 namespace Preprocessing
 {
 	class Preprocessor
 	{
-		/*
-		Attributes List...
-			...etc...
+	public:
+		Preprocessor();
+		~Preprocessor();
+		void preprocess(PngImage&);
 
-		Method List...
-			applyGrayscale
-			applyThreshold
-			...etc...
-		*/
+	private:
+		void applyGrayscale(PngImage&);
+		void applySimpleThreshold(PngImage&);
+		void removeBorder(PngImage&);
 	};
+
 }
-
-/*
-
-class SparseBlock {
-public:
-	inline int getTop();
-	inline int getLeft();
-	inline int getRight();
-	inline int getBottom();
-
-	inline int getWidth();
-	inline int getHeight();
-
-private:
-	int top;
-	int left;
-	int right;
-	int bottom;
-};
-
-vector<SparseBlock> asdf;
-
-*/
