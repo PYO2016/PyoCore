@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 namespace Common
 {
@@ -27,7 +28,7 @@ namespace Common
 	public:
 		// only create image by LoadImage() or copy constructor.
 		PngImage(const PngImage& image);
-		static PngImage* LoadImage(const std::wstring& filename);
+		static std::shared_ptr<PngImage> LoadImage(const std::wstring& filename);
 
 		PixelArray& operator[] (int idx);
 		const PixelArray& operator[] (int idx) const;

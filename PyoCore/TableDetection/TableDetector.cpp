@@ -16,7 +16,7 @@ namespace TableDetection
 	/* TableDetector */
 
 	TableDetector::TableDetector()
-		:image(NULL), hm(NULL)
+		:pImage(nullptr), pHm(nullptr)
 	{
 	}
 
@@ -27,13 +27,11 @@ namespace TableDetection
 
 	void TableDetector::cleanup()
 	{
-		if (!image) {
-			delete image;
-			image = NULL;
+		if (pImage) {
+			pImage.reset();
 		}
-		if (!hm) {
-			delete hm;
-			hm = NULL;
+		if (pHm) {
+			pHm.reset();
 		}
 	}
 
@@ -74,7 +72,7 @@ namespace TableDetection
 		DEBUG_MSG("preprocess() finish!!");
 
 		DEBUG_MSG("After preprocessing, store image file");
-		DEBUG_ACTION(image->storeToFile(imageFile + L"_after_preprocessing.png"));
+		DEBUG_ACTION(pImage->storeToFile(imageFile + L"_after_preprocessing.png"));
 
 		DEBUG_MSG("makeHistogram() start!!");
 
@@ -94,7 +92,7 @@ namespace TableDetection
 	bool TableDetector::registerImage(std::wstring imageFile)
 	{
 		cleanup();
-		return (image = Common::PngImage::LoadImage(imageFile)) != NULL;
+		return (pImage = Common::PngImage::LoadImage(imageFile)) != nullptr;
 	}
 
 	bool TableDetector::preprocess(void)
@@ -107,7 +105,7 @@ namespace TableDetection
 
 	bool TableDetector::makeHistogram(void)
 	{
-		HistogramManager *hm = new HistogramManager(*image);
+		std::shared_ptr<HistogramManager> hm(new HistogramManager(*pImage));
 
 		hm->makeHistogram(HistogramType::TYPE_X);
 		hm->makeHistogram(HistogramType::TYPE_Y);

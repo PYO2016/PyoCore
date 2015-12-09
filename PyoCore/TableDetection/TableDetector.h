@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include "../Common/PngImage.h"
 #include "HistogramManager.h"
 
@@ -26,7 +27,7 @@ namespace TableDetection
 	private:
 		std::wstring imageFile, outputFile;
 		bool isDebug;
-		Common::PngImage* image;
-		HistogramManager* hm;
+		std::shared_ptr<Common::PngImage> pImage;
+		std::shared_ptr<HistogramManager> pHm;
 	};
 }

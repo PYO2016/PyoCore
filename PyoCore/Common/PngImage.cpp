@@ -26,25 +26,24 @@ namespace Common
 	{
 	}
 
-	PngImage* PngImage::LoadImage(const std::wstring& filename)	// static member function
+	std::shared_ptr<PngImage> PngImage::LoadImage(const std::wstring& filename)	// static member function
 	{
-		PngImage *image = new PngImage();
-		image->isCopy = false;
+		std::shared_ptr<PngImage> pImage(new PngImage());
+		pImage->isCopy = false;
 		//decode
 		//the pixels are now in the vector "image", 4 bytes per pixel, ordered RGBARGBA.
-		unsigned error = lodepng::decode(image->data, image->width, image->height, 
+		unsigned error = lodepng::decode(pImage->data, pImage->width, pImage->height,
 			EncodingConverter::ws2s(filename));
 
 		//if there's an error, display it
 		//if (error) std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
 
 		if (!error) {
-			image->filename = filename;
-			return image;
+			pImage->filename = filename;
+			return pImage;
 		}
 		else {
-			delete image;
-			return NULL;
+			return nullptr;
 		}
 	}
 
