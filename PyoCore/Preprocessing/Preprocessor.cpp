@@ -11,10 +11,10 @@ namespace Preprocessing
 	{
 	}
 
-	void Preprocessor::preprocess(PngImage& image)
+	void Preprocessor::process(PngImage& image)
 	{
 		applyGrayscale(image);
-		applyThreshold(image);
+		applySimpleThreshold(image);
 		removeBorder(image);
 	}
 
@@ -39,16 +39,15 @@ namespace Preprocessing
 		}
 	}
 
-	void Preprocessor::applyThreshold(PngImage& grayscaledImage)
+	void Preprocessor::applySimpleThreshold(PngImage& grayImage, int threshold = DEFAULT_THRESHOLD)
 	{
-		int threshold = 128;
-		int width = grayscaledImage.getWidth();
-		int height = grayscaledImage.getHeight();
+		int width = grayImage.getWidth();
+		int height = grayImage.getHeight();
 		for (int i = 0; i < height; ++i)
 		{
 			for (int j = 0; j < width; ++j)
 			{
-				Pixel& pixel = grayscaledImage[i][j];
+				Pixel& pixel = grayImage[i][j];
 				unsigned char value = static_cast<unsigned char>(pixel.R > threshold);
 				pixel.R = value;
 				pixel.G = value;

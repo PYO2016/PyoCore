@@ -13,11 +13,13 @@ namespace Preprocessing
 	public:
 		Preprocessor();
 		~Preprocessor();
-		void preprocess(PngImage&);
+		void process(PngImage&);
 
 	private:
+		static const int DEFAULT_THRESHOLD = 128;
+
 		void applyGrayscale(PngImage&);
-		void applySimpleThreshold(PngImage&);
+		void applySimpleThreshold(PngImage&, int);
 		void removeBorder(PngImage&);
 	};
 
