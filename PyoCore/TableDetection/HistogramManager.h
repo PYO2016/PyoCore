@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Common/PngImage.h"
+#include <memory>
 
 namespace TableDetection
 {
@@ -58,6 +59,6 @@ namespace TableDetection
 		const Common::PngImage& image;
 		unsigned areaWidth, areaHeight;
 		unsigned offsetWidth, offsetHeight;
-		Histogram *histogramX, *histogramY;
+		std::shared_ptr<Histogram> pHistogramX, pHistogramY;
 	};
 }

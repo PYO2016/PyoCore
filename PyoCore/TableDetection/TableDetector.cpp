@@ -27,12 +27,8 @@ namespace TableDetection
 
 	void TableDetector::cleanup()
 	{
-		if (pImage) {
-			pImage.reset();
-		}
-		if (pHm) {
-			pHm.reset();
-		}
+		pImage.reset();
+		pHm.reset();
 	}
 
 	bool TableDetector::process(const std::wstring& imageFile, const std::wstring& outputFile, bool isDebug)
@@ -105,7 +101,7 @@ namespace TableDetection
 
 	bool TableDetector::makeHistogram(void)
 	{
-		std::shared_ptr<HistogramManager> hm(new HistogramManager(*pImage));
+		std::shared_ptr<HistogramManager> hm = std::make_shared<HistogramManager>(*pImage);
 
 		hm->makeHistogram(HistogramType::TYPE_X);
 		hm->makeHistogram(HistogramType::TYPE_Y);

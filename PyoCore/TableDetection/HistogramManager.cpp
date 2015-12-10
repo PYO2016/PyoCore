@@ -175,7 +175,7 @@ namespace TableDetection
 	HistogramManager::HistogramManager(const Common::PngImage& image,
 		unsigned areaWidth, unsigned areaHeight, unsigned offsetWidth, unsigned offsetHeight)
 		: image(image), areaWidth(areaWidth), areaHeight(areaHeight), 
-			offsetWidth(offsetWidth), offsetHeight(offsetHeight), histogramX(NULL), histogramY(NULL)
+			offsetWidth(offsetWidth), offsetHeight(offsetHeight), pHistogramX(nullptr), pHistogramY(nullptr)
 	{
 	}
 
@@ -191,14 +191,8 @@ namespace TableDetection
 
 	void HistogramManager::cleanup()
 	{
-		if (this->histogramX != NULL) {
-			delete histogramX;
-			histogramX = NULL;
-		}
-		if (this->histogramY != NULL) {
-			delete histogramY;
-			histogramY = NULL;
-		}
+		pHistogramX.reset();
+		pHistogramY.reset();
 	}
 
 	bool HistogramManager::makeHistogram(HistogramType type)
@@ -208,15 +202,15 @@ namespace TableDetection
 		switch (type)
 		{
 		case HistogramType::TYPE_X:
-			histogramX = new Histogram(type, image, offsetWidth, offsetHeight, areaWidth, areaHeight);
-			if (!(success = histogramX->calculateValues()))
-				delete histogramX;
+			pHistogramX = std::make_shared<Histogram>(type, image, offsetWidth, offsetHeight, areaWidth, areaHeight);
+			if (pHistogramX && !(success = pHistogramX->calculateValues()))
+				pHistogramX.reset();
 			break;
 			
 		case HistogramType::TYPE_Y:
-			histogramY = new Histogram(type, image, offsetWidth, offsetHeight, areaHeight, areaWidth);
-			if (!(success = histogramY->calculateValues()))
-				delete histogramY;
+			pHistogramY = std::make_shared<Histogram>(type, image, offsetWidth, offsetHeight, areaHeight, areaWidth);
+			if (pHistogramY && !(success = pHistogramY->calculateValues()))
+				pHistogramY.reset();
 			break;
 		}
 
@@ -230,11 +224,11 @@ namespace TableDetection
 		switch (type)
 		{
 		case HistogramType::TYPE_X:
-			success = histogramX->applyMedianFilter();
+			success = pHistogramX->applyMedianFilter();
 			break;
 
 		case HistogramType::TYPE_Y:
-			success = histogramY->applyMedianFilter();
+			success = pHistogramY->applyMedianFilter();
 			break;
 		}
 
@@ -248,11 +242,11 @@ namespace TableDetection
 		switch (type)
 		{
 		case HistogramType::TYPE_X:
-			success = histogramX->initFilterExtremum();
+			success = pHistogramX->initFilterExtremum();
 			break;
 
 		case HistogramType::TYPE_Y:
-			success = histogramY->initFilterExtremum();
+			success = pHistogramY->initFilterExtremum();
 			break;
 		}
 
