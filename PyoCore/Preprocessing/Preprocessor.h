@@ -19,7 +19,7 @@ namespace Preprocessing
 		static const int DEFAULT_THRESHOLD = 128;
 
 		void applyGrayscale(PngImage&);
-		void applySimpleThreshold(PngImage&, int);
+		void applySimpleThreshold(PngImage&, int = DEFAULT_THRESHOLD);
 		void removeBorder(PngImage&);
 	};
 
