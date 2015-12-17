@@ -3,15 +3,7 @@
 
 namespace Preprocessing 
 {
-	Preprocessor::Preprocessor()
-	{
-	}
-
-	Preprocessor::~Preprocessor()
-	{
-	}
-
-	void Preprocessor::process(PngImage& image)
+	bool Preprocessor::process(PngImage& image)
 	{
 		applyGrayscale(image);
 		applySimpleThreshold(image);
