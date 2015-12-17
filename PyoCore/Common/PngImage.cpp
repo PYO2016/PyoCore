@@ -18,18 +18,16 @@ namespace Common
 
 	/* Image */
 
-	PngImage::PngImage() { }
-
 	PngImage::PngImage(const PngImage& image)
-		:isCopy(true), filename(image.filename), width(image.width), height(image.height), 
+		:_isCopy(true), filename(image.filename), width(image.width), height(image.height), 
 			data(image.data)
 	{
 	}
 
 	std::shared_ptr<PngImage> PngImage::LoadImage(const std::wstring& filename)	// static member function
 	{
-		std::shared_ptr<PngImage> pImage = std::make_shared<PngImage>();
-		pImage->isCopy = false;
+		std::shared_ptr<PngImage> pImage = std::make_shared<PngImage>(HiddenKey());
+		pImage->_isCopy = false;
 		//decode
 		//the pixels are now in the vector "image", 4 bytes per pixel, ordered RGBARGBA.
 		unsigned error = lodepng::decode(pImage->data, pImage->width, pImage->height,
@@ -61,22 +59,4 @@ namespace Common
 	{
 		return lodepng::save_file(data, EncodingConverter::ws2s(targetFilename)) == 0 ? true : false;
 	}
-
-	bool PngImage::getIsCopy() const
-	{ return isCopy; }
-
-	std::wstring PngImage::getFileName() const
-	{ return filename; }
-
-	unsigned int PngImage::getWidth() const
-	{ return width; }
-
-	unsigned int PngImage::getHeight() const
-	{ return height; }
-
-	std::vector<unsigned char>& PngImage::getDataRef()
-	{ return data; }
-
-	unsigned char* PngImage::getDataRefAsByteArray()
-	{ return &data[0]; }
 }

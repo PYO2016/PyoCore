@@ -23,9 +23,11 @@ namespace Common
 	class PngImage
 	{
 	private:
-		PngImage();
+		PngImage() = default;
+		struct HiddenKey {};	// Used by LoadImage().
 
 	public:
+		inline PngImage(HiddenKey) : PngImage() { };
 		// only create image by LoadImage() or copy constructor.
 		PngImage(const PngImage& image);
 		static std::shared_ptr<PngImage> LoadImage(const std::wstring& filename);
@@ -35,18 +37,51 @@ namespace Common
 
 		bool storeToFile(const std::wstring& targetFilename);
 
-		bool getIsCopy() const;
-		std::wstring getFileName() const;
-		unsigned int getWidth() const;
-		unsigned int getHeight() const;
-		std::vector<unsigned char>& getDataRef();
-		unsigned char* getDataRefAsByteArray();
+		inline bool PngImage::isCopy() const;
+		inline std::wstring PngImage::getFileName() const;
+		inline unsigned int PngImage::getWidth() const;
+		inline unsigned int PngImage::getHeight() const;
+		inline std::vector<unsigned char>& PngImage::getDataRef();
+		inline unsigned char* PngImage::getDataRefAsByteArray();
 
 	private:
-		bool isCopy;	// true if created by copy constructor.
+		bool _isCopy;	// true if created by copy constructor.
 		std::wstring filename;
 		unsigned int width, height;		// width and height of image.
 		std::vector<unsigned char> data;
 	};
+
+	/* inline functions */
+
+	inline bool PngImage::isCopy() const
+	{
+		return _isCopy;
+	}
+
+	inline std::wstring PngImage::getFileName() const
+	{
+		return filename;
+	}
+
+	inline unsigned int PngImage::getWidth() const
+	{
+		return width;
+	}
+
+	inline unsigned int PngImage::getHeight() const
+	{
+		return height;
+	}
+
+	inline std::vector<unsigned char>& PngImage::getDataRef()
+	{
+		return data;
+	}
+
+	inline unsigned char* PngImage::getDataRefAsByteArray()
+	{
+		return &data[0];
+	}
 }
+
 
