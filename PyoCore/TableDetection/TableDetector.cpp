@@ -1,5 +1,6 @@
 #include "TableDetector.h"
 #include "HistogramManager.h"
+#include "../Preprocessing/Preprocessor.h"
 #include <iostream>
 
 #define DEBUG_MSG(STR) if(isDebug) { \
@@ -93,10 +94,7 @@ namespace TableDetection
 
 	bool TableDetector::preprocess(void)
 	{
-		/* do something. */
-
-		/* not yet implemented */
-		return false;
+		return Preprocessing::Preprocessor::process(*pImage);
 	}
 
 	bool TableDetector::makeHistogram(void)
