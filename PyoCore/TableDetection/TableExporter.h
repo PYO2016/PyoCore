@@ -4,12 +4,23 @@ namespace TableDetection
 {
 	class TableExporter
 	{
-		/*
-		Attributes List...
-			...etc...
+	public:
+		TableExporter() = default;
+		virtual ~TableExporter() = default;
+		TableExporter(const TableExporter &) = delete;
+		TableExporter& operator=(const TableExporter &) = delete;
+		TableExporter(TableExporter &&) = delete;
+		TableExporter& operator=(TableExporter &&) = delete;
+		
 
-		Method List...
-			exportTable
-		*/
+	private:
 	};
 }
+
+/*
+Attributes List...
+...etc...
+
+Method List...
+exportTable
+*/

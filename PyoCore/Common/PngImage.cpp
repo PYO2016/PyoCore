@@ -26,7 +26,7 @@ namespace Common
 
 	std::shared_ptr<PngImage> PngImage::LoadImage(const std::wstring& filename)	// static member function
 	{
-		std::shared_ptr<PngImage> pImage = std::make_shared<PngImage>(HiddenKey());
+		std::shared_ptr<PngImage> pImage = std::make_shared<PngImage>(cKey);
 		pImage->_isCopy = false;
 		//decode
 		//the pixels are now in the vector "image", 4 bytes per pixel, ordered RGBARGBA.

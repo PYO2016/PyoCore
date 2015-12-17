@@ -24,12 +24,13 @@ namespace Common
 	{
 	private:
 		PngImage() = default;
-		struct HiddenKey {};	// Used by LoadImage().
-
+		struct CreationKey {};	// Used by LoadImage().
+		static CreationKey cKey;
 	public:
-		inline PngImage(HiddenKey) : PngImage() { };
+		inline PngImage(CreationKey) : PngImage() { };
 		// only create image by LoadImage() or copy constructor.
 		PngImage(const PngImage& image);
+		PngImage& operator=(const PngImage &) = delete;
 		static std::shared_ptr<PngImage> LoadImage(const std::wstring& filename);
 
 		PixelArray& operator[] (int idx);

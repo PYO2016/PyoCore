@@ -57,7 +57,7 @@
     <ClCompile Include="Common\SparseBlock.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="Table.cpp">
+    <ClCompile Include="Common\Table.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
   </ItemGroup>
@@ -89,7 +89,7 @@
     <ClInclude Include="Common\SparseBlock.h">
       <Filter>소스 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Table.h">
+    <ClInclude Include="Common\Table.h">
       <Filter>소스 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>

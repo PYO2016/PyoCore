@@ -22,6 +22,7 @@ namespace TableDetection
 		Histogram(HistogramType type, const Common::PngImage& image, 
 			unsigned offsetWidth, unsigned offsetHeight, int length, int valLimit);
 		Histogram(const Histogram& h);
+		Histogram& operator=(const Histogram &h) = delete;
 		~Histogram();
 
 		bool calculateValues();		// not tested...
@@ -44,6 +45,7 @@ namespace TableDetection
 		HistogramManager(const Common::PngImage& image, unsigned areaWidth, unsigned areaHeight, 
 			unsigned offsetWidth, unsigned offsetHeight);
 		HistogramManager(const HistogramManager& h);
+		HistogramManager& operator=(const HistogramManager &h) = delete;
 		~HistogramManager();
 
 		void cleanup();

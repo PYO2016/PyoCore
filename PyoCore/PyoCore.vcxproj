@@ -145,11 +145,11 @@
     <ClCompile Include="Common\EncodingConverter.cpp" />
     <ClCompile Include="Common\PngImage.cpp" />
     <ClCompile Include="Common\SparseBlock.cpp" />
+    <ClCompile Include="Common\Table.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Lodepng\lodepng.cpp" />
     <ClCompile Include="Preprocessing\Preprocessor.cpp" />
     <ClCompile Include="PyoCore.cpp" />
-    <ClCompile Include="Table.cpp" />
     <ClCompile Include="TableDetection\HistogramManager.cpp" />
     <ClCompile Include="TableDetection\TableDetector.cpp" />
     <ClCompile Include="TableDetection\TableExporter.cpp" />
@@ -158,10 +158,10 @@
     <ClInclude Include="Common\EncodingConverter.h" />
     <ClInclude Include="Common\PngImage.h" />
     <ClInclude Include="Common\SparseBlock.h" />
+    <ClInclude Include="Common\Table.h" />
     <ClInclude Include="Lodepng\lodepng.h" />
     <ClInclude Include="Preprocessing\Preprocessor.h" />
     <ClInclude Include="PyoCore.h" />
-    <ClInclude Include="Table.h" />
     <ClInclude Include="TableDetection\HistogramManager.h" />
     <ClInclude Include="TableDetection\TableDetector.h" />
     <ClInclude Include="TableDetection\TableExporter.h" />

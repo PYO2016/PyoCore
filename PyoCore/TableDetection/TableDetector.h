@@ -11,6 +11,8 @@ namespace TableDetection
 	{
 	public:
 		TableDetector();
+		TableDetector(const TableDetector&) = delete;
+		TableDetector& operator=(const TableDetector&) = delete;
 		~TableDetector();
 
 		void cleanup();
