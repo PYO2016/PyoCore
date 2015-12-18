@@ -118,6 +118,10 @@ namespace TableDetection
 		currentState = ((values[1] - values[0]) > 0) ? ExtremumType::TYPE_MAX: ExtremumType::TYPE_MIN;
 		for (int i = 2; i < length; ++i)
 		{
+			if (values[i] - values[i - 1] == 0)
+			{
+				continue;
+			}
 			nextState = ((values[i] - values[i - 1]) > 0) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN;
 			if (currentState != nextState)
 			{
@@ -162,6 +166,11 @@ namespace TableDetection
 			}
 		}
 		return true;
+	}
+
+	std::vector<int> Histogram::getValues()
+	{
+		return this->values;
 	}
 
 
@@ -236,7 +245,6 @@ namespace TableDetection
 	}
 	bool HistogramManager::filterExtremum(HistogramType type)
 	{
-
 		bool success;
 
 		switch (type)
@@ -250,6 +258,66 @@ namespace TableDetection
 			break;
 		}
 
+		return success;
+	}
+	bool HistogramManager::applyKmeans()
+	{
+		bool success = false;
+
+		bool LOWER = false;
+		bool UPPER = true;
+		double xLower, xUpper, yLower, yUpper;
+		std::vector<int> x{ pHistogramX->getValues() };
+		std::vector<int> y{ pHistogramY->getValues() };
+		// for get 1/4th value, 3/4th value
+		std::vector<int> tempX{ pHistogramX->getValues() };
+		std::vector<int> tempY{ pHistogramY->getValues() };
+		std::vector<bool> xClustered((tempX.size()));
+		std::vector<bool> yClustered((tempY.size()));
+
+		std::sort(begin(tempX), end(tempX));
+		std::sort(begin(tempY), end(tempY));
+
+		xLower = static_cast<double>(tempX[(tempX.size() - 1) / 4]);
+		xUpper = static_cast<double>(tempX[((tempX.size() - 1) / 4) * 3]);
+
+		yLower = static_cast<double>(tempX[(tempY.size() - 1) / 4]);
+		yUpper = static_cast<double>(tempX[((tempY.size() - 1) / 4) * 3]);
+
+		while (true)
+		{
+			double currentXLow = 0, currentXUpper = 0;
+			double currentYLow = 0, currentYUpper = 0;
+			for (int i = 0; i < xClustered.size(); i++)
+			{
+				xClustered[i] = (abs(xLower - x[i]) > abs(xUpper - x[i])) ? UPPER : LOWER;
+				// if clustered as lower
+				if (xClustered[i] == LOWER)
+				{
+					currentXLow += x[i];
+				}
+				else
+				{
+					currentXUpper += x[i];
+				}
+			}
+			currentXLow /= xClustered.size();
+			currentXUpper /= xClustered.size();
+			for (int i = 0; i < yClustered.size(); i++)
+			{
+				yClustered[i] = (abs(yLower - x[i]) > abs(yUpper - x[i])) ? UPPER : LOWER;
+				// if clustered as lower
+				if (yClustered[i] == LOWER)
+				{
+					currentXLow += y[i];
+				}
+				else
+				{
+					currentXUpper += y[i];
+				}
+			}
+			yMid /= yClustered.size();
+		}
 		return success;
 	}
 }
