@@ -316,7 +316,17 @@ namespace TableDetection
 					currentXUpper += y[i];
 				}
 			}
-			yMid /= yClustered.size();
+			currentYLow /= yClustered.size();
+			currentYUpper /= yClustered.size();
+			if (xLower == currentXLow &&
+				xUpper == currentXUpper &&
+				yLower == currentYLow &&
+				yUpper == currentYUpper)
+			{
+				// can compiler optimize this while loop?
+				// if cant i will modify this code as do-while
+				break;
+			}
 		}
 		return success;
 	}
