@@ -3,7 +3,7 @@
 
 using namespace std;
 
-namespace PyoCore {
+namespace Common {
 
 	class SparseBlock
 	{
@@ -40,7 +40,7 @@ namespace PyoCore {
 			return (bottom < top ? top - bottom : bottom - top);
 		}
 
-		inline string getText()
+		inline wstring getText()
 		{
 			return text;
 		}
@@ -50,6 +50,6 @@ namespace PyoCore {
 		int left;
 		int right;
 		int bottom;
-		string text;
+		wstring text;
 	};
 }

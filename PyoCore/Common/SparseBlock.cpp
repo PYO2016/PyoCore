@@ -1,8 +1,9 @@
 #include "SparseBlock.h"
+#include "EncodingConverter.h"
 
 using namespace std;
 
-namespace PyoCore {
+namespace Common {
 
 	SparseBlock::SparseBlock(int top, int bottom, int left, int right, const char* text)
 	{
@@ -10,7 +11,7 @@ namespace PyoCore {
 		this->bottom = bottom;
 		this->left = left;
 		this->right = right;
-		this->text = text;
+		this->text = EncodingConverter::s2ws(text);
 	}
 
 

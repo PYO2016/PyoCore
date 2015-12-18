@@ -145,6 +145,7 @@
     <ClCompile Include="Common\EncodingConverter.cpp" />
     <ClCompile Include="Common\PngImage.cpp" />
     <ClCompile Include="Common\SparseBlock.cpp" />
+    <ClCompile Include="Common\Table.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Lodepng\lodepng.cpp" />
     <ClCompile Include="Preprocessing\Preprocessor.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="Common\EncodingConverter.h" />
     <ClInclude Include="Common\PngImage.h" />
     <ClInclude Include="Common\SparseBlock.h" />
+    <ClInclude Include="Common\Table.h" />
     <ClInclude Include="Lodepng\lodepng.h" />
     <ClInclude Include="Preprocessing\Preprocessor.h" />
     <ClInclude Include="PyoCore.h" />
