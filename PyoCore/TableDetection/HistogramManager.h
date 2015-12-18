@@ -27,7 +27,7 @@ namespace TableDetection
 		bool calculateValues();		// not tested...
 		bool applyMedianFilter();	// test pass!
 		bool initFilterExtremum();	// not tested
-		std::vector<int> getValues();
+		std::vector<int> getExtremumValues();
 
 	private:
 		// histogram type ( represents whether x-coordinate or y-coordinate )

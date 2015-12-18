@@ -169,9 +169,9 @@ namespace TableDetection
 		return true;
 	}
 
-	std::vector<int> Histogram::getValues()
+	std::list<std::pair<int, ExtremumType>> Histogram::getExtremumValues()
 	{
-		return this->values;
+		return this->extremumList;
 	}
 
 
@@ -268,11 +268,11 @@ namespace TableDetection
 		bool LOWER = false;
 		bool UPPER = true;
 		double xLower, xUpper, yLower, yUpper;
-		std::vector<int> x{ pHistogramX->getValues() };
-		std::vector<int> y{ pHistogramY->getValues() };
+		std::vector<int> x{ pHistogramX->getExtremumValues() };
+		std::vector<int> y{ pHistogramY->getExtremumValues() };
 		// for get 1/4th value, 3/4th value
-		std::vector<int> tempX{ pHistogramX->getValues() };
-		std::vector<int> tempY{ pHistogramY->getValues() };
+		std::vector<int> tempX{ pHistogramX->getExtremumValues() };
+		std::vector<int> tempY{ pHistogramY->getExtremumValues() };
 		std::vector<bool> xClustered((tempX.size()));
 		std::vector<bool> yClustered((tempY.size()));
 
