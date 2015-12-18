@@ -165,6 +165,7 @@ namespace TableDetection
 				nextItr = next(currItr, 1);
 			}
 		}
+		this->extremumList = std::move(eList);
 		return true;
 	}
 
@@ -328,6 +329,7 @@ namespace TableDetection
 				break;
 			}
 		}
+
 		return success;
 	}
 }

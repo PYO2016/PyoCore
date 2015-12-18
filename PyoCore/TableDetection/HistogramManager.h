@@ -36,6 +36,8 @@ namespace TableDetection
 		unsigned offsetWidth, offsetHeight;
 		std::vector<int> values;
 		int length, valLimit;
+		// extremum values
+		std::list<std::pair<int, ExtremumType>>&& extremumList;
 	};
 
 	class HistogramManager
