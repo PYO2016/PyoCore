@@ -15,6 +15,11 @@ namespace TableDetection
 		TYPE_MIN = 0,
 		TYPE_MAX
 	};
+	enum class KmeansType : int
+	{
+		TYPE_LOWER = 0,
+		TYPE_UPPER
+	};
 
 	class Histogram
 	{
@@ -62,6 +67,7 @@ namespace TableDetection
 		unsigned areaWidth, areaHeight;
 		unsigned offsetWidth, offsetHeight;
 		std::shared_ptr<Histogram> pHistogramX, pHistogramY;
-		double getKmeansBoundary(std::list<std::pair<int, ExtremumType>>, ExtremumType);
+		double getKmeansBoundary(std::list<std::pair<int, ExtremumType>>& axis, ExtremumType type);
+		bool removeKmeansValues(std::list<std::pair<int, ExtremumType>>& axis, double minBoundary, double maxBoundary);
 	};
 }

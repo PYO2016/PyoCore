@@ -268,14 +268,12 @@ namespace TableDetection
 		std::list<std::pair<int, ExtremumType>> x{ pHistogramX->getExtremumValues() };
 		std::list<std::pair<int, ExtremumType>> y{ pHistogramY->getExtremumValues() };
 
-		double xMinBoundary = this->getKmeansBoundary(x, ExtremumType::TYPE_MIN);
-		double xMaxBoundary = this->getKmeansBoundary(x, ExtremumType::TYPE_MAX);
-		double yMinBoundary = this->getKmeansBoundary(y, ExtremumType::TYPE_MIN);
-		double yMaxBoundary = this->getKmeansBoundary(y, ExtremumType::TYPE_MAX);
+		success = removeKmeansValues(x, this->getKmeansBoundary(x, ExtremumType::TYPE_MIN), this->getKmeansBoundary(x, ExtremumType::TYPE_MAX));
+		success &= removeKmeansValues(y, this->getKmeansBoundary(y, ExtremumType::TYPE_MIN), this->getKmeansBoundary(y, ExtremumType::TYPE_MAX));
 
 		return success;
 	}
-	double HistogramManager::getKmeansBoundary(std::list<std::pair<int, ExtremumType>> axis, ExtremumType type)
+	double HistogramManager::getKmeansBoundary(std::list<std::pair<int, ExtremumType>>& axis, ExtremumType type)
 	{
 		std::vector<int> forCluster;
 		for (std::pair<int, ExtremumType> p : axis)
@@ -283,17 +281,13 @@ namespace TableDetection
 			if (p.second == type)
 				forCluster.emplace_back(p.first);
 		}
-		std::vector<bool> clustered(forCluster.size());
+		std::vector<KmeansType> clustered(forCluster.size());
 		// for get 1/4th value, 3/4th value
-		std::list<int> forClusterTemp{ forCluster };
+		std::vector<int> forClusterTemp{ forCluster };
 
 		std::sort(begin(forClusterTemp), end(forClusterTemp));
 
-		bool LOWER = false;
-		bool UPPER = true;
 		double lower, upper;
-		//std::vector<bool> xClustered((tempX.size()));
-		//std::vector<bool> yClustered((tempY.size()));
 
 		lower = static_cast<double>(forClusterTemp[(forClusterTemp.size() - 1) / 4]);
 		upper = static_cast<double>(forClusterTemp[((forClusterTemp.size() - 1) / 4) * 3]);
@@ -304,9 +298,9 @@ namespace TableDetection
 			double currentLow = 0, currentUpper = 0;
 			for (int i = 0; i < forCluster.size(); i++)
 			{
-				clustered[i] = (abs(lower - forCluster[i]) > abs(upper - forCluster[i])) ? UPPER : LOWER;
+				clustered[i] = (abs(lower - forCluster[i]) > abs(upper - forCluster[i])) ? KmeansType::TYPE_UPPER : KmeansType::TYPE_LOWER;
 				// if clustered as lower
-				if (clustered[i] == LOWER)
+				if (clustered[i] == KmeansType::TYPE_LOWER)
 				{
 					currentLow += forCluster[i];
 				}
@@ -331,11 +325,51 @@ namespace TableDetection
 		int upperMinValue = INT_MAX;
 		for (int i = 0; i < clustered.size(); i++)
 		{
-			if (clustered[i] == LOWER && forCluster[i] > lowerMaxValue)
+			if (clustered[i] == KmeansType::TYPE_LOWER && forCluster[i] > lowerMaxValue)
 				lowerMaxValue = forCluster[i];
-			else if (clustered[i] == UPPER && forCluster[i] < upperMinValue)
+			else if (clustered[i] == KmeansType::TYPE_UPPER && forCluster[i] < upperMinValue)
 				upperMinValue = forCluster[i];
 		}
+		
 		return ((static_cast<double>(lowerMaxValue) + static_cast<double>(upperMinValue)) / 2);
+	}
+	bool HistogramManager::removeKmeansValues(std::list<std::pair<int, ExtremumType>>& axis, double minBoundary, double maxBoundary)
+	{
+		bool success = true;
+		for (auto itr = begin(axis); itr != end(axis); ++itr)
+		{
+			if (itr->second == ExtremumType::TYPE_MAX &&
+				itr->first > maxBoundary)
+			{
+				auto jtr = next(itr);
+				for (; jtr != end(axis) && jtr->second != ExtremumType::TYPE_MAX && jtr->first < maxBoundary; ++jtr);
+
+				if (jtr == end(axis))
+				{
+					goto outerLoop;
+				}
+				else 
+				{
+					int minValue = INT_MAX;
+					for (auto ktr = next(itr); ktr != jtr; ++ktr)
+					{
+						if (minValue > ktr->first && ktr->second == ExtremumType::TYPE_MIN && ktr->first < minBoundary)
+						{
+							minValue = ktr->first;
+						}
+					}
+					for (auto ktr = next(itr); ktr != jtr; ++ktr)
+					{
+						if (minValue > ktr->first && ktr->second == ExtremumType::TYPE_MIN && ktr->first < minBoundary)
+						{
+							ktr = axis.erase(ktr);
+							--ktr;
+						}
+					}
+				}
+			}
+		}
+		outerLoop:
+		return success;
 	}
 }
