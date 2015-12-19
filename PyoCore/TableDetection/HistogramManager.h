@@ -13,7 +13,12 @@ namespace TableDetection
 	enum class ExtremumType : int
 	{
 		TYPE_MIN = 0,
-		TYPE_MAX	
+		TYPE_MAX
+	};
+	enum class KmeansType : int
+	{
+		TYPE_LOWER = 0,
+		TYPE_UPPER
 	};
 
 	class Histogram
@@ -22,12 +27,12 @@ namespace TableDetection
 		Histogram(HistogramType type, const Common::PngImage& image, 
 			unsigned offsetWidth, unsigned offsetHeight, int length, int valLimit);
 		Histogram(const Histogram& h);
-		Histogram& operator=(const Histogram &h) = delete;
 		~Histogram();
 
 		bool calculateValues();		// not tested...
 		bool applyMedianFilter();	// test pass!
 		bool initFilterExtremum();	// not tested
+		std::list<std::pair<int, ExtremumType>> getExtremumValues();
 
 	private:
 		// histogram type ( represents whether x-coordinate or y-coordinate )
@@ -36,6 +41,8 @@ namespace TableDetection
 		unsigned offsetWidth, offsetHeight;
 		std::vector<int> values;
 		int length, valLimit;
+		// extremum values
+		std::list<std::pair<int, ExtremumType>>&& extremumList;
 	};
 
 	class HistogramManager
@@ -45,7 +52,6 @@ namespace TableDetection
 		HistogramManager(const Common::PngImage& image, unsigned areaWidth, unsigned areaHeight, 
 			unsigned offsetWidth, unsigned offsetHeight);
 		HistogramManager(const HistogramManager& h);
-		HistogramManager& operator=(const HistogramManager &h) = delete;
 		~HistogramManager();
 
 		void cleanup();
@@ -53,8 +59,7 @@ namespace TableDetection
 		bool makeHistogram(HistogramType type);
 		bool applyMedianFilter(HistogramType type);
 		bool filterExtremum(HistogramType type);
-		//bool applyKmeans(HistogramType type);			// not yet implemented...
-		// 
+		bool applyKmeans();
 		/* etc... */
 
 	private:
@@ -62,5 +67,7 @@ namespace TableDetection
 		unsigned areaWidth, areaHeight;
 		unsigned offsetWidth, offsetHeight;
 		std::shared_ptr<Histogram> pHistogramX, pHistogramY;
+		double getKmeansBoundary(std::list<std::pair<int, ExtremumType>>& axis, ExtremumType type);
+		bool removeKmeansValues(std::list<std::pair<int, ExtremumType>>& axis, double minBoundary, double maxBoundary);
 	};
 }

@@ -127,6 +127,10 @@ namespace TableDetection
 		currentState = ((values[1] - values[0]) > 0) ? ExtremumType::TYPE_MAX: ExtremumType::TYPE_MIN;
 		for (int i = 2; i < length; ++i)
 		{
+			if (values[i] - values[i - 1] == 0)
+			{
+				continue;
+			}
 			nextState = ((values[i] - values[i - 1]) > 0) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN;
 			if (currentState != nextState)
 			{
@@ -170,7 +174,13 @@ namespace TableDetection
 				nextItr = next(currItr, 1);
 			}
 		}
+		this->extremumList = std::move(eList);
 		return true;
+	}
+
+	std::list<std::pair<int, ExtremumType>> Histogram::getExtremumValues()
+	{
+		return this->extremumList;
 	}
 
 
@@ -245,7 +255,6 @@ namespace TableDetection
 	}
 	bool HistogramManager::filterExtremum(HistogramType type)
 	{
-
 		bool success;
 
 		switch (type)
@@ -259,6 +268,117 @@ namespace TableDetection
 			break;
 		}
 
+		return success;
+	}
+	bool HistogramManager::applyKmeans()
+	{
+		bool success = false;
+
+		std::list<std::pair<int, ExtremumType>> x{ pHistogramX->getExtremumValues() };
+		std::list<std::pair<int, ExtremumType>> y{ pHistogramY->getExtremumValues() };
+
+		success = removeKmeansValues(x, this->getKmeansBoundary(x, ExtremumType::TYPE_MIN), this->getKmeansBoundary(x, ExtremumType::TYPE_MAX));
+		success &= removeKmeansValues(y, this->getKmeansBoundary(y, ExtremumType::TYPE_MIN), this->getKmeansBoundary(y, ExtremumType::TYPE_MAX));
+
+		return success;
+	}
+	double HistogramManager::getKmeansBoundary(std::list<std::pair<int, ExtremumType>>& axis, ExtremumType type)
+	{
+		std::vector<int> forCluster;
+		for (std::pair<int, ExtremumType> p : axis)
+		{
+			if (p.second == type)
+				forCluster.emplace_back(p.first);
+		}
+		std::vector<KmeansType> clustered(forCluster.size());
+		// for get 1/4th value, 3/4th value
+		std::vector<int> forClusterTemp{ forCluster };
+
+		std::sort(begin(forClusterTemp), end(forClusterTemp));
+
+		double lower, upper;
+
+		lower = static_cast<double>(forClusterTemp[(forClusterTemp.size() - 1) / 4]);
+		upper = static_cast<double>(forClusterTemp[((forClusterTemp.size() - 1) / 4) * 3]);
+
+		// actually this while loop must divide as 2 group(xCluster, yCluser) but... just my tiresome
+		while (true)
+		{
+			double currentLow = 0, currentUpper = 0;
+			for (int i = 0; i < forCluster.size(); i++)
+			{
+				clustered[i] = (abs(lower - forCluster[i]) > abs(upper - forCluster[i])) ? KmeansType::TYPE_UPPER : KmeansType::TYPE_LOWER;
+				// if clustered as lower
+				if (clustered[i] == KmeansType::TYPE_LOWER)
+				{
+					currentLow += forCluster[i];
+				}
+				else
+				{
+					currentUpper += forCluster[i];
+				}
+			}
+			currentLow /= forCluster.size();
+			currentUpper /= forCluster.size();
+			if (lower == currentLow &&
+				upper == currentUpper)
+			{
+				// can compiler optimize this while loop?
+				// if cant i will modify this code as do-while
+				break;
+			}
+			lower = currentLow;
+			upper = currentUpper;
+		}
+		int lowerMaxValue = INT_MIN;
+		int upperMinValue = INT_MAX;
+		for (int i = 0; i < clustered.size(); i++)
+		{
+			if (clustered[i] == KmeansType::TYPE_LOWER && forCluster[i] > lowerMaxValue)
+				lowerMaxValue = forCluster[i];
+			else if (clustered[i] == KmeansType::TYPE_UPPER && forCluster[i] < upperMinValue)
+				upperMinValue = forCluster[i];
+		}
+		
+		return ((static_cast<double>(lowerMaxValue) + static_cast<double>(upperMinValue)) / 2);
+	}
+	bool HistogramManager::removeKmeansValues(std::list<std::pair<int, ExtremumType>>& axis, double minBoundary, double maxBoundary)
+	{
+		bool success = true;
+		for (auto itr = begin(axis); itr != end(axis); ++itr)
+		{
+			if (itr->second == ExtremumType::TYPE_MAX &&
+				itr->first > maxBoundary)
+			{
+				auto jtr = next(itr);
+				for (; jtr != end(axis) && jtr->second != ExtremumType::TYPE_MAX && jtr->first < maxBoundary; ++jtr);
+
+				if (jtr == end(axis))
+				{
+					goto outerLoop;
+				}
+				else 
+				{
+					int minValue = INT_MAX;
+					for (auto ktr = next(itr); ktr != jtr; ++ktr)
+					{
+						if (minValue > ktr->first && ktr->second == ExtremumType::TYPE_MIN && ktr->first < minBoundary)
+						{
+							minValue = ktr->first;
+						}
+					}
+					for (auto ktr = next(itr); ktr != jtr; ++ktr)
+					{
+						if (minValue > ktr->first && ktr->second == ExtremumType::TYPE_MIN && ktr->first < minBoundary)
+						{
+							ktr = axis.erase(ktr);
+							--ktr;
+						}
+					}
+				}
+			}
+		}
+		outerLoop:
 		return success;
 	}
 }
