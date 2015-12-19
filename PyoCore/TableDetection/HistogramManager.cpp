@@ -265,71 +265,77 @@ namespace TableDetection
 	{
 		bool success = false;
 
+		std::list<std::pair<int, ExtremumType>> x{ pHistogramX->getExtremumValues() };
+		std::list<std::pair<int, ExtremumType>> y{ pHistogramY->getExtremumValues() };
+
+		double xMinBoundary = this->getKmeansBoundary(x, ExtremumType::TYPE_MIN);
+		double xMaxBoundary = this->getKmeansBoundary(x, ExtremumType::TYPE_MAX);
+		double yMinBoundary = this->getKmeansBoundary(y, ExtremumType::TYPE_MIN);
+		double yMaxBoundary = this->getKmeansBoundary(y, ExtremumType::TYPE_MAX);
+
+		return success;
+	}
+	double HistogramManager::getKmeansBoundary(std::list<std::pair<int, ExtremumType>> axis, ExtremumType type)
+	{
+		std::vector<int> forCluster;
+		for (std::pair<int, ExtremumType> p : axis)
+		{
+			if (p.second == type)
+				forCluster.emplace_back(p.first);
+		}
+		std::vector<bool> clustered(forCluster.size());
+		// for get 1/4th value, 3/4th value
+		std::list<int> forClusterTemp{ forCluster };
+
+		std::sort(begin(forClusterTemp), end(forClusterTemp));
+
 		bool LOWER = false;
 		bool UPPER = true;
-		double xLower, xUpper, yLower, yUpper;
-		std::vector<int> x{ pHistogramX->getExtremumValues() };
-		std::vector<int> y{ pHistogramY->getExtremumValues() };
-		// for get 1/4th value, 3/4th value
-		std::vector<int> tempX{ pHistogramX->getExtremumValues() };
-		std::vector<int> tempY{ pHistogramY->getExtremumValues() };
-		std::vector<bool> xClustered((tempX.size()));
-		std::vector<bool> yClustered((tempY.size()));
+		double lower, upper;
+		//std::vector<bool> xClustered((tempX.size()));
+		//std::vector<bool> yClustered((tempY.size()));
 
-		std::sort(begin(tempX), end(tempX));
-		std::sort(begin(tempY), end(tempY));
+		lower = static_cast<double>(forClusterTemp[(forClusterTemp.size() - 1) / 4]);
+		upper = static_cast<double>(forClusterTemp[((forClusterTemp.size() - 1) / 4) * 3]);
 
-		xLower = static_cast<double>(tempX[(tempX.size() - 1) / 4]);
-		xUpper = static_cast<double>(tempX[((tempX.size() - 1) / 4) * 3]);
-
-		yLower = static_cast<double>(tempX[(tempY.size() - 1) / 4]);
-		yUpper = static_cast<double>(tempX[((tempY.size() - 1) / 4) * 3]);
-
+		// actually this while loop must divide as 2 group(xCluster, yCluser) but... just my tiresome
 		while (true)
 		{
-			double currentXLow = 0, currentXUpper = 0;
-			double currentYLow = 0, currentYUpper = 0;
-			for (int i = 0; i < xClustered.size(); i++)
+			double currentLow = 0, currentUpper = 0;
+			for (int i = 0; i < forCluster.size(); i++)
 			{
-				xClustered[i] = (abs(xLower - x[i]) > abs(xUpper - x[i])) ? UPPER : LOWER;
+				clustered[i] = (abs(lower - forCluster[i]) > abs(upper - forCluster[i])) ? UPPER : LOWER;
 				// if clustered as lower
-				if (xClustered[i] == LOWER)
+				if (clustered[i] == LOWER)
 				{
-					currentXLow += x[i];
+					currentLow += forCluster[i];
 				}
 				else
 				{
-					currentXUpper += x[i];
+					currentUpper += forCluster[i];
 				}
 			}
-			currentXLow /= xClustered.size();
-			currentXUpper /= xClustered.size();
-			for (int i = 0; i < yClustered.size(); i++)
-			{
-				yClustered[i] = (abs(yLower - x[i]) > abs(yUpper - x[i])) ? UPPER : LOWER;
-				// if clustered as lower
-				if (yClustered[i] == LOWER)
-				{
-					currentXLow += y[i];
-				}
-				else
-				{
-					currentXUpper += y[i];
-				}
-			}
-			currentYLow /= yClustered.size();
-			currentYUpper /= yClustered.size();
-			if (xLower == currentXLow &&
-				xUpper == currentXUpper &&
-				yLower == currentYLow &&
-				yUpper == currentYUpper)
+			currentLow /= forCluster.size();
+			currentUpper /= forCluster.size();
+			if (lower == currentLow &&
+				upper == currentUpper)
 			{
 				// can compiler optimize this while loop?
 				// if cant i will modify this code as do-while
 				break;
 			}
+			lower = currentLow;
+			upper = currentUpper;
 		}
-
-		return success;
+		int lowerMaxValue = INT_MIN;
+		int upperMinValue = INT_MAX;
+		for (int i = 0; i < clustered.size(); i++)
+		{
+			if (clustered[i] == LOWER && forCluster[i] > lowerMaxValue)
+				lowerMaxValue = forCluster[i];
+			else if (clustered[i] == UPPER && forCluster[i] < upperMinValue)
+				upperMinValue = forCluster[i];
+		}
+		return ((static_cast<double>(lowerMaxValue) + static_cast<double>(upperMinValue)) / 2);
 	}
 }

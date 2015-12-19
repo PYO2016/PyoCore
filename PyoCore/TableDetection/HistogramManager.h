@@ -27,7 +27,7 @@ namespace TableDetection
 		bool calculateValues();		// not tested...
 		bool applyMedianFilter();	// test pass!
 		bool initFilterExtremum();	// not tested
-		std::vector<int> getExtremumValues();
+		std::list<std::pair<int, ExtremumType>> getExtremumValues();
 
 	private:
 		// histogram type ( represents whether x-coordinate or y-coordinate )
@@ -62,5 +62,6 @@ namespace TableDetection
 		unsigned areaWidth, areaHeight;
 		unsigned offsetWidth, offsetHeight;
 		std::shared_ptr<Histogram> pHistogramX, pHistogramY;
+		double getKmeansBoundary(std::list<std::pair<int, ExtremumType>>, ExtremumType);
 	};
 }
