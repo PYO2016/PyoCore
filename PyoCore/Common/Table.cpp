@@ -2,6 +2,8 @@
 
 namespace Common
 {
+	/* Cell */
+
 	Cell::Cell(int top, int bottom, int left, int right, const std::wstring& innerString)
 	{
 		this->top = top;
@@ -10,4 +12,6 @@ namespace Common
 		this->right = right;
 		this->innerString = innerString;
 	}
+
+	/* Table */
 }
