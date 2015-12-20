@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Common/PngImage.h"
+#include <list>
 #include <memory>
 
 namespace TableDetection
