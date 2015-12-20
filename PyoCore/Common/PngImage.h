@@ -42,8 +42,10 @@ namespace Common
 		inline std::wstring PngImage::getFileName() const;
 		inline unsigned int PngImage::getWidth() const;
 		inline unsigned int PngImage::getHeight() const;
-		inline std::vector<unsigned char>& PngImage::getDataRef();
-		inline unsigned char* PngImage::getDataRefAsByteArray();
+		inline std::vector<unsigned char>& PngImage::getData();
+		inline const std::vector<unsigned char>& PngImage::getData() const;
+		inline unsigned char* PngImage::getDataAsByteArray();
+		inline const unsigned char* PngImage::getDataAsByteArray() const;
 
 	private:
 		bool _isCopy;	// true if created by copy constructor.
@@ -58,28 +60,31 @@ namespace Common
 	{
 		return _isCopy;
 	}
-
 	inline std::wstring PngImage::getFileName() const
 	{
 		return filename;
 	}
-
 	inline unsigned int PngImage::getWidth() const
 	{
 		return width;
 	}
-
 	inline unsigned int PngImage::getHeight() const
 	{
 		return height;
 	}
-
-	inline std::vector<unsigned char>& PngImage::getDataRef()
+	inline std::vector<unsigned char>& PngImage::getData()
 	{
 		return data;
 	}
-
-	inline unsigned char* PngImage::getDataRefAsByteArray()
+	inline const std::vector<unsigned char>& PngImage::getData() const
+	{
+		return data;
+	}
+	inline unsigned char* PngImage::getDataAsByteArray()
+	{
+		return &data[0];
+	}
+	inline const unsigned char* PngImage::getDataAsByteArray() const
 	{
 		return &data[0];
 	}
