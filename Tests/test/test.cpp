@@ -28,6 +28,13 @@ enum class ExtremumType : int
 	TYPE_MIN = 0,
 	TYPE_MAX
 };
+enum class KmeansType : int
+{
+	TYPE_LOWER = 0,
+	TYPE_UPPER
+};
+const int length = 20;
+int values[length] = { 0,100,0,20,0,30,0,40,0,50,0,60,0,234,2,3,4,51,2,3 };
 
 void testMedianFilter(void)
 {
@@ -35,8 +42,6 @@ void testMedianFilter(void)
 	const int length = 10;
 	int values[length] = { 1,10,3,40,3,20,1,20,3,40 };
 	*/
-	const int length = 10;
-	int values[length] = { 1,1,30,4,3,200,1,2,3,40 };
 
 	const int range = 5;	// must be odd number.
 	const int halfRange = range / 2;
@@ -113,24 +118,22 @@ void testMedianFilter(void)
 	cout << endl;
 }
 
+std::list<std::pair<int, ExtremumType>> extremumList;
+
 void filterExtremum()
 {
 	// find minmax value
 	cout << "Filter Test..." << endl;
-	std::list<std::pair<int, ExtremumType>> eList;
 	ExtremumType currentState, nextState;
 
-	const int length = 11;
-	int values[length] = { 1, 4, 3, 4, 4, 3, 3, 3, 3, 3, 0 };
-
-	auto eListMaxV = values[0];
+	auto extremumListMaxV = values[0];
 	if (length < 2) 
 	{
 		//I think it can not process
 		return;
 	}
 	currentState = ((values[0] - values[1]) > 0) ? ExtremumType::TYPE_MAX: ExtremumType::TYPE_MIN;
-	eList.emplace_back(0, currentState);
+	extremumList.emplace_back(0, currentState);
 	for (int i = 2; i < length; ++i)
 	{
 		if (values[i] - values[i - 1] == 0)
@@ -141,38 +144,38 @@ void filterExtremum()
 		if (currentState != nextState)
 		{
 			//state changed
-			if (eListMaxV < values[i - 1])
+			if (extremumListMaxV < values[i - 1])
 			{
-				eListMaxV = values[i - 1];
+				extremumListMaxV = values[i - 1];
 			}
-			eList.emplace_back(i - 1, nextState);
+			extremumList.emplace_back(i - 1, nextState);
 			currentState = nextState;
 		}
 	}
 	if (values[length - 1] != values[length - 2])
 	{
-		eList.emplace_back(length - 1, ((values[length - 1] - values[length - 2]) > 0) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN);
+		extremumList.emplace_back(length - 1, ((values[length - 1] - values[length - 2]) > 0) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN);
 	}
 
 	// remove non-reasonable value
-	eListMaxV = static_cast<int>(ceil(static_cast<double>(eListMaxV) * 0.2));
-	for (auto currItr = begin(eList); currItr != end(eList); ++currItr)
+	extremumListMaxV = static_cast<int>(ceil(static_cast<double>(extremumListMaxV) * 0.2));
+	for (auto currItr = begin(extremumList); currItr != end(extremumList); ++currItr)
 	{
 		auto nextItr = next(currItr, 1);
-		if (nextItr == end(eList))
+		if (nextItr == end(extremumList))
 			continue;
-		if (abs(values[nextItr->first] - values[currItr->first]) < eListMaxV)
+		if (abs(values[nextItr->first] - values[currItr->first]) < extremumListMaxV)
 		{
-			eList.erase(nextItr);
+			extremumList.erase(nextItr);
 		}
 	}
 	// data align
-	for (auto currItr = begin(eList); currItr != end(eList); ++currItr)
+	for (auto currItr = begin(extremumList); currItr != end(extremumList); ++currItr)
 	{
 		auto nextItr = next(currItr, 1);
-		if (nextItr == end(eList))
+		if (nextItr == end(extremumList))
 			continue;
-		while (currItr->second == nextItr->second)
+		while (nextItr != end(extremumList) && currItr->second == nextItr->second)
 		{
 			if (currItr->second == ExtremumType::TYPE_MAX)
 				if (values[currItr->first] < values[nextItr->first])
@@ -180,11 +183,11 @@ void filterExtremum()
 			else
 				if (values[nextItr->first] < values[currItr->first])
 					currItr->first = nextItr->first;
-			eList.erase(nextItr);
+			extremumList.erase(nextItr);
 			nextItr = next(currItr, 1);
 		}
 	}
-	for (pair<int, ExtremumType> q : eList)
+	for (pair<int, ExtremumType> q : extremumList)
 	{
 		cout << values[q.first];
 		if (q.second == ExtremumType::TYPE_MAX)
@@ -193,8 +196,113 @@ void filterExtremum()
 			cout << "TYPE_MIN" << " ";
 	}
 	cout << endl;
-	//this->extremumList = std::move(eList);
 	return;
+}
+
+double getKmeansBoundary(ExtremumType type)
+{
+	std::vector<int> forCluster;
+	for (std::pair<int, ExtremumType> p : extremumList)
+	{
+		if (p.second == type)
+			forCluster.emplace_back(p.first);
+	}
+	std::vector<KmeansType> clustered(forCluster.size());
+	// for get 1/4th value, 3/4th value
+	std::vector<int> forClusterTemp{ forCluster };
+
+	std::vector<int> vForSort(values, values + length);
+
+	std::sort(begin(forClusterTemp), end(forClusterTemp), 
+		[&vForSort](int a, int b)
+	{
+		return vForSort[a] < vForSort[b];
+	});
+
+	double lower, upper;
+
+	lower = static_cast<double>(values[forClusterTemp[(forClusterTemp.size() - 1) / 4]]);
+	upper = static_cast<double>(values[forClusterTemp[((forClusterTemp.size() - 1) / 4) * 3]]);
+
+	// actually this while loop must divide as 2 group(xCluster, yCluser) but... just my tiresome
+	while (true)
+	{
+		double currentLow = 0, currentUpper = 0;
+		for (int i = 0; i < forCluster.size(); i++)
+		{
+			clustered[i] = (abs(lower - values[forCluster[i]]) > abs(upper - values[forCluster[i]])) ? KmeansType::TYPE_UPPER : KmeansType::TYPE_LOWER;
+			// if clustered as lower
+			if (clustered[i] == KmeansType::TYPE_LOWER)
+			{
+				currentLow += values[forCluster[i]];
+			}
+			else
+			{
+				currentUpper += values[forCluster[i]];
+			}
+		}
+		currentLow /= forCluster.size();
+		currentUpper /= forCluster.size();
+		if (lower == currentLow &&
+			upper == currentUpper)
+		{
+			// can compiler optimize this while loop?
+			// if cant i will modify this code as do-while
+			break;
+		}
+		lower = currentLow;
+		upper = currentUpper;
+	}
+	int lowerMaxValue = INT_MIN;
+	int upperMinValue = INT_MAX;
+	for (int i = 0; i < clustered.size(); i++)
+	{
+		if (clustered[i] == KmeansType::TYPE_LOWER && values[forCluster[i]] > lowerMaxValue)
+			lowerMaxValue = values[forCluster[i]];
+		else if (clustered[i] == KmeansType::TYPE_UPPER && values[forCluster[i]] < upperMinValue)
+			upperMinValue = values[forCluster[i]];
+	}
+	
+	return ((static_cast<double>(lowerMaxValue) + static_cast<double>(upperMinValue)) / 2);
+}
+bool removeKmeansValues(double minBoundary, double maxBoundary)
+{
+	bool success = true;
+	for (auto itr = begin(extremumList); itr != end(extremumList); ++itr)
+	{
+		if (itr->second == ExtremumType::TYPE_MAX &&
+			itr->first > maxBoundary)
+		{
+			auto jtr = next(itr);
+			for (; jtr != end(extremumList) && jtr->second != ExtremumType::TYPE_MAX && jtr->first < maxBoundary; ++jtr);
+
+			if (jtr == end(extremumList))
+			{
+				goto outerLoop;
+			}
+			else 
+			{
+				int minValue = INT_MAX;
+				for (auto ktr = next(itr); ktr != jtr; ++ktr)
+				{
+					if (minValue > ktr->first && ktr->second == ExtremumType::TYPE_MIN && ktr->first < minBoundary)
+					{
+						minValue = ktr->first;
+					}
+				}
+				for (auto ktr = next(itr); ktr != jtr; ++ktr)
+				{
+					if (minValue > ktr->first && ktr->second == ExtremumType::TYPE_MIN && ktr->first < minBoundary)
+					{
+						ktr = extremumList.erase(ktr);
+						--ktr;
+					}
+				}
+			}
+		}
+	}
+	outerLoop:
+	return success;
 }
 
 int main()
@@ -217,6 +325,7 @@ int main()
 	testMedianFilter();
 
 	filterExtremum();
+	removeKmeansValues(getKmeansBoundary(ExtremumType::TYPE_MIN), getKmeansBoundary(ExtremumType::TYPE_MAX));
 
 
 	return 0;
