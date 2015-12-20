@@ -8,6 +8,7 @@ namespace Preprocessing
 		applyGrayscale(image);
 		applySimpleThreshold(image);
 		removeBorder(image);
+		return true;
 	}
 
 	void Preprocessor::applyGrayscale(PngImage& colorImage)
