@@ -19,15 +19,14 @@ namespace Common
 		Pixel& operator[] (int idx);
 		const Pixel& operator[] (int idx) const;
 	};
-	
+
 	class PngImage
 	{
 	private:
 		PngImage() = default;
-		struct CreationKey {};	// Used by LoadImage().
-		static CreationKey cKey;
+		struct CreationKey {};
 	public:
-		inline PngImage(CreationKey) : PngImage() { };
+		PngImage(CreationKey) : PngImage() { };
 		// only create image by LoadImage() or copy constructor.
 		PngImage(const PngImage& image);
 		PngImage& operator=(const PngImage &) = delete;
