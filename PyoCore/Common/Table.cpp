@@ -14,4 +14,14 @@ namespace Common
 	}
 
 	/* Table */
+
+	Table::Table(const std::vector<Cell>& cells)
+		: cells(cells)
+	{
+	}
+
+	Table::Table(std::vector<Cell>&& cells)
+		: cells(cells)
+	{
+	}
 }

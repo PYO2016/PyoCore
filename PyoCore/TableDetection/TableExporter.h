@@ -20,5 +20,6 @@ namespace TableDetection
 		static std::wstring exportTable(const Common::Table& table);
 
 	private:
+		static std::wstring generateHtml(std::vector<Common::Cell> &cells);
 	};
 }

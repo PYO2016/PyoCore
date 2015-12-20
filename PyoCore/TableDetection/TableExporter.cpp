@@ -31,23 +31,48 @@ namespace TableDetection
 		}
 		colMap[maxRight] = colCnt;
 
-		for (const auto &cell : cells) {
+		for (auto &cell : cells) {
 			int row = rowMap[cell.getTop()];
 			int col = colMap[cell.getLeft()];
 			int rowspan = rowMap[cell.getBottom()] - row;
 			int colspan = colMap[cell.getRight()] - col;
+			cell.setRow(row);
+			cell.setCol(col);
+			cell.setRowspan(rowspan);
+			cell.setColspan(colspan);
 		}
 
-		/* sort cells by row asc, col asc */
-		/* iterate sorted cells and generate HTML and CSS */
-		
-		/* HTML generating rule 
+		return generateHtml(cells);
+	}
+
+	std::wstring TableExporter::generateHtml(std::vector<Common::Cell> &cells)
+	{
+		/* sort rule
+			*assume that most top and most left cell is (row,col) = (0,0).
+			1. row asc
+			2. col asc
+		*/
+		std::sort(std::begin(cells), std::end(cells),
+			[](const auto &c1, const auto &c2) {
+			if (c1.getRow() < c2.getRow())
+				return true;
+			else if (c1.getRow() > c2.getRow())
+				return false;
+			else {
+				if (c1.getCol() < c2.getCol())
+					return true;
+				else
+					return false;
+			}
+		});
+
+		/* HTML generating example
 			<table class='PYO2016-table'>
 				~~~
 			</table>
 		*/
 		/* CSS rule
-			<table class='PYO2016-table'>
+			<table border=1 class='PYO2016-table'>
 
 			<tr class='####'>
 				#### : row-x (x means row(th))
@@ -55,30 +80,52 @@ namespace TableDetection
 			<td ... class='#####'>
 				##### : cell-x (x is index of sorted cells.)
 
-			Issue) 
+			Issue)
 				thead, tbody, tfoot
 				th ?? (need more informations to apply these tags)
 		*/
-
-		/************************************/
-		/* sort rule
-			*assume that most top and most left point is (0,0).
-			1. top asc
-			2. left asc
-		*/
-		/*std::sort(std::begin(cells), std::end(cells),
-			[](const auto &c1, const auto &c2) {
-			if (c1.getTop() < c2.getTop())
-				return true;
-			else if (c1.getTop() > c2.getTop())
-				return false;
-			else {
-				if (c1.getLeft() < c2.getLeft())
-					return true;
-				else
-					return false;
+		std::wstring html;
+		int row = -1;
+		int idx = 0;
+		html += L"<table class='PYO2016-table'>\n";
+		for (const auto &cell : cells) {
+			if (row < cell.getRow()) {
+				if(row >= 0) html += L"  </tr>\n";
+				html += L"  <tr class='row-" + std::to_wstring(cell.getRow()) + L"'>\n";
+				row = cell.getRow();
 			}
-		});
-		*/
+			html += L"    <td rowspan=" + std::to_wstring(cell.getRowspan()) +
+				L" colspan=" + std::to_wstring(cell.getColspan()) +
+				L" class='cell-" + std::to_wstring(idx++) + L"'>" +
+				cell.getInnerString() + L"</td>\n";
+		}
+		html += L"</table>";
+
+		std::wstring css(
+			L"<style type='text/css'>\n"
+			L"  .PYO2016-table { \n"
+			L"    border-collapse : collapse; \n"
+			L"    text-align : center; \n"
+			L"  } \n"
+			L"  .PYO2016-table table, .PYO2016-table th, .PYO2016-table td { \n"
+			L"    border : 1px gray solid; \n"
+			L"  } \n"
+			);
+
+		idx = 0;
+		for (const auto &cell : cells) {
+			css += L"  .cell-" + std::to_wstring(idx++) + L" { \n" +
+				L"    width : " + std::to_wstring(cell.getWidth()) + L"px; \n" +
+				L"    height : " + std::to_wstring(cell.getHeight()) + L"px; \n" +
+				L"  } \n";
+		}
+
+		css += L"</style>";
+
+		return css + L"\n\n" + html;
 	}
 }
+
+/* sort cells by row asc, col asc */
+/* iterate sorted cells and generate HTML and CSS */
+

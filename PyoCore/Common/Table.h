@@ -19,6 +19,15 @@ namespace Common
 		inline int getHeight() const;
 		inline std::wstring getInnerString() const;
 
+		inline int getRow() const;
+		inline int getCol() const;
+		inline int getRowspan() const;
+		inline int getColspan() const;
+		inline void setRow(int row);
+		inline void setCol(int col);
+		inline void setRowspan(int rowspan);
+		inline void setColspan(int colspan);
+
 	private:
 		int top;
 		int left;
@@ -28,16 +37,16 @@ namespace Common
 		/* innerImage ?? */
 		/* sparse blocks ?? */
 		
-		/*
 		int row, col;
 		int rowspan, colspan;
-		*/
 	};
 
 	class Table
 	{
 	public:
 		Table() = default;
+		Table(const std::vector<Cell>& cells);
+		Table(std::vector<Cell>&& cells);
 		~Table() = default;
 
 		inline std::vector<Cell>& getCells();
@@ -52,40 +61,70 @@ namespace Common
 
 	/* inline functions */
 
+	/* Cell */
+
+	inline int Cell::getRow() const
+	{
+		return row;
+	}
+	inline int Cell::getCol() const 
+	{
+		return col;
+	}
+	inline int Cell::getRowspan() const 
+	{
+		return rowspan;
+	}
+	inline int Cell::getColspan() const 
+	{
+		return colspan;
+	}
+	inline void Cell::setRow(int row)
+	{
+		this->row = row;
+	}
+	inline void Cell::setCol(int col)
+	{
+		this->col = col;
+	}
+	inline void Cell::setRowspan(int rowspan)
+	{
+		this->rowspan = rowspan;
+	}
+	inline void Cell::setColspan(int colspan)
+	{
+		this->colspan = colspan;
+	}
 	inline int Cell::getTop() const
 	{
 		return top;
 	}
-
 	inline int Cell::getLeft() const
 	{
 		return left;
 	}
-
 	inline int Cell::getRight() const
 	{
 		return right;
 	}
-
 	inline int Cell::getBottom() const
 	{
 		return bottom;
 	}
-
 	inline int Cell::getWidth() const
 	{
 		return (left < right ? right - left : left - right);
 	}
-
 	inline int Cell::getHeight() const
 	{
 		return (bottom < top ? top - bottom : bottom - top);
 	}
-
 	inline std::wstring Cell::getInnerString() const
 	{
 		return innerString;
 	}
+
+	/* Table */
 
 	inline std::vector<Cell>& Table::getCells()
 	{
