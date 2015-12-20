@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <array>
 #include <list>
 #include <utility>
 #include <functional>
@@ -62,43 +63,51 @@ namespace TableDetection
 	{
 		const int range = 5;	// must be odd number.
 		const int halfRange = range / 2;
-		std::vector<std::pair<int, int> > valVector;	// val, idx
-
+		std::array<std::pair<int, int>, range> valArray;	// val, idx
+		int cnt = 0;
+		
 		if (length < halfRange || range < 3) {
 			// nothing to do for median filter.
 			return true;	// return value is true or false?? 
 		}
 
 		for (int i = 0; i < halfRange; ++i) {
-			valVector.emplace_back(values[i], i);
+			valArray[cnt].first = values[i];
+			valArray[cnt++].second = i;
 		}
 
 		for (int i = 0; i < length; ++i) {
 			// In case of right corner of histogram,
 			if (i + halfRange >= length) {
-				auto iter = std::find_if(begin(valVector), end(valVector),
+				auto iter = std::find_if(std::begin(valArray), std::begin(valArray) + cnt,
 					[i, halfRange](const std::pair<int, int>& v) {
 					return v.second == i - halfRange - 1;
 				}
 				);
-				valVector.erase(iter);
+				while (iter < std::begin(valArray) + cnt - 1) {
+					*iter = *std::next(iter);
+					iter = std::next(iter);
+				}
+				--cnt;
 			}
 			// In case of most positions of histogram,
-			else if (valVector.size() == range) {
-				auto iter = std::find_if(begin(valVector), end(valVector),
+			else if (cnt == range) {
+				auto iter = std::find_if(std::begin(valArray), std::begin(valArray) + cnt,
 					[i, halfRange](const std::pair<int, int>& v) {
 					return v.second == i - halfRange - 1;
 				}
 				);
-				*iter = std::make_pair(values[i + halfRange], i + halfRange);
+				(*iter).first = values[i + halfRange];
+				(*iter).second = i + halfRange;
 			}
 			// In case of left corner of histogram,
 			else {
-				valVector.emplace_back(values[i + halfRange], i + halfRange);
+				valArray[cnt].first = values[i + halfRange];
+				valArray[cnt++].second = i + halfRange;
 			}
 
-			std::sort(begin(valVector), end(valVector));
-			values[i] = valVector[valVector.size() / 2].first;
+			std::sort(std::begin(valArray), std::begin(valArray) + cnt);
+			values[i] = valArray[cnt / 2].first;
 		}
 
 		return true;
