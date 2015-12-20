@@ -221,13 +221,14 @@ double getKmeansBoundary(ExtremumType type)
 
 	double lower, upper;
 
-	lower = static_cast<double>(values[forClusterTemp[(forClusterTemp.size() - 1) / 4]]);
-	upper = static_cast<double>(values[forClusterTemp[((forClusterTemp.size() - 1) / 4) * 3]]);
+	lower = static_cast<double>(values[forClusterTemp[0]]);
+	upper = static_cast<double>(values[forClusterTemp[forClusterTemp.size()-1]]);
 
 	// actually this while loop must divide as 2 group(xCluster, yCluser) but... just my tiresome
 	while (true)
 	{
 		double currentLow = 0, currentUpper = 0;
+		int lowCnt = 0, upperCnt = 0;
 		for (int i = 0; i < forCluster.size(); i++)
 		{
 			clustered[i] = (abs(lower - values[forCluster[i]]) > abs(upper - values[forCluster[i]])) ? KmeansType::TYPE_UPPER : KmeansType::TYPE_LOWER;
@@ -235,14 +236,16 @@ double getKmeansBoundary(ExtremumType type)
 			if (clustered[i] == KmeansType::TYPE_LOWER)
 			{
 				currentLow += values[forCluster[i]];
+				++lowCnt;
 			}
 			else
 			{
 				currentUpper += values[forCluster[i]];
+				++upperCnt;
 			}
 		}
-		currentLow /= forCluster.size();
-		currentUpper /= forCluster.size();
+		currentLow /= (lowCnt);
+		currentUpper /= (upperCnt);
 		if (lower == currentLow &&
 			upper == currentUpper)
 		{

@@ -212,6 +212,7 @@ namespace TableDetection
 		while (true)
 		{
 			double currentLow = 0, currentUpper = 0;
+			int lowCnt = 0, upperCnt = 0;
 			for (int i = 0; i < forCluster.size(); i++)
 			{
 				clustered[i] = (abs(lower - this->values[forCluster[i]]) > abs(upper - this->values[forCluster[i]])) ? KmeansType::TYPE_UPPER : KmeansType::TYPE_LOWER;
@@ -219,14 +220,16 @@ namespace TableDetection
 				if (clustered[i] == KmeansType::TYPE_LOWER)
 				{
 					currentLow += this->values[forCluster[i]];
+					++lowCnt;
 				}
 				else
 				{
 					currentUpper += this->values[forCluster[i]];
+					++upperCnt;
 				}
 			}
-			currentLow /= forCluster.size();
-			currentUpper /= forCluster.size();
+			currentLow /= lowCnt;
+			currentUpper /= upperCnt;
 			if (lower == currentLow &&
 				upper == currentUpper)
 			{
