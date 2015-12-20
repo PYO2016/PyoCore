@@ -14,10 +14,10 @@ namespace TableDetection
 
 	/* Histogram */
 
-	Histogram::Histogram(HistogramType type, const Common::PngImage& image, 
+	Histogram::Histogram(HistogramType type, const Common::PngImage& image,
 		unsigned offsetWidth, unsigned offsetHeight, int length, int valLimit)
-		: type(type), image(image), offsetWidth(offsetWidth), offsetHeight(offsetHeight), 
-			values(length), length(length), valLimit(valLimit)
+		: type(type), image(image), offsetWidth(offsetWidth), offsetHeight(offsetHeight),
+			values(length), length(length), valLimit(valLimit), extremumList()
 	{
 	}
 
@@ -124,14 +124,15 @@ namespace TableDetection
 			//I think it can not process
 			return true;
 		}
-		currentState = ((values[1] - values[0]) > 0) ? ExtremumType::TYPE_MAX: ExtremumType::TYPE_MIN;
+		currentState = ((values[0] - values[1]) > 0) ? ExtremumType::TYPE_MAX: ExtremumType::TYPE_MIN;
+		eList.emplace_back(0, currentState);
 		for (int i = 2; i < length; ++i)
 		{
 			if (values[i] - values[i - 1] == 0)
 			{
 				continue;
 			}
-			nextState = ((values[i] - values[i - 1]) > 0) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN;
+			nextState = ((values[i - 1] - values[i]) > 0) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN;
 			if (currentState != nextState)
 			{
 				//state changed
@@ -139,9 +140,13 @@ namespace TableDetection
 				{
 					eListMaxV = values[i - 1];
 				}
-				eList.emplace_back(i - 1, currentState);
+				eList.emplace_back(i - 1, nextState);
 				currentState = nextState;
 			}
+		}
+		if (values[length - 1] != values[length - 2])
+		{
+			eList.emplace_back(length - 1, ((values[length - 1] - values[length - 2]) > 0) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN);
 		}
 
 		// remove non-reasonable value

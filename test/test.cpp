@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <list>
 #include <utility>
 #include <functional>
 #include <algorithm>
@@ -21,6 +22,11 @@ public:
 	{
 		return reinterpret_cast<Pixel*>(this)[idx];
 	}
+};
+enum class ExtremumType : int
+{
+	TYPE_MIN = 0,
+	TYPE_MAX
 };
 
 void testMedianFilter(void)
@@ -102,9 +108,93 @@ void testMedianFilter(void)
 
 	cout << "-------- after --------" << endl;
 	for (int i = 0; i < length; ++i) {
-		cout << values[i] << " ";
+		cout << values[i] << ", ";
 	}
 	cout << endl;
+}
+
+void filterExtremum()
+{
+	// find minmax value
+	cout << "Filter Test..." << endl;
+	std::list<std::pair<int, ExtremumType>> eList;
+	ExtremumType currentState, nextState;
+
+	const int length = 11;
+	int values[length] = { 1, 4, 3, 4, 4, 3, 3, 3, 3, 3, 0 };
+
+	auto eListMaxV = values[0];
+	if (length < 2) 
+	{
+		//I think it can not process
+		return;
+	}
+	currentState = ((values[0] - values[1]) > 0) ? ExtremumType::TYPE_MAX: ExtremumType::TYPE_MIN;
+	eList.emplace_back(0, currentState);
+	for (int i = 2; i < length; ++i)
+	{
+		if (values[i] - values[i - 1] == 0)
+		{
+			continue;
+		}
+		nextState = ((values[i - 1] - values[i]) > 0) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN;
+		if (currentState != nextState)
+		{
+			//state changed
+			if (eListMaxV < values[i - 1])
+			{
+				eListMaxV = values[i - 1];
+			}
+			eList.emplace_back(i - 1, nextState);
+			currentState = nextState;
+		}
+	}
+	if (values[length - 1] != values[length - 2])
+	{
+		eList.emplace_back(length - 1, ((values[length - 1] - values[length - 2]) > 0) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN);
+	}
+
+	// remove non-reasonable value
+	eListMaxV = static_cast<int>(ceil(static_cast<double>(eListMaxV) * 0.2));
+	for (auto currItr = begin(eList); currItr != end(eList); ++currItr)
+	{
+		auto nextItr = next(currItr, 1);
+		if (nextItr == end(eList))
+			continue;
+		if (abs(values[nextItr->first] - values[currItr->first]) < eListMaxV)
+		{
+			eList.erase(nextItr);
+		}
+	}
+	// data align
+	for (auto currItr = begin(eList); currItr != end(eList); ++currItr)
+	{
+		auto nextItr = next(currItr, 1);
+		if (nextItr == end(eList))
+			continue;
+		while (currItr->second == nextItr->second)
+		{
+			if (currItr->second == ExtremumType::TYPE_MAX)
+				if (values[currItr->first] < values[nextItr->first])
+					currItr->first = nextItr->first;
+			else
+				if (values[nextItr->first] < values[currItr->first])
+					currItr->first = nextItr->first;
+			eList.erase(nextItr);
+			nextItr = next(currItr, 1);
+		}
+	}
+	for (pair<int, ExtremumType> q : eList)
+	{
+		cout << values[q.first];
+		if (q.second == ExtremumType::TYPE_MAX)
+			cout << "TYPE_MAX" << " ";
+		else
+			cout << "TYPE_MIN" << " ";
+	}
+	cout << endl;
+	//this->extremumList = std::move(eList);
+	return;
 }
 
 int main()
@@ -125,6 +215,9 @@ int main()
 	*/
 
 	testMedianFilter();
+
+	filterExtremum();
+
 
 	return 0;
 }
