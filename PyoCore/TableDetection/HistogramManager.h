@@ -22,6 +22,7 @@ namespace TableDetection
 		TYPE_UPPER
 	};
 
+
 	class Histogram
 	{
 	public:
@@ -33,7 +34,8 @@ namespace TableDetection
 		bool calculateValues();		// not tested...
 		bool applyMedianFilter();	// test pass!
 		bool initFilterExtremum();	// not tested
-		std::list<std::pair<int, ExtremumType>> getExtremumValues();
+		double getKmeansBoundary(ExtremumType type);
+		bool removeKmeansValues(double minBoundary, double maxBoundary);
 
 	private:
 		// histogram type ( represents whether x-coordinate or y-coordinate )
@@ -43,7 +45,7 @@ namespace TableDetection
 		std::vector<int> values;
 		int length, valLimit;
 		// extremum values
-		std::list<std::pair<int, ExtremumType>>&& extremumList;
+		std::list<std::pair<int, ExtremumType>> extremumList;
 	};
 
 	class HistogramManager
@@ -60,7 +62,7 @@ namespace TableDetection
 		bool makeHistogram(HistogramType type);
 		bool applyMedianFilter(HistogramType type);
 		bool filterExtremum(HistogramType type);
-		bool applyKmeans();
+		bool applyKmeans(HistogramType type);
 		/* etc... */
 
 	private:
@@ -68,7 +70,5 @@ namespace TableDetection
 		unsigned areaWidth, areaHeight;
 		unsigned offsetWidth, offsetHeight;
 		std::shared_ptr<Histogram> pHistogramX, pHistogramY;
-		double getKmeansBoundary(std::list<std::pair<int, ExtremumType>>& axis, ExtremumType type);
-		bool removeKmeansValues(std::list<std::pair<int, ExtremumType>>& axis, double minBoundary, double maxBoundary);
 	};
 }
