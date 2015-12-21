@@ -26,7 +26,10 @@ namespace HistogramManagerTest
 		TEST_METHOD(TestApplyMedianFilter)
 		{
 			// TODO: 테스트 코드를 여기에 입력합니다.
-			TableDetection::Histogram histogram = getHistogramFromTrash();
+
+			/* Get trash object and initializing member variables as needed. */
+			TableDetection::Histogram& histogram = getHistogramFromTrash();
+			histogram.values = std::vector<int>();
 
 			/* Test Case #1 */
 			histogram.length = 10;
@@ -44,7 +47,6 @@ namespace HistogramManagerTest
 			/* Test Case #2 */
 			histogram.length = 20;
 			histogram.values = { 0,100,0,20,0,30,0,40,0,50,0,60,0,234,2,3,4,51,2,3 };
-
 
 			Logger::WriteMessage("\nTest Case #2\n");
 			Logger::WriteMessage("-------- before --------\n");
@@ -74,25 +76,28 @@ namespace HistogramManagerTest
 			Logger::WriteMessage("\n");
 		}
 
-		/* Get Histogram without calling constructor. */
-		TableDetection::Histogram getHistogramFromTrash(void)
+		/* Get Trash Object without calling constructor.
+			Trash Object is not initialized. Must be initialized after acquirement.
+			Be careful to use. There is a possibility to not working.
+		*/
+		/* Get Trash Histogram */
+		TableDetection::Histogram& getHistogramFromTrash(void)
 		{
 			trashHistograms.emplace_back();
-			return *reinterpret_cast<TableDetection::Histogram*>(&trashHistograms.back());
+			return reinterpret_cast<TableDetection::Histogram&>(trashHistograms.back());
 		}
-
-		/* Get HistogramManager without calling constructor. */
-		TableDetection::HistogramManager getHistogramManagerFromTrash(void)
+		/* Get Trash HistogramManager */
+		TableDetection::HistogramManager& getHistogramManagerFromTrash(void)
 		{
 			trashHistogramManagers.emplace_back();
-			return *reinterpret_cast<TableDetection::HistogramManager*>(&trashHistogramManagers.back());
+			return reinterpret_cast<TableDetection::HistogramManager&>(trashHistogramManagers.back());
 		}
 
-		/* Wrapper of Histogram and HistogramManager */
-		struct WrapHistogram { char d[sizeof(TableDetection::Histogram)]; };
-		struct WrapHistogramManager { char d[sizeof(TableDetection::HistogramManager)]; };
+		/* Trash version of Histogram and HistogramManager */
+		struct TrashHistogram { char d[sizeof(TableDetection::Histogram)]; };
+		struct TrashHistogramManager { char d[sizeof(TableDetection::HistogramManager)]; };
 
-		std::vector<WrapHistogram> trashHistograms;
-		std::vector<WrapHistogramManager> trashHistogramManagers;
+		std::vector<TrashHistogram> trashHistograms;
+		std::vector<TrashHistogramManager> trashHistogramManagers;
 	};
 }
