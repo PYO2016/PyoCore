@@ -292,6 +292,11 @@ namespace TableDetection
 		return success;
 	}
 
+	const std::vector<int>& Histogram::getValues() const
+	{
+		return (this->values);
+	}
+
 	const std::list<std::pair<int, ExtremumType>>& Histogram::getExtremumList() const
 	{
 		return this->extremumList;

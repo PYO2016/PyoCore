@@ -36,6 +36,7 @@ namespace TableDetection
 		bool initFilterExtremum();	// not tested
 		double getKmeansBoundary(ExtremumType type);
 		bool removeKmeansValues(double minBoundary, double maxBoundary);
+		const std::list<std::pair<int, ExtremumType>>& getExtremumList () const;
 
 	private:
 		// histogram type ( represents whether x-coordinate or y-coordinate )
@@ -63,6 +64,7 @@ namespace TableDetection
 		bool applyMedianFilter(HistogramType type);
 		bool filterExtremum(HistogramType type);
 		bool applyKmeans(HistogramType type);
+		std::vector<std::tuple<int, int, int, int>> getTableInfo();
 		/* etc... */
 
 	private:
