@@ -60,6 +60,8 @@ namespace HistogramManagerTest
 
 	private:
 		/* Useful Methods for test */
+
+		/* Dump vector */
 		template <typename T>
 		void dumpVector(const std::vector<T> &vec)
 		{
@@ -72,18 +74,25 @@ namespace HistogramManagerTest
 			Logger::WriteMessage("\n");
 		}
 
+		/* Get Histogram without calling constructor. */
 		TableDetection::Histogram getHistogramFromTrash(void)
 		{
-			return *reinterpret_cast<TableDetection::Histogram*>(trashHistogram[cntHistogram++]);
-		}
-		TableDetection::HistogramManager getHistogramManagerFromTrash(void)
-		{
-			return *reinterpret_cast<TableDetection::HistogramManager*>(trashHistogramManager[cntHistogramManager++]);
+			trashHistograms.emplace_back();
+			return *reinterpret_cast<TableDetection::Histogram*>(&trashHistograms.back());
 		}
 
-		char trashHistogram[100][sizeof(TableDetection::Histogram)];
-		int cntHistogram = 0;
-		char trashHistogramManager[100][sizeof(TableDetection::HistogramManager)];
-		int cntHistogramManager = 0;
+		/* Get HistogramManager without calling constructor. */
+		TableDetection::HistogramManager getHistogramManagerFromTrash(void)
+		{
+			trashHistogramManagers.emplace_back();
+			return *reinterpret_cast<TableDetection::HistogramManager*>(&trashHistogramManagers.back());
+		}
+
+		/* Wrapper of Histogram and HistogramManager */
+		struct WrapHistogram { char d[sizeof(TableDetection::Histogram)]; };
+		struct WrapHistogramManager { char d[sizeof(TableDetection::HistogramManager)]; };
+
+		std::vector<WrapHistogram> trashHistograms;
+		std::vector<WrapHistogramManager> trashHistogramManagers;
 	};
 }
