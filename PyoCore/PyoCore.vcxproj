@@ -151,6 +151,7 @@
     <ClCompile Include="Preprocessing\Preprocessor.cpp" />
     <ClCompile Include="PyoCore.cpp" />
     <ClCompile Include="TableDetection\HistogramManager.cpp" />
+    <ClCompile Include="TableDetection\OCRManager.cpp" />
     <ClCompile Include="TableDetection\TableDetector.cpp" />
     <ClCompile Include="TableDetection\TableExporter.cpp" />
   </ItemGroup>
@@ -163,6 +164,7 @@
     <ClInclude Include="Preprocessing\Preprocessor.h" />
     <ClInclude Include="PyoCore.h" />
     <ClInclude Include="TableDetection\HistogramManager.h" />
+    <ClInclude Include="TableDetection\OCRManager.h" />
     <ClInclude Include="TableDetection\TableDetector.h" />
     <ClInclude Include="TableDetection\TableExporter.h" />
   </ItemGroup>
