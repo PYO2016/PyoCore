@@ -118,7 +118,7 @@ namespace TableDetection
 		// find minmax value
 		std::list<std::pair<int, ExtremumType>> eList;
 		TableDetection::ExtremumType currentState, nextState;
-		auto eListMaxV = values[0];
+		auto eListMaxV = values[0], eListMinV = values[0];
 		if (length < 2) 
 		{
 			//I think it can not process
@@ -140,6 +140,10 @@ namespace TableDetection
 				{
 					eListMaxV = values[i - 1];
 				}
+				if (eListMinV > values[i - 1])
+				{
+					eListMinV = values[i - 1];
+				}
 				eList.emplace_back(i - 1, nextState);
 				currentState = nextState;
 			}
@@ -150,26 +154,36 @@ namespace TableDetection
 		}
 
 		// remove non-reasonable value
-		eListMaxV = static_cast<int>(ceil(static_cast<double>(eListMaxV) * 0.2));
+		eListMaxV = static_cast<int>(ceil(static_cast<double>(eListMaxV) * 0.8));
+		eListMinV = static_cast<int>(ceil(static_cast<double>(eListMinV) * 1.2));
 		for (auto currItr = begin(eList); currItr != end(eList); ++currItr)
 		{
-			auto nextItr = next(currItr, 1);
-			if (nextItr == end(eList))
-				continue;
-			if (abs(values[nextItr->first] - values[currItr->first]) < eListMaxV)
+			if (currItr->second == ExtremumType::TYPE_MAX && values[currItr->first] < eListMaxV)
 			{
-				eList.erase(nextItr);
+				currItr = eList.erase(currItr);
+				if(currItr != begin(eList))
+					--currItr;
 			}
+			else if (currItr->second == ExtremumType::TYPE_MIN && values[currItr->first] > eListMinV)
+			{
+				currItr = eList.erase(currItr);
+				if(currItr != begin(eList))
+					--currItr;
+			}
+			//if (abs(values[nextItr->first] - values[currItr->first]) < eListMaxV)
+			//{
+			//	eList.erase(nextItr);
+			//}
 		}
 		// data align
 		for (auto currItr = begin(eList); currItr != end(eList); ++currItr)
 		{
 			auto nextItr = next(currItr, 1);
 			if (nextItr == end(eList))
-				continue;
-			while (currItr->second == nextItr->second)
+				break;
+			while (nextItr != end(eList) && currItr->second == nextItr->second)
 			{
-				if (nextItr != end(extremumList) && currItr->second == ExtremumType::TYPE_MAX)
+				if (nextItr != end(eList) && currItr->second == ExtremumType::TYPE_MAX)
 					if (values[currItr->first] < values[nextItr->first])
 						currItr->first = nextItr->first;
 				else
@@ -198,15 +212,15 @@ namespace TableDetection
 		std::vector<int>& vForSort = this->values;
 
 		std::sort(begin(forClusterTemp), end(forClusterTemp), 
-			[&vForSort](int a, int b)
+			[&vForSort](auto a, auto b)
 		{
 			return vForSort[a] < vForSort[b];
 		});
 
 		double lower, upper;
 
-		lower = static_cast<double>(this->values[forClusterTemp[(forClusterTemp.size() - 1) / 4]]);
-		upper = static_cast<double>(this->values[forClusterTemp[((forClusterTemp.size() - 1) / 4) * 3]]);
+		lower = static_cast<double>(this->values[forClusterTemp[0]]);
+		upper = static_cast<double>(this->values[forClusterTemp[forClusterTemp.size()-1]]);
 
 		// actually this while loop must divide as 2 group(xCluster, yCluser) but... just my tiresome
 		while (true)
@@ -230,6 +244,10 @@ namespace TableDetection
 			}
 			currentLow /= lowCnt;
 			currentUpper /= upperCnt;
+			if (lowCnt == 0 || upperCnt == 0)
+			{
+				return 0;
+			}
 			if (lower == currentLow &&
 				upper == currentUpper)
 			{
