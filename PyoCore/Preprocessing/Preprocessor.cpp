@@ -7,7 +7,7 @@ namespace Preprocessing
 	{
 		applyGrayscale(image);
 		applySimpleThreshold(image);
-		removeBorder(image);
+		//removeBorder(image);
 		return true;
 	}
 
@@ -37,7 +37,7 @@ namespace Preprocessing
 		for (int i = 0; i < height; ++i) {
 			for (int j = 0; j < width; ++j) {
 				Pixel& pixel = grayImage[i][j];
-				unsigned char value = static_cast<unsigned char>(pixel.R > threshold);
+				unsigned char value = (pixel.R > threshold ? 255 : 0);
 				pixel.R = value;
 				pixel.G = value;
 				pixel.B = value;
