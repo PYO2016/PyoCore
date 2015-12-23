@@ -57,6 +57,6 @@ namespace Common
 
 	bool PngImage::storeToFile(const std::wstring& targetFilename)
 	{
-		return lodepng::save_file(data, EncodingConverter::ws2s(targetFilename)) == 0 ? true : false;
+		return lodepng::encode(EncodingConverter::ws2s(targetFilename), data, width, height) == 0 ? true : false;
 	}
 }
