@@ -17,9 +17,9 @@ namespace TableDetection
 		TableExporter& operator=(TableExporter &&) = delete;
 		*/
 
-		static std::wstring exportTable(const Common::Table& table);
+		static std::wstring ExportTable(const Common::Table& table);
 
 	private:
-		static std::wstring generateHtml(std::vector<Common::Cell> &cells);
+		static std::wstring GenerateHtml(std::vector<Common::Cell> &cells);
 	};
 }

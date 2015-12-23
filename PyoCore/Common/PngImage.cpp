@@ -47,16 +47,16 @@ namespace Common
 
 	PixelArray& PngImage::operator[] (int idx)
 	{
-		return *reinterpret_cast<PixelArray*>(&data[idx * width]);
+		return reinterpret_cast<PixelArray&>(data[idx * width * sizeof(Pixel)]);
 	}
 
 	const PixelArray& PngImage::operator[] (int idx) const
 	{
-		return *reinterpret_cast<const PixelArray*>(&data[idx * width]);
+		return reinterpret_cast<const PixelArray&>(data[idx * width * sizeof(Pixel)]);
 	}
 
 	bool PngImage::storeToFile(const std::wstring& targetFilename)
 	{
-		return lodepng::save_file(data, EncodingConverter::ws2s(targetFilename)) == 0 ? true : false;
+		return lodepng::encode(EncodingConverter::ws2s(targetFilename), data, width, height) == 0 ? true : false;
 	}
 }
