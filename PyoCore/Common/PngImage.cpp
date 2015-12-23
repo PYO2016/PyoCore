@@ -47,12 +47,12 @@ namespace Common
 
 	PixelArray& PngImage::operator[] (int idx)
 	{
-		return reinterpret_cast<PixelArray&>(data[idx * width]);
+		return reinterpret_cast<PixelArray&>(data[idx * width * sizeof(Pixel)]);
 	}
 
 	const PixelArray& PngImage::operator[] (int idx) const
 	{
-		return reinterpret_cast<const PixelArray&>(data[idx * width]);
+		return reinterpret_cast<const PixelArray&>(data[idx * width * sizeof(Pixel)]);
 	}
 
 	bool PngImage::storeToFile(const std::wstring& targetFilename)
