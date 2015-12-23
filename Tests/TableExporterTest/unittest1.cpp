@@ -27,7 +27,7 @@ namespace TableDetectionTest
 				Common::Cell(400,500,0,400,L"cell-h"),
 				Common::Cell(500,600,0,300,L"cell-i")
 			};
-			std::wstring html = TableDetection::TableExporter::exportTable(cells);
+			std::wstring html = TableDetection::TableExporter::ExportTable(cells);
 			Logger::WriteMessage(html.c_str());
 		}
 

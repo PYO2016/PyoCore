@@ -6,7 +6,7 @@
 
 namespace TableDetection
 {
-	std::wstring TableExporter::exportTable(const Common::Table& table)
+	std::wstring TableExporter::ExportTable(const Common::Table& table)
 	{
 		std::vector<Common::Cell> cells = table.getCells();
 		std::set<int, std::less<int>> topSet, leftSet;
@@ -42,10 +42,10 @@ namespace TableDetection
 			cell.setColspan(colspan);
 		}
 
-		return generateHtml(cells);
+		return GenerateHtml(cells);
 	}
 
-	std::wstring TableExporter::generateHtml(std::vector<Common::Cell> &cells)
+	std::wstring TableExporter::GenerateHtml(std::vector<Common::Cell> &cells)
 	{
 		/* sort rule
 			*assume that most top and most left cell is (row,col) = (0,0).
