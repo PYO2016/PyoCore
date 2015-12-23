@@ -24,8 +24,6 @@ namespace TableDetection
 	std::wstring OCRManager::getStringFromRect(PngImage image, int left, int top, int width, int height)
 	{
 		unsigned char* imagedata = image.getDataAsByteArray();
-		int width = image.getWidth();
-		int height = image.getHeight();
 		int depth = 1;
 		int rowbytes = width * depth * 4;
 
