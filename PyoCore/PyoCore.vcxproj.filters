@@ -60,6 +60,9 @@
     <ClCompile Include="Common\Table.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
+    <ClCompile Include="TableDetection\OCRManager.cpp">
+      <Filter>소스 파일\TableDetection</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PyoCore.h">
@@ -91,6 +94,9 @@
     </ClInclude>
     <ClInclude Include="Common\Table.h">
       <Filter>소스 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="TableDetection\OCRManager.h">
+      <Filter>소스 파일\TableDetection</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
