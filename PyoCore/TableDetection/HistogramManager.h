@@ -36,7 +36,8 @@ namespace TableDetection
 		bool initFilterExtremum();	// not tested
 		double getKmeansBoundary(ExtremumType type);
 		bool removeKmeansValues(double minBoundary, double maxBoundary);
-		const std::list<std::pair<int, ExtremumType>>& getExtremumList () const;
+		
+		inline const std::list<std::pair<int, ExtremumType>>& getExtremumList () const;
 
 	private:
 		// histogram type ( represents whether x-coordinate or y-coordinate )
@@ -73,4 +74,11 @@ namespace TableDetection
 		unsigned offsetWidth, offsetHeight;
 		std::shared_ptr<Histogram> pHistogramX, pHistogramY;
 	};
+
+	/* inline methods */
+
+	inline const std::list<std::pair<int, ExtremumType>>& Histogram::getExtremumList() const
+	{
+		return this->extremumList;
+	}
 }
