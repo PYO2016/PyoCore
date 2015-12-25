@@ -197,7 +197,7 @@ namespace TableDetection
 	double Histogram::getKmeansBoundary(ExtremumType type)
 	{
 		std::vector<int> forCluster;
-		for (std::pair<int, ExtremumType> p : this->extremumList)
+		for (const std::pair<int, ExtremumType>& p : this->extremumList)
 		{
 			if (p.second == type)
 				forCluster.emplace_back(p.first);
@@ -214,16 +214,17 @@ namespace TableDetection
 			return vForSort[a] < vForSort[b];
 		});
 
+		double currentLow = static_cast<double>(this->values[forClusterTemp[0]]);
+		double currentUpper = static_cast<double>(this->values[forClusterTemp[forClusterTemp.size()-1]]);
 		double lower, upper;
 
-		lower = static_cast<double>(this->values[forClusterTemp[0]]);
-		upper = static_cast<double>(this->values[forClusterTemp[forClusterTemp.size()-1]]);
-
 		// actually this while loop must divide as 2 group(xCluster, yCluser) but... just my tiresome
-		while (true)
+		do
 		{
-			double currentLow = 0, currentUpper = 0;
 			int lowCnt = 0, upperCnt = 0;
+			lower = currentLow;
+			upper = currentUpper;
+			currentUpper = currentLow = 0;
 			for (int i = 0; i < forCluster.size(); i++)
 			{
 				clustered[i] = (abs(lower - this->values[forCluster[i]]) > abs(upper - this->values[forCluster[i]])) ? KmeansType::TYPE_UPPER : KmeansType::TYPE_LOWER;
@@ -245,16 +246,8 @@ namespace TableDetection
 			{
 				return 0;
 			}
-			if (lower == currentLow &&
-				upper == currentUpper)
-			{
-				// can compiler optimize this while loop?
-				// if cant i will modify this code as do-while
-				break;
-			}
-			lower = currentLow;
-			upper = currentUpper;
-		}
+		}while (lower != currentLow || upper != currentUpper);
+
 		int lowerMaxValue = INT_MIN;
 		int upperMinValue = INT_MAX;
 		for (int i = 0; i < clustered.size(); i++)
