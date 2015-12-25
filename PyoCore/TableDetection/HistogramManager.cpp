@@ -116,7 +116,8 @@ namespace TableDetection
 	bool Histogram::initFilterExtremum()
 	{
 		// find minmax value
-		std::list<std::pair<int, ExtremumType>> eList;
+		int i;
+		auto& eList = this->extremumList;
 		TableDetection::ExtremumType currentState, nextState;
 		auto eListMaxV = values[0], eListMinV = values[0];
 		if (length < 2) 
@@ -124,11 +125,18 @@ namespace TableDetection
 			//I think it can not process
 			return true;
 		}
-		currentState = ((values[0] - values[1]) > 0) ? ExtremumType::TYPE_MAX: ExtremumType::TYPE_MIN;
-		eList.emplace_back(0, currentState);
-		for (int i = 2; i < length; ++i)
+		for (i = 1; i < length; i++)
 		{
-			if (values[i] - values[i - 1] == 0)
+			if (values[i] != values[i + 1])
+			{
+				currentState = ((values[i - 1] - values[i]) > 0) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN;
+				eList.emplace_back(i - 1, currentState);
+				break;
+			}
+		}
+		for (i = 2; i < length; ++i)
+		{
+			if (values[i] == values[i - 1])
 			{
 				continue;
 			}
@@ -154,26 +162,16 @@ namespace TableDetection
 		}
 
 		// remove non-reasonable value
-		eListMaxV = static_cast<int>(ceil(static_cast<double>(eListMaxV) * 0.8));
-		//eListMinV = static_cast<int>(ceil(static_cast<double>(eListMinV) * 1.2));
+		eListMaxV = static_cast<int>(ceil(static_cast<double>(eListMaxV) * 0.2));
 		for (auto currItr = begin(eList); currItr != end(eList); ++currItr)
 		{
-			if (currItr->second == ExtremumType::TYPE_MAX && values[currItr->first] < eListMaxV)
+			auto nextItr = next(currItr, 1);
+			if (nextItr == end(eList))
+				continue;
+			if (abs(values[nextItr->first] - values[currItr->first]) < eListMaxV)
 			{
-				currItr = eList.erase(currItr);
-				if(currItr != begin(eList))
-					--currItr;
+				eList.erase(nextItr);
 			}
-			//else if (currItr->second == ExtremumType::TYPE_MIN && values[currItr->first] > eListMinV)
-			//{
-			//	currItr = eList.erase(currItr);
-			//	if(currItr != begin(eList))
-			//		--currItr;
-			//}
-			//if (abs(values[nextItr->first] - values[currItr->first]) < eListMaxV)
-			//{
-			//	eList.erase(nextItr);
-			//}
 		}
 		// data align
 		for (auto currItr = begin(eList); currItr != end(eList); ++currItr)
@@ -193,7 +191,6 @@ namespace TableDetection
 				nextItr = next(currItr, 1);
 			}
 		}
-		this->extremumList = std::move(eList);
 		return true;
 	}
 
@@ -428,7 +425,7 @@ namespace TableDetection
 			bottom = next(itr)->first;
 			for (auto jtr = begin(xExtremum); jtr != prev(end(xExtremum)); ++jtr)
 			{
-				if (jtr->second == ExtremumType::TYPE_MIN)
+				if (jtr->second == ExtremumType::TYPE_MAX)
 					continue;
 				left = jtr->first;
 				right = next(jtr)->first;
