@@ -140,7 +140,7 @@ namespace TableDetection
 				{
 					eListMaxV = values[i - 1];
 				}
-				if (eListMinV > values[i - 1])
+				if (eListMinV > values[i - 1] && values[i - 1] != 0)
 				{
 					eListMinV = values[i - 1];
 				}
@@ -155,7 +155,7 @@ namespace TableDetection
 
 		// remove non-reasonable value
 		eListMaxV = static_cast<int>(ceil(static_cast<double>(eListMaxV) * 0.8));
-		eListMinV = static_cast<int>(ceil(static_cast<double>(eListMinV) * 1.2));
+		//eListMinV = static_cast<int>(ceil(static_cast<double>(eListMinV) * 1.2));
 		for (auto currItr = begin(eList); currItr != end(eList); ++currItr)
 		{
 			if (currItr->second == ExtremumType::TYPE_MAX && values[currItr->first] < eListMaxV)
@@ -164,12 +164,12 @@ namespace TableDetection
 				if(currItr != begin(eList))
 					--currItr;
 			}
-			else if (currItr->second == ExtremumType::TYPE_MIN && values[currItr->first] > eListMinV)
-			{
-				currItr = eList.erase(currItr);
-				if(currItr != begin(eList))
-					--currItr;
-			}
+			//else if (currItr->second == ExtremumType::TYPE_MIN && values[currItr->first] > eListMinV)
+			//{
+			//	currItr = eList.erase(currItr);
+			//	if(currItr != begin(eList))
+			//		--currItr;
+			//}
 			//if (abs(values[nextItr->first] - values[currItr->first]) < eListMaxV)
 			//{
 			//	eList.erase(nextItr);
@@ -427,10 +427,14 @@ namespace TableDetection
 		int top, bottom, left, right;
 		for (auto itr = begin(yExtremum); itr != prev(end(yExtremum)); ++itr)
 		{
+			if (itr->second == ExtremumType::TYPE_MIN)
+				continue;
 			top = itr->first;
 			bottom = next(itr)->first;
 			for (auto jtr = begin(xExtremum); jtr != prev(end(xExtremum)); ++jtr)
 			{
+				if (jtr->second == ExtremumType::TYPE_MIN)
+					continue;
 				left = jtr->first;
 				right = next(jtr)->first;
 				tableVector.emplace_back(top, bottom, left, right);

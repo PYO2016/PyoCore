@@ -54,7 +54,7 @@ namespace HistogramManagerTest
 
 				//Logger::WriteMessage((q1 + " " + q2 + " " + q3 + " " + q4 + "\n").c_str());
 			}
-			std::wstring html = TableDetection::TableExporter::exportTable(cells);
+			std::wstring html = TableDetection::TableExporter::ExportTable(cells);
 			Logger::WriteMessage(html.c_str());
 		}
 
