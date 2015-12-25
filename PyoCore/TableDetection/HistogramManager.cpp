@@ -266,10 +266,10 @@ namespace TableDetection
 		for (auto itr = begin(this->extremumList); itr != end(this->extremumList); ++itr)
 		{
 			if (itr->second == ExtremumType::TYPE_MAX &&
-				itr->first > maxBoundary)
+				values[itr->first] > maxBoundary)
 			{
 				auto jtr = next(itr);
-				for (; jtr != end(this->extremumList) && jtr->second != ExtremumType::TYPE_MAX && jtr->first < maxBoundary; ++jtr);
+				for (; jtr != end(this->extremumList) && (jtr->second == ExtremumType::TYPE_MIN || values[jtr->first] < maxBoundary); ++jtr);
 
 				if (jtr == end(this->extremumList))
 				{
@@ -278,16 +278,18 @@ namespace TableDetection
 				else 
 				{
 					int minValue = INT_MAX;
+					decltype(itr) minPtr;
 					for (auto ktr = next(itr); ktr != jtr; ++ktr)
 					{
-						if (minValue > ktr->first && ktr->second == ExtremumType::TYPE_MIN && ktr->first < minBoundary)
+						if (minValue > values[ktr->first] && ktr->second == ExtremumType::TYPE_MIN && values[ktr->first] < minBoundary)
 						{
-							minValue = ktr->first;
+							minValue = values[ktr->first];
+							minPtr = ktr;
 						}
 					}
 					for (auto ktr = next(itr); ktr != jtr; ++ktr)
 					{
-						if (minValue > ktr->first && ktr->second == ExtremumType::TYPE_MIN && ktr->first < minBoundary)
+						if (ktr != minPtr && minValue <= values[ktr->first] && ktr->second == ExtremumType::TYPE_MIN && values[ktr->first] < minBoundary)
 						{
 							ktr = this->extremumList.erase(ktr);
 							--ktr;
