@@ -310,11 +310,6 @@ namespace TableDetection
 		return success;
 	}
 
-	const std::list<std::pair<int, ExtremumType>>& Histogram::getExtremumList() const
-	{
-		return this->extremumList;
-	}
-
 	/* HistogramManager */
 
 	HistogramManager::HistogramManager(const Common::PngImage& image)
