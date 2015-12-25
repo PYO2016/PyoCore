@@ -299,6 +299,7 @@ namespace TableDetection
 			}
 		}
 		outerLoop:
+
 		return success;
 	}
 
