@@ -407,6 +407,7 @@ namespace TableDetection
 	}
 	std::vector<std::tuple<int, int, int, int>> HistogramManager::getTableInfo()
 	{
+		// top bottom left right
 		std::vector<std::tuple<int, int, int, int>> tableVector;
 
 		auto xExtremum  = pHistogramX->getExtremumList();

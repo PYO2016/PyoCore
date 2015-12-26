@@ -3,7 +3,9 @@
 #include <string>
 #include <memory>
 #include "../Common/PngImage.h"
+#include "../Common/Table.h"
 #include "HistogramManager.h"
+#include <tuple>
 
 namespace TableDetection
 {
@@ -23,7 +25,11 @@ namespace TableDetection
 		bool process();		// real process function!
 		bool registerImage(std::wstring imageFile);
 		bool preprocess(void);
-		bool makeHistogram(void);
+		bool detectTable(void);		// not tested
+		bool _detectTable(int recDepth, unsigned areaWidth, unsigned areaHeight,
+			unsigned offsetWidth, unsigned offsetHeight);	// not tested
+		bool makeHistogram(std::vector<std::tuple<int, int, int, int>>& cells, unsigned areaWidth, unsigned areaHeight,
+			unsigned offsetWidth, unsigned offsetHeight);	// not tested
 		/* etc... */
 
 	private:
@@ -31,5 +37,12 @@ namespace TableDetection
 		bool isDebug;
 		std::shared_ptr<Common::PngImage> pImage;
 		std::shared_ptr<HistogramManager> pHm;
+		Common::Table table;
+
+		/* Constants for recursive table detection. */
+		/* These values changed depending on image size. */
+		unsigned maxRecDepth = 1;
+		int minWidth = 10;
+		int minHeight = 10;
 	};
 }

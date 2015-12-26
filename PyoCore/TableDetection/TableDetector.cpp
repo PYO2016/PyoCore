@@ -71,13 +71,13 @@ namespace TableDetection
 		DEBUG_MSG("After preprocessing, store image file");
 		DEBUG_ACTION(pImage->storeToFile(imageFile + L"_after_preprocessing.png"));
 
-		DEBUG_MSG("makeHistogram() start!!");
+		DEBUG_MSG("detectTable() start!!");
 
-		/////// makeHistogram()
-		if (!makeHistogram())
+		/////// detectTable()
+		if (!detectTable())
 			return false;
 
-		DEBUG_MSG("makeHistogram() finish!!");
+		DEBUG_MSG("detectTable() finish!!");
 
 		/* Do more things */
 
@@ -89,7 +89,9 @@ namespace TableDetection
 	bool TableDetector::registerImage(std::wstring imageFile)
 	{
 		cleanup();
-		return (pImage = Common::PngImage::LoadImage(imageFile)) != nullptr;
+		if ((pImage = Common::PngImage::LoadImage(imageFile)) == nullptr)
+			return false;
+		return true;
 	}
 
 	bool TableDetector::preprocess(void)
@@ -97,22 +99,86 @@ namespace TableDetection
 		return Preprocessing::Preprocessor::process(*pImage);
 	}
 
-	bool TableDetector::makeHistogram(void)
+	/* detectTable and _detectTable is incomplete and inefficient. */
+	/* These methods must be re-designed. */
+
+	bool TableDetector::detectTable(void)
 	{
-		std::shared_ptr<HistogramManager> hm = std::make_shared<HistogramManager>(*pImage);
+		pHm = std::make_shared<HistogramManager>(*pImage);
+		return _detectTable(0, pImage->getWidth(), pImage->getHeight(), 0, 0);
+	}
 
-		hm->makeHistogram(HistogramType::TYPE_X);
-		hm->makeHistogram(HistogramType::TYPE_Y);
+	bool TableDetector::_detectTable(int recDepth, unsigned areaWidth, unsigned areaHeight,
+		unsigned offsetWidth, unsigned offsetHeight)
+	{
+		if (recDepth >= maxRecDepth || areaWidth < minWidth || areaHeight < minHeight) {
+			// register cell to this->table.
+			// will be implemented...
+			return true;
+		}
 
-		hm->applyMedianFilter(HistogramType::TYPE_X);
-		hm->applyMedianFilter(HistogramType::TYPE_Y);
+		std::vector<std::tuple<int, int, int, int>> cells;
 
-		/* do more things. */
+		if (!makeHistogram(cells, areaWidth, areaHeight, offsetWidth, offsetHeight))
+			return false;
 
-		// this->hm = hm;
+		// when not splited.
+		if (cells.size() <= 1) {
+			// register cell to this->table.
+			// will be implemented...
+			return true;
+		}
 
-		/* not yet implemented */
-		return false;
+		bool success = true;
+
+		for (const auto &cell : cells) {
+			int top = std::get<0>(cell);
+			int bottom = std::get<1>(cell);
+			int left = std::get<2>(cell);
+			int right = std::get<3>(cell);
+
+			success = success && _detectTable(recDepth + 1, right - left, bottom - top, left, top);
+			if (!success)
+				break;
+		}
+
+		return success;
+	}
+
+	bool TableDetector::makeHistogram(std::vector<std::tuple<int, int, int, int>>& cells, unsigned areaWidth, unsigned areaHeight,
+		unsigned offsetWidth, unsigned offsetHeight)
+	{
+		bool success = false;
+
+		pHm->setAttr(areaWidth, areaHeight, offsetWidth, offsetHeight);
+
+		if (!pHm->makeHistogram(HistogramType::TYPE_X))
+			goto END;
+		if (!pHm->makeHistogram(HistogramType::TYPE_Y))
+			goto END;
+
+		if (!pHm->applyMedianFilter(HistogramType::TYPE_X))
+			goto END;
+		if (!pHm->applyMedianFilter(HistogramType::TYPE_Y))
+			goto END;
+
+		if (!pHm->filterExtremum(HistogramType::TYPE_X))
+			goto END;
+		if (!pHm->filterExtremum(HistogramType::TYPE_Y))
+			goto END;
+
+		if (!pHm->applyKmeans(HistogramType::TYPE_X))
+			goto END;
+		if (!pHm->applyKmeans(HistogramType::TYPE_Y))
+			goto END;
+
+		cells = pHm->getTableInfo();
+
+		success = true;
+	END:;
+		pHm->cleanup();
+
+		return success;
 	}
 
 	/* etc... */

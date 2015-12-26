@@ -3,6 +3,7 @@
 #include "../Common/PngImage.h"
 #include <list>
 #include <memory>
+#include <tuple>
 
 namespace TableDetection
 {
@@ -60,12 +61,14 @@ namespace TableDetection
 		~HistogramManager();
 
 		void cleanup();
+		inline void setAttr(unsigned areaWidth, unsigned areaHeight, 
+			unsigned offsetWidth, unsigned offsetHeight);
 
 		bool makeHistogram(HistogramType type);
 		bool applyMedianFilter(HistogramType type);
 		bool filterExtremum(HistogramType type);
 		bool applyKmeans(HistogramType type);
-		std::vector<std::tuple<int, int, int, int>> getTableInfo();
+		std::vector<std::tuple<int, int, int, int>> getTableInfo();	// top bottom left right
 		/* etc... */
 
 	private:
@@ -80,5 +83,14 @@ namespace TableDetection
 	inline const std::list<std::pair<int, ExtremumType>>& Histogram::getExtremumList() const
 	{
 		return this->extremumList;
+	}
+
+	inline void HistogramManager::setAttr(unsigned areaWidth, unsigned areaHeight,
+		unsigned offsetWidth, unsigned offsetHeight)
+	{
+		this->areaWidth = areaWidth;
+		this->areaHeight = areaHeight;
+		this->offsetWidth = offsetWidth;
+		this->offsetHeight = offsetHeight;
 	}
 }
