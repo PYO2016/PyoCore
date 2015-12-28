@@ -289,7 +289,7 @@ namespace TableDetection
 					}
 					for (auto ktr = next(itr); ktr != jtr; ++ktr)
 					{
-						if (ktr != minPtr && minValue <= values[ktr->first] && ktr->second == ExtremumType::TYPE_MIN && values[ktr->first] < minBoundary)
+						if (ktr != minPtr && ktr->second == ExtremumType::TYPE_MIN && values[ktr->first] < minBoundary)
 						{
 							ktr = this->extremumList.erase(ktr);
 							--ktr;
