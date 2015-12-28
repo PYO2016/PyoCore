@@ -26,9 +26,9 @@ namespace TableDetection
 		bool registerImage(std::wstring imageFile);
 		bool preprocess(void);
 		bool detectTable(void);		// not tested
-		bool _detectTable(int recDepth, unsigned areaWidth, unsigned areaHeight,
+		bool recXycut(int recDepth, unsigned areaWidth, unsigned areaHeight,
 			unsigned offsetWidth, unsigned offsetHeight);	// not tested
-		bool makeHistogram(std::vector<std::tuple<int, int, int, int>>& cells, unsigned areaWidth, unsigned areaHeight,
+		bool xycut(std::vector<std::tuple<int, int, int, int>>& cells, unsigned areaWidth, unsigned areaHeight,
 			unsigned offsetWidth, unsigned offsetHeight);	// not tested
 		/* etc... */
 

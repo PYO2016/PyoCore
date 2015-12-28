@@ -99,33 +99,32 @@ namespace TableDetection
 		return Preprocessing::Preprocessor::process(*pImage);
 	}
 
-	/* detectTable and _detectTable is incomplete and inefficient. */
+	/* detectTable is incomplete and inefficient. */
 	/* These methods must be re-designed. */
 
 	bool TableDetector::detectTable(void)
 	{
 		pHm = std::make_shared<HistogramManager>(*pImage);
-		return _detectTable(0, pImage->getWidth(), pImage->getHeight(), 0, 0);
+		return recXycut(0, pImage->getWidth(), pImage->getHeight(), 0, 0);
 	}
 
-	bool TableDetector::_detectTable(int recDepth, unsigned areaWidth, unsigned areaHeight,
+	bool TableDetector::recXycut(int recDepth, unsigned areaWidth, unsigned areaHeight,
 		unsigned offsetWidth, unsigned offsetHeight)
 	{
 		if (recDepth >= maxRecDepth || areaWidth < minWidth || areaHeight < minHeight) {
-			// register cell to this->table.
-			// will be implemented...
+			table.addCell(offsetHeight, offsetHeight + areaHeight, 
+				offsetWidth, offsetWidth + areaWidth);
 			return true;
 		}
 
 		std::vector<std::tuple<int, int, int, int>> cells;
 
-		if (!makeHistogram(cells, areaWidth, areaHeight, offsetWidth, offsetHeight))
+		if (!xycut(cells, areaWidth, areaHeight, offsetWidth, offsetHeight))
 			return false;
 
 		// when not splited.
 		if (cells.size() <= 1) {
-			// register cell to this->table.
-			// will be implemented...
+			table.addCell(cells[0]);
 			return true;
 		}
 
@@ -137,7 +136,7 @@ namespace TableDetection
 			int left = std::get<2>(cell);
 			int right = std::get<3>(cell);
 
-			success = success && _detectTable(recDepth + 1, right - left, bottom - top, left, top);
+			success = success && recXycut(recDepth + 1, right - left, bottom - top, left, top);
 			if (!success)
 				break;
 		}
@@ -145,7 +144,7 @@ namespace TableDetection
 		return success;
 	}
 
-	bool TableDetector::makeHistogram(std::vector<std::tuple<int, int, int, int>>& cells, unsigned areaWidth, unsigned areaHeight,
+	bool TableDetector::xycut(std::vector<std::tuple<int, int, int, int>>& cells, unsigned areaWidth, unsigned areaHeight,
 		unsigned offsetWidth, unsigned offsetHeight)
 	{
 		bool success = false;

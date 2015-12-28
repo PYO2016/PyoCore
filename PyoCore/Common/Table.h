@@ -2,13 +2,14 @@
 
 #include <string>
 #include <vector>
+#include <tuple>
 
 namespace Common
 {
 	class Cell
 	{
 	public:
-		Cell(int top, int bottom, int left, int right, const std::wstring& innerString);
+		Cell(int top, int bottom, int left, int right, const std::wstring& innerString = L"");
 		~Cell() = default;
 
 		inline int getTop() const;
@@ -49,6 +50,8 @@ namespace Common
 		Table(std::vector<Cell>&& cells);
 		~Table() = default;
 
+		inline void addCell(int top, int bottom, int left, int right);
+		inline void addCell(std::tuple<int,int,int,int> cell);
 		inline std::vector<Cell>& getCells();
 		inline const std::vector<Cell>& getCells() const;
 	private:
@@ -125,7 +128,18 @@ namespace Common
 	}
 
 	/* Table */
-
+	inline void Table::addCell(int top, int bottom, int left, int right)
+	{
+		cells.emplace_back(top, bottom, left, right);
+	}
+	inline void Table::addCell(std::tuple<int, int, int, int> cell)
+	{
+		int top = std::get<0>(cell);
+		int bottom = std::get<1>(cell);
+		int left = std::get<2>(cell);
+		int right = std::get<3>(cell);
+		addCell(top, bottom, left, right);
+	}
 	inline std::vector<Cell>& Table::getCells()
 	{
 		return cells;
