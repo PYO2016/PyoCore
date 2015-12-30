@@ -15,7 +15,8 @@ namespace TableDetection
 	enum class ExtremumType : int
 	{
 		TYPE_MIN = 0,
-		TYPE_MAX
+		TYPE_MAX,
+		NOTHING
 	};
 	enum class KmeansType : int
 	{
