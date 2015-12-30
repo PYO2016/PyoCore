@@ -2,9 +2,10 @@
 #include "HistogramManager.h"
 #include "../Preprocessing/Preprocessor.h"
 #include <iostream>
+#include "TableExporter.h"
 
 #define DEBUG_MSG(STR) if(isDebug) { \
-	std::cout << "[Debug] " STR << std::endl; \
+	std::cerr << "[Debug] " STR << std::endl; \
 }
 
 #define DEBUG_ACTION(ACT) if(isDebug) { \
@@ -78,6 +79,12 @@ namespace TableDetection
 			return false;
 
 		DEBUG_MSG("detectTable() finish!!");
+
+		DEBUG_MSG("exportTable() start!!");
+
+		result = TableExporter::ExportTable(table);
+
+		DEBUG_MSG("exportTable() finish!!");
 
 		/* Do more things */
 

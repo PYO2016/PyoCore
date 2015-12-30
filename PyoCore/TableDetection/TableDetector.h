@@ -38,6 +38,7 @@ namespace TableDetection
 		std::shared_ptr<Common::PngImage> pImage;
 		std::shared_ptr<HistogramManager> pHm;
 		Common::Table table;
+		std::wstring result;
 
 		/* Constants for recursive table detection. */
 		/* These values changed depending on image size. */

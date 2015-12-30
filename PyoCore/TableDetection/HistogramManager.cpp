@@ -22,7 +22,8 @@ namespace TableDetection
 	}
 
 	Histogram::Histogram(const Histogram& h)
-		: type(h.type), image(h.image), length(h.length), valLimit(h.valLimit)
+		: type(h.type), image(h.image), length(h.length), valLimit(h.valLimit),
+			extremumList(h.extremumList)
 	{
 		for (int i = 0; i < length; ++i)
 			values[i] = h.values[i];
@@ -240,12 +241,8 @@ namespace TableDetection
 					++upperCnt;
 				}
 			}
-			currentLow /= lowCnt;
-			currentUpper /= upperCnt;
-			if (lowCnt == 0 || upperCnt == 0)
-			{
-				return 0;
-			}
+			if (lowCnt > 0) currentLow /= lowCnt;
+			if (upperCnt > 0) currentUpper /= upperCnt;
 		}while (lower != currentLow || upper != currentUpper);
 
 		int lowerMaxValue = INT_MIN;
@@ -392,7 +389,7 @@ namespace TableDetection
 	bool HistogramManager::applyKmeans(HistogramType type)
 	{
 		bool success = false;
-
+		 
 		switch (type)
 		{
 		case HistogramType::TYPE_X:
