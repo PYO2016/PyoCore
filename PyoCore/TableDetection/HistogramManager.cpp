@@ -126,16 +126,8 @@ namespace TableDetection
 			//I think it can not process
 			return true;
 		}
-		for (i = 1; i < length; i++)
-		{
-			if (values[i] != values[i + 1])
-			{
-				currentState = ((values[i - 1] - values[i]) > 0) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN;
-				eList.emplace_back(i - 1, currentState);
-				break;
-			}
-		}
-		for (i = 2; i < length; ++i)
+		currentState = ExtremumType::NOTHING;
+		for (i = 1; i < length; ++i)
 		{
 			if (values[i] == values[i - 1])
 			{
@@ -157,23 +149,25 @@ namespace TableDetection
 				currentState = nextState;
 			}
 		}
-		if (values[length - 1] != values[length - 2])
+		// need modify
+		if (values[length - 1] == values[length - 2])
 		{
 			eList.emplace_back(length - 1, ((values[length - 1] - values[length - 2]) > 0) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN);
 		}
 
 		// remove non-reasonable value
 		eListMaxV = static_cast<int>(ceil(static_cast<double>(eListMaxV) * 0.2));
-		for (auto currItr = begin(eList); currItr != end(eList); ++currItr)
+		for (auto currItr = begin(eList); currItr != end(eList); )
 		{
 			auto nextItr = next(currItr, 1);
 			if (nextItr == end(eList))
-				continue;
+				break;
 			if (abs(values[nextItr->first] - values[currItr->first]) < eListMaxV)
-			{
 				eList.erase(nextItr);
-			}
+			else
+				++currItr;
 		}
+		
 		// data align
 		for (auto currItr = begin(eList); currItr != end(eList); ++currItr)
 		{
@@ -183,11 +177,19 @@ namespace TableDetection
 			while (nextItr != end(eList) && currItr->second == nextItr->second)
 			{
 				if (nextItr != end(eList) && currItr->second == ExtremumType::TYPE_MAX)
+				{
 					if (values[currItr->first] < values[nextItr->first])
+					{
 						currItr->first = nextItr->first;
-				else
+					}
+				}
+				else if (nextItr != end(eList) && currItr->second == ExtremumType::TYPE_MIN)
+				{
 					if (values[nextItr->first] < values[currItr->first])
+					{
 						currItr->first = nextItr->first;
+					}
+				}
 				eList.erase(nextItr);
 				nextItr = next(currItr, 1);
 			}
@@ -420,16 +422,20 @@ namespace TableDetection
 		auto xExtremum  = pHistogramX->getExtremumList();
 		auto yExtremum  = pHistogramY->getExtremumList();
 
-		for (auto itr = begin(xExtremum); itr != end(xExtremum); ++itr) {
+		for (auto itr = begin(xExtremum); itr != end(xExtremum); ) {
 			if (itr->second == ExtremumType::TYPE_MAX) {
 				itr = xExtremum.erase(itr);
-				--itr;
+			}
+			else {
+				++itr;
 			}
 		}
-		for (auto itr = begin(yExtremum); itr != end(yExtremum); ++itr) {
+		for (auto itr = begin(yExtremum); itr != end(yExtremum); ) {
 			if (itr->second == ExtremumType::TYPE_MAX) {
 				itr = yExtremum.erase(itr);
-				--itr;
+			}
+			else {
+				++itr;
 			}
 		}
 
