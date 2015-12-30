@@ -228,7 +228,10 @@ namespace TableDetection
 			currentUpper = currentLow = 0;
 			for (int i = 0; i < forCluster.size(); i++)
 			{
-				clustered[i] = (abs(lower - this->values[forCluster[i]]) > abs(upper - this->values[forCluster[i]])) ? KmeansType::TYPE_UPPER : KmeansType::TYPE_LOWER;
+				if (type == ExtremumType::TYPE_MAX)
+					clustered[i] = (abs(lower - this->values[forCluster[i]]) >= abs(upper - this->values[forCluster[i]])) ? KmeansType::TYPE_UPPER : KmeansType::TYPE_LOWER;
+				else
+					clustered[i] = (abs(lower - this->values[forCluster[i]]) > abs(upper - this->values[forCluster[i]])) ? KmeansType::TYPE_UPPER : KmeansType::TYPE_LOWER;
 				// if clustered as lower
 				if (clustered[i] == KmeansType::TYPE_LOWER)
 				{
@@ -254,6 +257,10 @@ namespace TableDetection
 			else if (clustered[i] == KmeansType::TYPE_UPPER && this->values[forCluster[i]] < upperMinValue)
 				upperMinValue = this->values[forCluster[i]];
 		}
+		if (lowerMaxValue == INT_MIN)
+			lowerMaxValue = 0;
+		if (upperMinValue == INT_MAX)
+			upperMinValue = 0;
 		
 		return ((static_cast<double>(lowerMaxValue) + static_cast<double>(upperMinValue)) / 2);
 	}
@@ -284,12 +291,15 @@ namespace TableDetection
 							minPtr = ktr;
 						}
 					}
-					for (auto ktr = next(itr); ktr != jtr; ++ktr)
+					if (minValue != INT_MAX)
 					{
-						if (ktr != minPtr && ktr->second == ExtremumType::TYPE_MIN && values[ktr->first] < minBoundary)
+						for (auto ktr = next(itr); ktr != jtr; ++ktr)
 						{
-							ktr = this->extremumList.erase(ktr);
-							--ktr;
+							if (ktr != minPtr && ktr->second == ExtremumType::TYPE_MIN && values[ktr->first] < minBoundary)
+							{
+								ktr = this->extremumList.erase(ktr);
+								--ktr;
+							}
 						}
 					}
 				}
@@ -410,17 +420,26 @@ namespace TableDetection
 		auto xExtremum  = pHistogramX->getExtremumList();
 		auto yExtremum  = pHistogramY->getExtremumList();
 
+		for (auto itr = begin(xExtremum); itr != end(xExtremum); ++itr) {
+			if (itr->second == ExtremumType::TYPE_MAX) {
+				itr = xExtremum.erase(itr);
+				--itr;
+			}
+		}
+		for (auto itr = begin(yExtremum); itr != end(yExtremum); ++itr) {
+			if (itr->second == ExtremumType::TYPE_MAX) {
+				itr = yExtremum.erase(itr);
+				--itr;
+			}
+		}
+
 		int top, bottom, left, right;
 		for (auto itr = begin(yExtremum); itr != prev(end(yExtremum)); ++itr)
 		{
-			if (itr->second == ExtremumType::TYPE_MIN)
-				continue;
 			top = itr->first;
 			bottom = next(itr)->first;
 			for (auto jtr = begin(xExtremum); jtr != prev(end(xExtremum)); ++jtr)
 			{
-				if (jtr->second == ExtremumType::TYPE_MAX)
-					continue;
 				left = jtr->first;
 				right = next(jtr)->first;
 				tableVector.emplace_back(top, bottom, left, right);
