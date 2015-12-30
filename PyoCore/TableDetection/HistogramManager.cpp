@@ -159,7 +159,8 @@ namespace TableDetection
 		}
 		if (values[length - 1] != values[length - 2])
 		{
-			eList.emplace_back(length - 1, ((values[length - 1] - values[length - 2]) > 0) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN);
+			eList.emplace_back(length - 1, ((values[length - 1] - values[length - 2]) > 0) ? 
+				ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN);
 		}
 
 		// remove non-reasonable value
@@ -229,9 +230,11 @@ namespace TableDetection
 			for (int i = 0; i < forCluster.size(); i++)
 			{
 				if (type == ExtremumType::TYPE_MAX)
-					clustered[i] = (abs(lower - this->values[forCluster[i]]) >= abs(upper - this->values[forCluster[i]])) ? KmeansType::TYPE_UPPER : KmeansType::TYPE_LOWER;
+					clustered[i] = (abs(lower - this->values[forCluster[i]]) >= abs(upper - this->values[forCluster[i]])) ?
+						KmeansType::TYPE_UPPER : KmeansType::TYPE_LOWER;
 				else
-					clustered[i] = (abs(lower - this->values[forCluster[i]]) > abs(upper - this->values[forCluster[i]])) ? KmeansType::TYPE_UPPER : KmeansType::TYPE_LOWER;
+					clustered[i] = (abs(lower - this->values[forCluster[i]]) > abs(upper - this->values[forCluster[i]])) ?
+						KmeansType::TYPE_UPPER : KmeansType::TYPE_LOWER;
 				// if clustered as lower
 				if (clustered[i] == KmeansType::TYPE_LOWER)
 				{
@@ -269,11 +272,12 @@ namespace TableDetection
 		bool success = true;
 		for (auto itr = begin(this->extremumList); itr != end(this->extremumList); ++itr)
 		{
-			if (itr->second == ExtremumType::TYPE_MAX &&
+			if (itr->second == ExtremumType::TYPE_MAX && 
 				values[itr->first] > maxBoundary)
 			{
 				auto jtr = next(itr);
-				for (; jtr != end(this->extremumList) && (jtr->second == ExtremumType::TYPE_MIN || values[jtr->first] < maxBoundary); ++jtr);
+				for (; jtr != end(this->extremumList) && 
+					(jtr->second == ExtremumType::TYPE_MIN || values[jtr->first] < maxBoundary); ++jtr);
 
 				if (jtr == end(this->extremumList))
 				{
@@ -285,17 +289,25 @@ namespace TableDetection
 					decltype(itr) minPtr;
 					for (auto ktr = next(itr); ktr != jtr; ++ktr)
 					{
-						if (minValue > values[ktr->first] && ktr->second == ExtremumType::TYPE_MIN && values[ktr->first] < minBoundary)
+						if (ktr->second == ExtremumType::TYPE_MIN)
 						{
-							minValue = values[ktr->first];
-							minPtr = ktr;
+							if (values[ktr->first] > minBoundary)
+							{
+								ktr = this->extremumList.erase(ktr);
+								--ktr;
+							}
+							else if (minValue > values[ktr->first])
+							{
+								minValue = values[ktr->first];
+								minPtr = ktr;
+							}
 						}
 					}
 					if (minValue != INT_MAX)
 					{
 						for (auto ktr = next(itr); ktr != jtr; ++ktr)
 						{
-							if (ktr != minPtr && ktr->second == ExtremumType::TYPE_MIN && values[ktr->first] < minBoundary)
+							if (ktr != minPtr && ktr->second == ExtremumType::TYPE_MIN)
 							{
 								ktr = this->extremumList.erase(ktr);
 								--ktr;
@@ -420,16 +432,20 @@ namespace TableDetection
 		auto xExtremum  = pHistogramX->getExtremumList();
 		auto yExtremum  = pHistogramY->getExtremumList();
 
-		for (auto itr = begin(xExtremum); itr != end(xExtremum); ++itr) {
+		for (auto itr = begin(xExtremum); itr != end(xExtremum); ) {
 			if (itr->second == ExtremumType::TYPE_MAX) {
 				itr = xExtremum.erase(itr);
-				--itr;
+			}
+			else {
+				++itr;
 			}
 		}
-		for (auto itr = begin(yExtremum); itr != end(yExtremum); ++itr) {
+		for (auto itr = begin(yExtremum); itr != end(yExtremum); ) {
 			if (itr->second == ExtremumType::TYPE_MAX) {
 				itr = yExtremum.erase(itr);
-				--itr;
+			}
+			else {
+				++itr;
 			}
 		}
 

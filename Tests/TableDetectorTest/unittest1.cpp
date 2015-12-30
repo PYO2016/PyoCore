@@ -19,7 +19,7 @@ namespace TableDetectorTest
 			_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
 			_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
 			TableDetection::TableDetector td;
-			Logger::WriteMessage(td.process(L"test.png", L"junk", true) ? "true" : "false");
+			Logger::WriteMessage(td.process(L"test7.png", L"junk", true) ? "true" : "false");
 			Logger::WriteMessage(td.result.c_str());
 		}
 

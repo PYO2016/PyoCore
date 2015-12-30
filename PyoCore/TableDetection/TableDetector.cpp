@@ -131,7 +131,8 @@ namespace TableDetection
 
 		// when not splited.
 		if (cells.size() <= 1) {
-			table.addCell(cells[0]);
+			table.addCell(offsetHeight, offsetHeight + areaHeight,
+				offsetWidth, offsetWidth + areaWidth);
 			return true;
 		}
 
@@ -162,12 +163,12 @@ namespace TableDetection
 			goto END;
 		if (!pHm->makeHistogram(HistogramType::TYPE_Y))
 			goto END;
-
+		/*
 		if (!pHm->applyMedianFilter(HistogramType::TYPE_X))
 			goto END;
 		if (!pHm->applyMedianFilter(HistogramType::TYPE_Y))
 			goto END;
-
+		*/
 		if (!pHm->filterExtremum(HistogramType::TYPE_X))
 			goto END;
 		if (!pHm->filterExtremum(HistogramType::TYPE_Y))
