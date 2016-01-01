@@ -62,7 +62,7 @@ namespace TableDetection
 
 	bool Histogram::applyMedianFilter()
 	{
-		const int range = 7;	// must be odd number.
+		const int range = 5;	// must be odd number.
 		const int halfRange = range / 2;
 		std::array<std::pair<int, int>, range> valArray;	// val, idx
 		int cnt = 0;
@@ -206,6 +206,13 @@ namespace TableDetection
 			if (p.second == type)
 				forCluster.emplace_back(p.first);
 		}
+
+		if (forCluster.empty())
+		{
+			// no meaning return value.
+			return 0;
+		}
+
 		std::vector<KmeansType> clustered(forCluster.size());
 		// for get 1/4th value, 3/4th value
 		std::vector<int> forClusterTemp{ forCluster };
@@ -309,7 +316,7 @@ namespace TableDetection
 					{
 						for (auto ktr = next(itr); ktr != jtr; ++ktr)
 						{
-							if (ktr != minPtr && ktr->second == ExtremumType::TYPE_MIN)
+							if (ktr != minPtr && ktr->second == ExtremumType::TYPE_MIN && values[ktr->first] > 0)
 							{
 								ktr = this->extremumList.erase(ktr);
 								--ktr;
@@ -434,7 +441,8 @@ namespace TableDetection
 		auto xExtremum  = pHistogramX->getExtremumList();
 		auto yExtremum  = pHistogramY->getExtremumList();
 
-		for (auto itr = begin(xExtremum); itr != end(xExtremum); ) {
+		for (auto itr = begin(xExtremum); itr != end(xExtremum); ) 
+		{
 			if (itr->second == ExtremumType::TYPE_MAX) {
 				itr = xExtremum.erase(itr);
 			}
@@ -442,13 +450,19 @@ namespace TableDetection
 				++itr;
 			}
 		}
-		for (auto itr = begin(yExtremum); itr != end(yExtremum); ) {
+		for (auto itr = begin(yExtremum); itr != end(yExtremum); ) 
+		{
 			if (itr->second == ExtremumType::TYPE_MAX) {
 				itr = yExtremum.erase(itr);
 			}
 			else {
 				++itr;
 			}
+		}
+
+		if (yExtremum.empty() || xExtremum.empty()) 
+		{
+			return tableVector;
 		}
 
 		int top, bottom, left, right;
