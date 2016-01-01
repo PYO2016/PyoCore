@@ -109,14 +109,15 @@ namespace TableDetection
 			L"  } \n"
 			L"  .PYO2016-table table, .PYO2016-table th, .PYO2016-table td { \n"
 			L"    border : 1px gray solid; \n"
+			L"    padding : 0px; \n"
 			L"  } \n"
 			);
 
 		idx = 0;
 		for (const auto &cell : cells) {
 			css += L"  .cell-" + std::to_wstring(idx++) + L" { \n" +
-				L"    width : " + std::to_wstring(cell.getWidth()) + L"px; \n" +
-				L"    height : " + std::to_wstring(cell.getHeight()) + L"px; \n" +
+				L"    width : " + std::to_wstring(cell.getWidth()-1) + L"px; \n" +
+				L"    height : " + std::to_wstring(cell.getHeight()-1) + L"px; \n" +
 				L"  } \n";
 		}
 
