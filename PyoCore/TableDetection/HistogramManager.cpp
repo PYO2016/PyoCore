@@ -7,6 +7,7 @@
 #include <utility>
 #include <functional>
 #include <algorithm>
+#include <cmath>
 #include "../Lodepng/lodepng.h"
 
 namespace TableDetection
@@ -119,45 +120,58 @@ namespace TableDetection
 		// find minmax value
 		int i;
 		auto& eList = this->extremumList;
-		TableDetection::ExtremumType currentState, nextState;
+		TableDetection::ExtremumType prevState, curState;
+		int prevIdx, notEqualIdx;
 		auto eListMaxV = values[0], eListMinV = values[0];
 		if (length < 2) 
 		{
 			//I think it can not process
 			return true;
 		}
-		currentState = ExtremumType::NOTHING;
-		for (i = 1; i < length; ++i)
+		prevState = ExtremumType::NOTHING;
+		prevIdx = -1;		// last previous extremum idx.
+		notEqualIdx = 0;	// last idx where values[idx-1] != values[idx].
+		for (i = 0; i < length - 1; ++i)
 		{
-			if (values[i] == values[i - 1])
+			if (values[i] == values[i + 1])
 			{
 				continue;
 			}
-			nextState = ((values[i - 1] - values[i]) > 0) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN;
-			if (currentState != nextState)
+			notEqualIdx = i + 1;
+			curState = (values[i] > values[i + 1]) ? ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN;
+			if (prevState != curState)
 			{
 				//state changed
-				if (eListMaxV < values[i - 1])
+				if (eListMaxV < values[i])
 				{
-					eListMaxV = values[i - 1];
+					eListMaxV = values[i];
 				}
-				if (eListMinV > values[i - 1] && values[i - 1] != 0)
-				{
-					eListMinV = values[i - 1];
-				}
-				eList.emplace_back(i - 1, nextState);
-				currentState = nextState;
+				eList.emplace_back(i, curState);
+				prevState = curState;
+				prevIdx = i;
 			}
 		}
-		// need modify
-		if (values[length - 1] == values[length - 2])
+		if (values[length - 2] > values[length - 1])
 		{
-			eList.emplace_back(length - 1, ((values[length - 1] - values[length - 2]) > 0) ? 
-				ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN);
+			if (prevState == ExtremumType::TYPE_MAX)
+				eList.emplace_back(length - 1, ExtremumType::TYPE_MIN);
+		}
+		else if (values[length - 2] < values[length - 1])
+		{
+			if (prevState == ExtremumType::TYPE_MIN)
+				eList.emplace_back(length - 1, ExtremumType::TYPE_MAX);
+		}
+		else
+		{
+			if (prevIdx >= 0) {
+				// Always, values[prevIdx] != values[notEqualIdx]
+				eList.emplace_back(notEqualIdx, (values[prevIdx] < values[notEqualIdx] ?
+					ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN));
+			}
 		}
 
 		// remove non-reasonable value
-		eListMaxV = static_cast<int>(ceil(static_cast<double>(eListMaxV) * 0.2));
+		eListMaxV = static_cast<int>(std::ceil(static_cast<double>(eListMaxV) * 0.2));
 		for (auto currItr = begin(eList); currItr != end(eList); )
 		{
 			auto nextItr = next(currItr, 1);
