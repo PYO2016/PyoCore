@@ -62,7 +62,7 @@ namespace TableDetection
 
 	bool Histogram::applyMedianFilter()
 	{
-		const int range = 5;	// must be odd number.
+		const int range = 7;	// must be odd number.
 		const int halfRange = range / 2;
 		std::array<std::pair<int, int>, range> valArray;	// val, idx
 		int cnt = 0;
@@ -278,8 +278,16 @@ namespace TableDetection
 				values[itr->first] > maxBoundary)
 			{
 				auto jtr = next(itr);
-				for (; jtr != end(this->extremumList) && 
-					(jtr->second == ExtremumType::TYPE_MIN || values[jtr->first] < maxBoundary); ++jtr);
+				for (; jtr != end(this->extremumList) &&
+					(jtr->second == ExtremumType::TYPE_MIN || values[jtr->first] < maxBoundary); ++jtr)
+				{
+					// delete minimum in upper minimum cluster.
+					if (jtr->second == ExtremumType::TYPE_MIN && values[jtr->first] > minBoundary)
+					{
+						jtr = this->extremumList.erase(jtr);
+						--jtr;
+					}
+				}
 
 				if (jtr == end(this->extremumList))
 				{
@@ -291,18 +299,10 @@ namespace TableDetection
 					decltype(itr) minPtr;
 					for (auto ktr = next(itr); ktr != jtr; ++ktr)
 					{
-						if (ktr->second == ExtremumType::TYPE_MIN)
+						if (ktr->second == ExtremumType::TYPE_MIN && minValue > values[ktr->first])
 						{
-							if (values[ktr->first] > minBoundary)
-							{
-								ktr = this->extremumList.erase(ktr);
-								--ktr;
-							}
-							else if (minValue > values[ktr->first])
-							{
-								minValue = values[ktr->first];
-								minPtr = ktr;
-							}
+							minValue = values[ktr->first];
+							minPtr = ktr;
 						}
 					}
 					if (minValue != INT_MAX)
