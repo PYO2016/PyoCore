@@ -117,7 +117,7 @@ namespace TableDetection
 		for (const auto &cell : cells) {
 			css += L"  .cell-" + std::to_wstring(idx++) + L" { \n" +
 				L"    width : " + std::to_wstring(cell.getWidth()-1) + L"px; \n" +
-				L"    height : " + std::to_wstring(cell.getHeight()-1) + L"px; \n" +
+				L"    height : " + std::to_wstring(cell.getHeight()) + L"px; \n" +
 				L"  } \n";
 		}
 
