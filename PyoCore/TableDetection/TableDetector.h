@@ -42,7 +42,7 @@ namespace TableDetection
 
 		/* Constants for recursive table detection. */
 		/* These values changed depending on image size. */
-		unsigned maxRecDepth = 5;
+		unsigned maxRecDepth = 2;
 		int minWidth = 10;
 		int minHeight = 10;
 	};

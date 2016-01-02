@@ -180,6 +180,11 @@ namespace TableDetection
 		if (!pHm->makeHistogram(HistogramType::TYPE_Y))
 			goto END;
 
+		if (!pHm->detectVisibleLines(HistogramType::TYPE_X))
+			goto END;
+		if (!pHm->detectVisibleLines(HistogramType::TYPE_Y))
+			goto END;
+
 		if (!pHm->applyMedianFilter(HistogramType::TYPE_X))
 			goto END;
 		if (!pHm->applyMedianFilter(HistogramType::TYPE_Y))
