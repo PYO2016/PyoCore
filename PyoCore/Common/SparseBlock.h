@@ -44,6 +44,10 @@ namespace Common {
 		{
 			return text;
 		}
+		bool operator< (const SparseBlock& right) const
+		{
+			return left < right.right;
+		}
 
 	private:
 		int top;

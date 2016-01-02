@@ -16,9 +16,6 @@
     <Filter Include="소스 파일\TableDetection">
       <UniqueIdentifier>{d8ee509b-e70d-4613-b571-13ffd6d34157}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Loadpng">
-      <UniqueIdentifier>{12d4ab87-ee60-425a-bb6b-c28d8c73d5dc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\Preprocessing">
       <UniqueIdentifier>{e2f4ac9f-fee2-43cf-8897-1d78a203cfb0}</UniqueIdentifier>
     </Filter>
@@ -45,9 +42,6 @@
     <ClCompile Include="TableDetection\TableExporter.cpp">
       <Filter>소스 파일\TableDetection</Filter>
     </ClCompile>
-    <ClCompile Include="Lodepng\lodepng.cpp">
-      <Filter>소스 파일\Loadpng</Filter>
-    </ClCompile>
     <ClCompile Include="Common\PngImage.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
@@ -62,6 +56,9 @@
     </ClCompile>
     <ClCompile Include="TableDetection\OCRManager.cpp">
       <Filter>소스 파일\TableDetection</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\SparseBlockManager.cpp">
+      <Filter>소스 파일\Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -80,9 +77,6 @@
     <ClInclude Include="TableDetection\TableExporter.h">
       <Filter>소스 파일\TableDetection</Filter>
     </ClInclude>
-    <ClInclude Include="Lodepng\lodepng.h">
-      <Filter>소스 파일\Loadpng</Filter>
-    </ClInclude>
     <ClInclude Include="Common\PngImage.h">
       <Filter>소스 파일\Common</Filter>
     </ClInclude>
@@ -97,6 +91,9 @@
     </ClInclude>
     <ClInclude Include="TableDetection\OCRManager.h">
       <Filter>소스 파일\TableDetection</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\SparseBlockManager.h">
+      <Filter>소스 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

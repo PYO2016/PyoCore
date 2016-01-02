@@ -3,13 +3,14 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include "opencv2\highgui\highgui.hpp"
 
 namespace Common
 {
 #pragma pack(push, 1)
 	struct Pixel
 	{
-		unsigned char R, G, B, A;
+		unsigned char B, G, R;
 	};
 #pragma pack(pop)
 
@@ -41,16 +42,13 @@ namespace Common
 		inline std::wstring PngImage::getFileName() const;
 		inline unsigned int PngImage::getWidth() const;
 		inline unsigned int PngImage::getHeight() const;
-		inline std::vector<unsigned char>& PngImage::getData();
-		inline const std::vector<unsigned char>& PngImage::getData() const;
 		inline unsigned char* PngImage::getDataAsByteArray();
 		inline const unsigned char* PngImage::getDataAsByteArray() const;
 
 	private:
 		bool _isCopy;	// true if created by copy constructor.
 		std::wstring filename;
-		unsigned int width, height;		// width and height of image.
-		std::vector<unsigned char> data;
+		cv::Mat imageMat;
 	};
 
 	/* inline functions */
@@ -65,27 +63,19 @@ namespace Common
 	}
 	inline unsigned int PngImage::getWidth() const
 	{
-		return width;
+		return imageMat.cols;
 	}
 	inline unsigned int PngImage::getHeight() const
 	{
-		return height;
-	}
-	inline std::vector<unsigned char>& PngImage::getData()
-	{
-		return data;
-	}
-	inline const std::vector<unsigned char>& PngImage::getData() const
-	{
-		return data;
+		return imageMat.rows;
 	}
 	inline unsigned char* PngImage::getDataAsByteArray()
 	{
-		return &data[0];
+		return imageMat.data;
 	}
 	inline const unsigned char* PngImage::getDataAsByteArray() const
 	{
-		return &data[0];
+		return imageMat.data;
 	}
 }
 

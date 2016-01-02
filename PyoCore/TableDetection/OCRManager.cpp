@@ -1,8 +1,8 @@
 #include "OCRManager.h"
 #include <string>
 
-#pragma comment(lib, "../../../Leptonica/lib/liblept168")
-#pragma comment(lib, "../../../Tesseract/lib/libtesseract302")
+#pragma comment(lib, "C:/Users/KGWANGMIN/git/PYO2016/Leptonica/lib/liblept168")
+#pragma comment(lib, "C:/Users/KGWANGMIN/git/PYO2016/Tesseract/lib/libtesseract302")
 
 
 namespace TableDetection
