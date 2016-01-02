@@ -1,83 +1,76 @@
 #include "Preprocessor.h"
-
+#include "opencv2\imgproc\imgproc.hpp"
+#include "opencv2\highgui\highgui.hpp"
 
 namespace Preprocessing 
 {
 	bool Preprocessor::process(PngImage& image)
 	{
-		applyGrayscale(image);
-		//lowPassFilter(image);
-		applySimpleThreshold(image);
-		//removeBorder(image);
+		static int lowThreshold = 30;
+		static int ratio = 3;
+
+		Mat src(image.getHeight(), image.getWidth(), CV_8UC3, image.getDataAsByteArray());
+		Mat src_gray;
+		Mat dst;
+		
+		// grayscaling
+		cvtColor(src, src_gray, CV_BGR2GRAY);
+
+		// Reduce noise with a kernel 3x3
+		blur(src_gray, dst, Size(3, 3));
+		//medianBlur(src_gray, detected_edges, 5);
+
+		// Canny edge detecting
+		Canny(dst, dst, lowThreshold, lowThreshold * ratio, 3);
+
+
+		// extract the horizontal and vertical lines
+
+		Mat horizontal = dst.clone();
+		// Specify size on horizontal axis
+		int horizontalsize = horizontal.cols / 30;
+		// Create structure element for extracting horizontal lines through morphology operations
+		Mat horizontalStructure = getStructuringElement(MORPH_RECT, Size(horizontalsize, 1));
+		// Apply morphology operations
+		erode(horizontal, horizontal, horizontalStructure, Point(-1, -1));
+		dilate(horizontal, horizontal, horizontalStructure, Point(-1, -1));
+
+		Mat vertical = dst.clone();
+		// Specify size on vertical axis
+		int verticalsize = vertical.rows / 30;
+		// Create structure element for extracting vertical lines through morphology operations
+		Mat verticalStructure = getStructuringElement(MORPH_RECT, Size(1, verticalsize));
+		// Apply morphology operations
+		erode(vertical, vertical, verticalStructure, Point(-1, -1));
+		dilate(vertical, vertical, verticalStructure, Point(-1, -1));
+
+		// remove horizontal and vertical line from image
+		bitwise_and(dst, ~horizontal, dst);
+		bitwise_and(dst, ~vertical, dst);
+
+		// reverse black-white
+		bitwise_not(dst, dst);
+
+		// change apply to original image
+		applyToOrigin(image, dst);
+
 		return true;
 	}
 
-	void Preprocessor::lowPassFilter(PngImage& image)
+	void Preprocessor::applyToOrigin(PngImage& image, Mat& mat)
 	{
-		const int dir[5][2] = { { 1, 0 },{ 0, 1 },{ -1, 0 },{ 0, -1 },{ 0,0 } };
-		PngImage copiedImage(image);
-		int width = image.getWidth();
-		int height = image.getHeight();
+		// mat is gray image
+		int w = image.getWidth();
+		int h = image.getHeight();
 
-		for (int i = 0; i < height; i++)
-		{
-			for (int j = 0; j < width; j++)
-			{
-				int r = 0;
-				for (int p = 0; p < 5; p++) {
-					int ty = dir[p][0] + i;
-					int tx = dir[p][1] + j;
-					if (ty < 0)
-						ty = 0;
-					else if (ty >= height)
-						ty = height - 1;
-					if (tx < 0)
-						tx = 0;
-					else if (tx >= width)
-						tx = width - 1;
-					r += copiedImage[ty][tx].R;
-				}
-				image[i][j].R = r/5;
+		for (int i = 0; i < h; ++i) {
+			for (int j = 0; j < w; ++j) {
+				int intensity = mat.at<uchar>(i, j);
+
+				image[i][j].R = intensity;
+				image[i][j].G = intensity;
+				image[i][j].B = intensity;
 			}
 		}
-		return;
-	}
-
-	void Preprocessor::applyGrayscale(PngImage& colorImage)
-	{
-		int width = colorImage.getWidth();
-		int height = colorImage.getHeight();
-		for (int i = 0; i < height; ++i) {
-			for (int j = 0; j < width; ++j) {
-				Pixel& pixel = colorImage[i][j];
-
-				unsigned char r = pixel.R;
-				unsigned char g = pixel.G;
-				unsigned char b = pixel.B;
-				unsigned char gray = static_cast<unsigned char>(0.2989 * r + 0.5870 * g + 0.1140 * b);
-				pixel.R = gray;
-				pixel.G = gray;
-				pixel.B = gray;
-			}
-		}
-	}
-
-	void Preprocessor::applySimpleThreshold(PngImage& grayImage, int threshold)
-	{
-		int width = grayImage.getWidth();
-		int height = grayImage.getHeight();
-		for (int i = 0; i < height; ++i) {
-			for (int j = 0; j < width; ++j) {
-				Pixel& pixel = grayImage[i][j];
-				unsigned char value = (pixel.R > threshold ? 255 : 0);
-				pixel.R = value;
-				pixel.G = value;
-				pixel.B = value;
-			}
-		}
-	}
-
-	void Preprocessor::removeBorder(PngImage& image)
-	{
 	}
 }
