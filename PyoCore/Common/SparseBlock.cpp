@@ -5,15 +5,10 @@ using namespace std;
 
 namespace Common {
 
-	SparseBlock::SparseBlock(int top, int bottom, int left, int right, const char* text)
+	SparseBlock::SparseBlock(const char* text)
 	{
-		this->top = top;
-		this->bottom = bottom;
-		this->left = left;
-		this->right = right;
 		this->text = EncodingConverter::s2ws(text);
 	}
-
 
 	SparseBlock::~SparseBlock()
 	{

@@ -130,7 +130,7 @@ namespace Common
 						|| itr->min_corner().get<0>() != p.min_corner().get<0>()
 						|| itr->min_corner().get<1>() != p.min_corner().get<1>())
 					{
-						dist = bg::distance(*itr, p);
+						dist = bg::distance(dynamic_cast<box&>(*itr), p);
 						deletedIndex = k;
 						break;
 					}

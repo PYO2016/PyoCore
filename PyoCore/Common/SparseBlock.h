@@ -1,59 +1,56 @@
 #pragma once
 #include <string>
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point.hpp>
+#include <boost/geometry/geometries/box.hpp>
 
 using namespace std;
 
-namespace Common {
-
-	class SparseBlock
+namespace Common 
+{
+	typedef boost::geometry::model::point<int, 2, boost::geometry::cs::cartesian> point;
+	typedef boost::geometry::model::box<point> box;
+	class SparseBlock : public box
 	{
 	public:
 		SparseBlock(int top, int bottom, int left, int right, const char* text);
 		~SparseBlock();
 		inline int getTop()
 		{
-			return top;
+			return min_corner().get<1>();
 		}
 
 		inline int getLeft()
 		{
-			return left;
+			return min_corner().get<0>();
 		}
 
 		inline int getRight()
 		{
-			return right;
+			return max_corner().get<0>();
 		}
 
 		inline int getBottom()
 		{
-			return bottom;
+			return max_corner().get<1>();
 		}
 
 		inline int getWidth()
 		{
-			return (left < right ? right - left : left - right);
+			return (getLeft() < getRight() ? getRight() - getLeft() : getLeft() - getRight());
 		}
 
 		inline int getHeight()
 		{
-			return (bottom < top ? top - bottom : bottom - top);
+			return (getBottom() < getTop() ? getTop() - getBottom() : getBottom() - getTop());
 		}
 
 		inline wstring getText()
 		{
 			return text;
 		}
-		bool operator< (const SparseBlock& right) const
-		{
-			return left < right.right;
-		}
 
 	private:
-		int top;
-		int left;
-		int right;
-		int bottom;
 		wstring text;
 	};
 }
