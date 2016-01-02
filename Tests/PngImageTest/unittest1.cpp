@@ -24,7 +24,6 @@ namespace PngImageTest
 					(*img)[i][j].R = 100;
 					(*img)[i][j].G = 100;
 					(*img)[i][j].B = 100;
-					(*img)[i][j].A = 255;
 				}
 			}
 			img->storeToFile(L"C:/Users/taeguk/Pictures/test_gray.png"); 

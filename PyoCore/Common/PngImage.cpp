@@ -20,7 +20,7 @@ namespace Common
 
 	PngImage::PngImage(const PngImage& image)
 		:_isCopy(true), filename(image.filename), width(image.width), height(image.height), 
-			data(image.data)
+			imageMat(image.imageMat)
 	{
 	}
 
@@ -29,34 +29,28 @@ namespace Common
 		std::shared_ptr<PngImage> pImage = std::make_shared<PngImage>(CreationKey());
 		pImage->_isCopy = false;
 		//decode
-		//the pixels are now in the vector "image", 4 bytes per pixel, ordered RGBARGBA.
-		unsigned error = lodepng::decode(pImage->data, pImage->width, pImage->height,
-			EncodingConverter::ws2s(filename));
-
-		//if there's an error, display it
-		//if (error) std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
-
-		if (!error) {
-			pImage->filename = filename;
-			return pImage;
-		}
-		else {
+		//the pixels are now in the vector "image", 3 bytes per pixel, ordered BGRBGR...
+		pImage->imageMat = cv::imread(EncodingConverter::ws2s(filename), cv::IMREAD_COLOR);
+		bool error = (pImage->imageMat.data == nullptr);
+		if (error)
 			return nullptr;
-		}
+
+		pImage->filename = filename;
+		return pImage;
 	}
 
 	PixelArray& PngImage::operator[] (int idx)
 	{
-		return reinterpret_cast<PixelArray&>(data[idx * width * sizeof(Pixel)]);
+		return reinterpret_cast<PixelArray&>(imageMat.data[idx * width * sizeof(Pixel)]);
 	}
 
 	const PixelArray& PngImage::operator[] (int idx) const
 	{
-		return reinterpret_cast<const PixelArray&>(data[idx * width * sizeof(Pixel)]);
+		return reinterpret_cast<const PixelArray&>(imageMat.data[idx * width * sizeof(Pixel)]);
 	}
 
 	bool PngImage::storeToFile(const std::wstring& targetFilename)
 	{
-		return lodepng::encode(EncodingConverter::ws2s(targetFilename), data, width, height) == 0 ? true : false;
+		return cv::imwrite(EncodingConverter::ws2s(targetFilename), imageMat);
 	}
 }
