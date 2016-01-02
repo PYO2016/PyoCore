@@ -63,6 +63,9 @@
     <ClCompile Include="TableDetection\OCRManager.cpp">
       <Filter>소스 파일\TableDetection</Filter>
     </ClCompile>
+    <ClCompile Include="Common\SparseBlockManager.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PyoCore.h">
@@ -97,6 +100,9 @@
     </ClInclude>
     <ClInclude Include="TableDetection\OCRManager.h">
       <Filter>소스 파일\TableDetection</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\SparseBlockManager.h">
+      <Filter>소스 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
