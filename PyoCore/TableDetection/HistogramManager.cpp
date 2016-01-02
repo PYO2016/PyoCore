@@ -8,7 +8,6 @@
 #include <functional>
 #include <algorithm>
 #include <cmath>
-#include "../Lodepng/lodepng.h"
 
 namespace TableDetection
 {

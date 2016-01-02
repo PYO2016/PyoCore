@@ -48,8 +48,6 @@ namespace Common
 	private:
 		bool _isCopy;	// true if created by copy constructor.
 		std::wstring filename;
-		unsigned int width, height;		// width and height of image.
-		//std::vector<unsigned char> data;
 		cv::Mat imageMat;
 	};
 
@@ -65,11 +63,11 @@ namespace Common
 	}
 	inline unsigned int PngImage::getWidth() const
 	{
-		return width;
+		return imageMat.cols;
 	}
 	inline unsigned int PngImage::getHeight() const
 	{
-		return height;
+		return imageMat.rows;
 	}
 	inline unsigned char* PngImage::getDataAsByteArray()
 	{

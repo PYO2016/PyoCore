@@ -1,6 +1,5 @@
 #include "PngImage.h"
 #include "EncodingConverter.h"
-#include "../Lodepng/lodepng.h"
 
 namespace Common
 {
@@ -19,8 +18,7 @@ namespace Common
 	/* Image */
 
 	PngImage::PngImage(const PngImage& image)
-		:_isCopy(true), filename(image.filename), width(image.width), height(image.height), 
-			imageMat(image.imageMat)
+		:_isCopy(true), filename(image.filename), imageMat(image.imageMat)
 	{
 	}
 
@@ -41,12 +39,12 @@ namespace Common
 
 	PixelArray& PngImage::operator[] (int idx)
 	{
-		return reinterpret_cast<PixelArray&>(imageMat.data[idx * width * sizeof(Pixel)]);
+		return reinterpret_cast<PixelArray&>(imageMat.data[idx * this->getWidth() * sizeof(Pixel)]);
 	}
 
 	const PixelArray& PngImage::operator[] (int idx) const
 	{
-		return reinterpret_cast<const PixelArray&>(imageMat.data[idx * width * sizeof(Pixel)]);
+		return reinterpret_cast<const PixelArray&>(imageMat.data[idx * this->getWidth() * sizeof(Pixel)]);
 	}
 
 	bool PngImage::storeToFile(const std::wstring& targetFilename)
