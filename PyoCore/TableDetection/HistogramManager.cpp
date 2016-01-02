@@ -24,7 +24,7 @@ namespace TableDetection
 
 	Histogram::Histogram(const Histogram& h)
 		: type(h.type), image(h.image), length(h.length), valLimit(h.valLimit),
-			extremumList(h.extremumList), edgeExist(edgeExist)
+			extremumList(h.extremumList), edgeExist(h.edgeExist), visibleLines(h.visibleLines)
 	{
 		for (int i = 0; i < length; ++i)
 			values[i] = h.values[i];
@@ -58,6 +58,22 @@ namespace TableDetection
 			}
 		}
 
+		return true;
+	}
+
+	bool Histogram::detectVisibleLines()
+	{
+		int maxVal = INT_MIN;
+		for (int i = 0; i < length; ++i) {
+			if (values[i] > maxVal)
+				maxVal = values[i];
+		}
+		
+		for (int i = 0; i < length; ++i) {
+			if (values[i] > maxVal * 0.9 ) {
+				this->visibleLines.push_back(i);
+			}
+		}
 		return true;
 	}
 
@@ -122,7 +138,7 @@ namespace TableDetection
 		auto& eList = this->extremumList;
 		TableDetection::ExtremumType prevState, curState;
 		int prevIdx, notEqualIdx;
-		auto eListMaxV = values[0], eListMinV = values[0];
+		auto eListMaxV = values[0];
 		if (length < 2) 
 		{
 			//I think it can not process
@@ -294,16 +310,17 @@ namespace TableDetection
 		}
 		if (lowerMaxValue == INT_MIN)
 			lowerMaxValue = 0;
-		if (upperMinValue == INT_MAX)
-			upperMinValue = 0;
 		
 		return ((static_cast<double>(lowerMaxValue) + static_cast<double>(upperMinValue)) / 2);
 	}
 	bool Histogram::removeKmeansValues(double minBoundary, double maxBoundary)
 	{
 		bool success = true;
+		int maxVal = INT_MIN;
 		for (auto itr = begin(this->extremumList); itr != end(this->extremumList); ++itr)
 		{
+			if (values[itr->first] > maxVal)
+				maxVal = values[itr->first];
 			if (itr->second == ExtremumType::TYPE_MAX && 
 				values[itr->first] > maxBoundary)
 			{
@@ -349,7 +366,31 @@ namespace TableDetection
 				}
 			}
 		}
-		outerLoop:
+
+	outerLoop:
+
+		// erase all maximums.
+		for (auto itr = std::begin(this->extremumList); itr != std::end(this->extremumList); )
+		{
+			if (itr->second == ExtremumType::TYPE_MAX)
+			{
+				itr = this->extremumList.erase(itr);
+			}
+			else
+			{
+				++itr;
+			}
+		}
+
+		// add visible lines to extremumList.
+		auto itr = std::begin(this->extremumList);
+		for (const auto &idx : visibleLines)
+		{
+			while (itr != std::end(this->extremumList) && itr->first < idx) ++itr;
+			if (itr == std::end(this->extremumList) || itr->first != idx) {
+				this->extremumList.emplace(itr, idx, ExtremumType::TYPE_MAX);
+			}
+		}
 
 		return success;
 	}
@@ -401,6 +442,24 @@ namespace TableDetection
 			pHistogramY = std::make_shared<Histogram>(type, image, offsetWidth, offsetHeight, areaHeight, areaWidth, edgeExist);
 			if (pHistogramY && !(success = pHistogramY->calculateValues()))
 				pHistogramY.reset();
+			break;
+		}
+
+		return success;
+	}
+
+	bool HistogramManager::detectVisibleLines(HistogramType type)
+	{
+		bool success;
+
+		switch (type)
+		{
+		case HistogramType::TYPE_X:
+			success = pHistogramX->detectVisibleLines();
+			break;
+
+		case HistogramType::TYPE_Y:
+			success = pHistogramY->detectVisibleLines();
 			break;
 		}
 
@@ -465,18 +524,21 @@ namespace TableDetection
 		auto xExtremum  = pHistogramX->getExtremumList();
 		auto yExtremum  = pHistogramY->getExtremumList();
 
-		for (auto itr = begin(xExtremum); itr != end(xExtremum); ) 
+		// merge adjacent lines.
+		for (auto itr = std::begin(xExtremum); itr != std::prev(std::end(xExtremum)); )
 		{
-			if (itr->second == ExtremumType::TYPE_MAX) {
+			auto jtr = std::next(itr);
+			if (itr->first + 1 >= jtr->first) {
 				itr = xExtremum.erase(itr);
 			}
 			else {
 				++itr;
 			}
 		}
-		for (auto itr = begin(yExtremum); itr != end(yExtremum); ) 
+		for (auto itr = std::begin(yExtremum); itr != std::prev(std::end(yExtremum)); )
 		{
-			if (itr->second == ExtremumType::TYPE_MAX) {
+			auto jtr = std::next(itr);
+			if (itr->first + 1 >= jtr->first) {
 				itr = yExtremum.erase(itr);
 			}
 			else {
