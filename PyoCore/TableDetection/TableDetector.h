@@ -32,6 +32,8 @@ namespace TableDetection
 			unsigned offsetWidth, unsigned offsetHeight);	// not tested
 		bool xycut(std::vector<std::tuple<int, int, int, int>>& cells, unsigned areaWidth, unsigned areaHeight,
 			unsigned offsetWidth, unsigned offsetHeight, bool edgeExist);	// not tested
+		bool xycutPostProcess(std::vector<std::tuple<int, int, int, int>>& cells,
+			unsigned offsetWidth, unsigned offsetHeight);
 		/* etc... */
 
 	private:
@@ -44,9 +46,9 @@ namespace TableDetection
 		std::wstring result;
 
 		/* Constants for recursive table detection. */
-		/* These values changed depending on image size. */
-		unsigned maxRecDepth = 1;
-		int minWidth = 10;
-		int minHeight = 10;
+		/* These values is determined in preprocess(). */
+		unsigned maxRecDepth;
+		int minWidth;
+		int minHeight;
 	};
 }
