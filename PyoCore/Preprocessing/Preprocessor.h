@@ -14,10 +14,9 @@ namespace Preprocessing
 	public:
 		Preprocessor() = delete;
 		~Preprocessor() = delete;
-		static bool process(PngImage&, int, double);
+		static bool process(PngImage&);
 
 	private:
-		static void removeBorder(Mat&);
 		static void applyToOrigin(PngImage&, Mat&);
 	};
 
