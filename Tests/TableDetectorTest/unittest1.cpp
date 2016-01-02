@@ -20,18 +20,18 @@ namespace TableDetectorTest
 		TEST_METHOD(TestProcess)
 		{
 			// TODO: 테스트 코드를 여기에 입력합니다.
-			_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
-			_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+			std::wstring dir = L"..\\..\\testcases\\";
+
 			TableDetection::TableDetector td;
-			std::wstring configFile = L"CONFIG.txt";
+			std::wstring configFile = dir + L"CONFIG.txt";
 			std::wifstream cif(configFile);
 
 			std::wstring prefix;
 			cif >> prefix;
 			cif.close();
-
-			std::wstring imageFile = prefix + L".png";
-			std::wstring outputFile = prefix + L".html";
+			
+			std::wstring imageFile = dir + prefix + L".png";
+			std::wstring outputFile = dir + prefix + L".html";
 			Logger::WriteMessage(td.process(imageFile, L"junk", true) ? "true" : "false");
 			Logger::WriteMessage(td.result.c_str());
 			std::wofstream of(outputFile);
@@ -56,8 +56,9 @@ namespace TableDetectorTest
 					result[top][i].B = result[bottom][i].B = 0x99;
 				}
 			}
-			std::wstring resultFile = prefix + L"_result.png";
+			std::wstring resultFile = dir + prefix + L"_result.png";
 			result.storeToFile(resultFile);
+
 			system(Common::EncodingConverter::ws2s(L"mspaint.exe " + resultFile).c_str());
 		}
 
