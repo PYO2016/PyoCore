@@ -3,7 +3,6 @@
 #include "../../PyoCore/Common/PngImage.h"
 #include "../../../Leptonica/include/leptonica/allheaders.h"
 #include "../../PyoCore/Preprocessing/Preprocessor.h"
-#include "../../PyoCore/Lodepng/lodepng.h"
 #include "../../PyoCore/Common/SparseBlockManager.h"
 #include <vector>
 #include <string>
