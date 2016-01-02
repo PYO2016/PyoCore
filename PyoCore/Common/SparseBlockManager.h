@@ -21,10 +21,11 @@ namespace Common
 		~SparseBlockManager();
 		bool makeSparseBlock();
 		bool mergeSparseBlock();
-		double getHeightAvg();
-		double getWidthAvg();
+		inline double getHeightAvg();
+		inline double getWidthAvg();
 
-		std::vector<Common::box> getSparseBlocks();
+		inline std::list<Common::box>& getSparseBlocks();
+		inline const std::list<Common::box>& getSparseBlocks() const;
 
 	private:
 		bool clearSparseBlocks();
@@ -41,4 +42,23 @@ namespace Common
 		const int directions[8][2] = { { 1, 0 },{ 0, 1 },{ -1, 0 },{ 0, -1 },{ 1, 1 },{ 1, -1 },{ -1, 1 },{ -1, -1 } };
 		const int directionsLength = 8;
 	};
+
+	/* inline functions */
+
+	inline double SparseBlockManager::getWidthAvg()
+	{
+		return this->widthAvg;
+	}
+	inline double SparseBlockManager::getHeightAvg()
+	{
+		return this->heightAvg;
+	}
+	inline std::list<Common::box>& SparseBlockManager::getSparseBlocks()
+	{
+		return this->sparseBlocks;
+	}
+	inline const std::list<Common::box>& SparseBlockManager::getSparseBlocks() const
+	{
+		return this->sparseBlocks;
+	}
 }

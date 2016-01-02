@@ -18,7 +18,7 @@ namespace TableDetection
 	/* TableDetector */
 
 	TableDetector::TableDetector()
-		:pImage(nullptr), pHm(nullptr)
+		:pImage(nullptr), pHm(nullptr), pSbm(nullptr)
 	{
 	}
 
@@ -30,6 +30,7 @@ namespace TableDetection
 	void TableDetector::cleanup()
 	{
 		pImage.reset();
+		pSbm.reset();
 		pHm.reset();
 	}
 
@@ -100,10 +101,30 @@ namespace TableDetection
 			return false;
 		return true;
 	}
-
+	
 	bool TableDetector::preprocess(void)
 	{
-		return Preprocessing::Preprocessor::process(*pImage);
+		bool success = false;
+		
+		// do image pre-processing.
+		if (!Preprocessing::Preprocessor::process(*pImage))
+			goto end;
+
+		// get sparse blocks.
+		pSbm = std::make_shared<Common::SparseBlockManager>(*pImage);
+		
+		if (!pSbm->makeSparseBlock())
+			goto end;
+
+		if (!pSbm->mergeSparseBlock())
+			goto end;
+
+		// determine constants.
+		
+
+		success = true;
+	end:
+		return success;
 	}
 
 	/* detectTable is incomplete and inefficient. */

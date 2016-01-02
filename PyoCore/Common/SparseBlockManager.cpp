@@ -165,26 +165,6 @@ namespace Common
 		return true;
 	}
 
-	double SparseBlockManager::getWidthAvg()
-	{
-		return this->widthAvg;
-	}
-
-	double SparseBlockManager::getHeightAvg()
-	{
-		return this->heightAvg;
-	}
-
-	std::vector<Common::box> SparseBlockManager::getSparseBlocks()
-	{
-		vector<Common::box> b;
-		for (auto& p : rtree)
-		{
-			b.push_back(p);
-		}
-		return b;
-	}
-
 	bool SparseBlockManager::clearSparseBlocks()
 	{
 		this->sparseBlocks.clear();

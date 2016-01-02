@@ -2,6 +2,8 @@
 
 #include <string>
 #include <memory>
+#include "../Common/SparseBlock.h"
+#include "../Common/SparseBlockManager.h"
 #include "../Common/PngImage.h"
 #include "../Common/Table.h"
 #include "HistogramManager.h"
@@ -36,13 +38,14 @@ namespace TableDetection
 		std::wstring imageFile, outputFile;
 		bool isDebug;
 		std::shared_ptr<Common::PngImage> pImage;
+		std::shared_ptr<Common::SparseBlockManager> pSbm;
 		std::shared_ptr<HistogramManager> pHm;
 		Common::Table table;
 		std::wstring result;
 
 		/* Constants for recursive table detection. */
 		/* These values changed depending on image size. */
-		unsigned maxRecDepth = 2;
+		unsigned maxRecDepth = 1;
 		int minWidth = 10;
 		int minHeight = 10;
 	};
