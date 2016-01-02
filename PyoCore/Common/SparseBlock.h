@@ -13,7 +13,7 @@ namespace Common
 	class SparseBlock : public box
 	{
 	public:
-		SparseBlock(int top, int bottom, int left, int right, const char* text);
+		SparseBlock(const char* text);
 		~SparseBlock();
 		inline int getTop()
 		{
