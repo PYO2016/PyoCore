@@ -5,6 +5,7 @@
 
 using namespace std;
 using namespace Common;
+using namespace cv;
 
 namespace Preprocessing
 {
@@ -13,16 +14,11 @@ namespace Preprocessing
 	public:
 		Preprocessor() = delete;
 		~Preprocessor() = delete;
-		static bool process(PngImage&);
-
+		static bool process(PngImage&, int, double);
 
 	private:
-		static const int DEFAULT_THRESHOLD = 128;
-
-		static void applyGrayscale(PngImage&);
-		static void applySimpleThreshold(PngImage&, int = DEFAULT_THRESHOLD);
-		static void lowPassFilter(PngImage & image);
-		static void removeBorder(PngImage&);
+		static void removeBorder(Mat&);
+		static void applyToOrigin(PngImage&, Mat&);
 	};
 
 }
