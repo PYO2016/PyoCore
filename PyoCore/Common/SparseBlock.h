@@ -1,10 +1,9 @@
 #pragma once
 #include <string>
+#include "EncodingConverter.h"
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
-
-using namespace std;
 
 namespace Common 
 {
@@ -13,44 +12,59 @@ namespace Common
 	class SparseBlock : public box
 	{
 	public:
-		SparseBlock(const char* text);
+		SparseBlock(point p1, point p2, std::wstring text = L"");
 		~SparseBlock();
-		inline int getTop()
-		{
-			return min_corner().get<1>();
-		}
 
-		inline int getLeft()
-		{
-			return min_corner().get<0>();
-		}
-
-		inline int getRight()
-		{
-			return max_corner().get<0>();
-		}
-
-		inline int getBottom()
-		{
-			return max_corner().get<1>();
-		}
-
-		inline int getWidth()
-		{
-			return (getLeft() < getRight() ? getRight() - getLeft() : getLeft() - getRight());
-		}
-
-		inline int getHeight()
-		{
-			return (getBottom() < getTop() ? getTop() - getBottom() : getBottom() - getTop());
-		}
-
-		inline wstring getText()
-		{
-			return text;
-		}
+		inline int getTop();
+		inline int getLeft();
+		inline int getRight();
+		inline int getBottom();
+		inline int getWidth();
+		inline int getHeight();
+		inline std::wstring getText();
+		inline std::wstring SparseBlock::setText(const char *text);
+		inline std::wstring setText(std::wstring text);
 
 	private:
-		wstring text;
+		std::wstring text;
 	};
+
+	/* inline functions */
+
+	inline int SparseBlock::getTop()
+	{
+		return min_corner().get<1>();
+	}
+	inline int SparseBlock::getLeft()
+	{
+		return min_corner().get<0>();
+	}
+	inline int SparseBlock::getRight()
+	{
+		return max_corner().get<0>();
+	}
+	inline int SparseBlock::getBottom()
+	{
+		return max_corner().get<1>();
+	}
+	inline int SparseBlock::getWidth()
+	{
+		return (getLeft() < getRight() ? getRight() - getLeft() : getLeft() - getRight());
+	}
+	inline int SparseBlock::getHeight()
+	{
+		return (getBottom() < getTop() ? getTop() - getBottom() : getBottom() - getTop());
+	}
+	inline std::wstring SparseBlock::getText()
+	{
+		return text;
+	}
+	inline std::wstring SparseBlock::setText(const char *text)
+	{
+		this->text = EncodingConverter::s2ws(text);
+	}
+	inline std::wstring SparseBlock::setText(std::wstring text)
+	{
+		this->text = text;
+	}
 }

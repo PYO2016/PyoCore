@@ -10,16 +10,11 @@
 #include <vector>
 #include <list>
 #include <queue>
+#include <algorithm>
 
 // just for output
 #include <iostream>
 #include <boost/foreach.hpp>
-
-namespace bg = boost::geometry;
-namespace bgi = boost::geometry::index;
-
-typedef bg::model::point<int, 2, bg::cs::cartesian> point;
-typedef bg::model::box<point> box;
 
 namespace Common
 {
@@ -48,9 +43,10 @@ namespace Common
 		{
 			for (int j = 0; j < width; j++)
 			{
-				if (image[i][j].R == 0 /* valid value */
+				if (image[i][j].R == 0
 					&& isConquered[i][j] == false)
 				{
+					
 					int top = i, bottom = i, left = j, right = j;
 					std::queue<std::pair<int, int>> q;
 					q.emplace(i, j);
@@ -92,6 +88,7 @@ namespace Common
 						topist = top;
 					if (bottom > bottomest)
 						bottomest = bottom;
+					
 				}
 			}
 		}
@@ -115,11 +112,10 @@ namespace Common
 		{
 			isDeleted = false;
 
-			//for (int i = 0; i < result_i.size(); i++)
-			for (auto itr = begin(sparseBlocks); itr != end(sparseBlocks); )
+			for (auto itr = std::begin(sparseBlocks); itr != std::end(sparseBlocks); )
 			{
 				result_n.clear();
-				rtree.query(bgi::nearest(*itr, 2), std::back_inserter(result_n));
+				rtree.query(bgi::nearest(static_cast<box&>(*itr), 2), std::back_inserter(result_n));
 				std::cout << "pause";
 				double dist = 987654321; // for trace
 				int deletedIndex = -1, k = 0;
@@ -130,7 +126,7 @@ namespace Common
 						|| itr->min_corner().get<0>() != p.min_corner().get<0>()
 						|| itr->min_corner().get<1>() != p.min_corner().get<1>())
 					{
-						dist = bg::distance(dynamic_cast<box&>(*itr), p);
+						dist = bg::distance(static_cast<box&>(*itr), p);
 						deletedIndex = k;
 						break;
 					}
@@ -141,12 +137,12 @@ namespace Common
 					// for Debug...
 					if (dist < MOOSNSU)
 					{
-						auto left = min(itr->min_corner().get<0>(), result_n[deletedIndex].min_corner().get<0>());
-						auto right = max(itr->max_corner().get<0>(), result_n[deletedIndex].max_corner().get<0>());
-						auto top = min(itr->min_corner().get<1>(), result_n[deletedIndex].min_corner().get<1>());
-						auto bottom = max(itr->max_corner().get<1>(), result_n[deletedIndex].max_corner().get<1>());
+						auto left = std::min(itr->min_corner().get<0>(), result_n[deletedIndex].min_corner().get<0>());
+						auto right = std::max(itr->max_corner().get<0>(), result_n[deletedIndex].max_corner().get<0>());
+						auto top = std::min(itr->min_corner().get<1>(), result_n[deletedIndex].min_corner().get<1>());
+						auto bottom = std::max(itr->max_corner().get<1>(), result_n[deletedIndex].max_corner().get<1>());
 
-						rtree.remove(*itr);
+						rtree.remove(static_cast<box&>(*itr));
 						rtree.remove(result_n[deletedIndex]);
 						rtree.insert(box(point(left, top), point(right, bottom)));
 

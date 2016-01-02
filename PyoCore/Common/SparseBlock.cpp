@@ -1,13 +1,13 @@
 #include "SparseBlock.h"
-#include "EncodingConverter.h"
 
 using namespace std;
 
-namespace Common {
-
-	SparseBlock::SparseBlock(const char* text)
+namespace Common 
+{
+	SparseBlock::SparseBlock(point p1, point p2, std::wstring text)
+		: box(p1, p2), text(text)
 	{
-		this->text = EncodingConverter::s2ws(text);
+
 	}
 
 	SparseBlock::~SparseBlock()

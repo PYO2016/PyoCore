@@ -11,8 +11,11 @@
 
 namespace Common
 {
-	typedef boost::geometry::model::point<int, 2, boost::geometry::cs::cartesian> point;
-	typedef boost::geometry::model::box<point> box;
+	namespace bg = boost::geometry;
+	namespace bgi = boost::geometry::index;
+
+	typedef bg::model::point<int, 2, bg::cs::cartesian> point;
+	typedef bg::model::box<point> box;
 
 	class SparseBlockManager
 	{
