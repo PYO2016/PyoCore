@@ -112,6 +112,10 @@ namespace TableDetection
 	bool TableDetector::detectTable(void)
 	{
 		pHm = std::make_shared<HistogramManager>(*pImage);
+		if (pImage->getWidth() < minWidth || pImage->getHeight() < minHeight) {
+			// nothing to process.
+			return true;
+		}
 		return recXycut(0, pImage->getWidth(), pImage->getHeight(), 0, 0);
 	}
 
@@ -119,6 +123,8 @@ namespace TableDetection
 		unsigned offsetWidth, unsigned offsetHeight)
 	{
 		if (recDepth >= maxRecDepth || areaWidth < minWidth || areaHeight < minHeight) {
+			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
+				offsetWidth, offsetWidth + areaWidth - 1);
 			return true;
 		}
 
@@ -127,6 +133,7 @@ namespace TableDetection
 		if (!xycut(cells, areaWidth, areaHeight, offsetWidth, offsetHeight, recDepth > 0))
 			return false;
 
+		/*
 		bool valid = true;
 		for (const auto &cell : cells) {
 			int width = std::get<3>(cell) - std::get<2>(cell) + 1;
@@ -136,9 +143,10 @@ namespace TableDetection
 				break;
 			}
 		}
+		*/
 
-		// when not splited.
-		if (cells.size() <= 1 || !valid) {
+		// when can't split cell anymore.
+		if (cells.size() <= 1) {
 			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
 				offsetWidth, offsetWidth + areaWidth - 1);
 			return true;
