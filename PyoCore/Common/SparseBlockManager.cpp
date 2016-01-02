@@ -8,6 +8,7 @@
 
 // to store queries results
 #include <vector>
+#include <list>
 #include <queue>
 
 // just for output
@@ -82,7 +83,7 @@ namespace Common
 						}
 					}
 					rtree.insert(box(point(left, top), point(right, bottom)));
-					sparseBlocks.emplace_back(point(left, top), point(right, bottom));
+					this->sparseBlocks.emplace_back(point(left, top), point(right, bottom));
 					if (left < leftest)
 						leftest = left;
 					if (right > rightest)
@@ -99,37 +100,37 @@ namespace Common
 			delete [] *(isConquered + i);
 		delete [] isConquered;
 		covered = new box(point(leftest, topist), point(rightest, bottomest));
+
+		initWidthHeight();
 		return true;
 	}
 	bool SparseBlockManager::mergeSparseBlock()
 	{
 		std::vector<box> result_n;
-		std::vector<box> result_i;
+		double MOOSNSU = getHeightAvg() / 2;
 
 		bool isDeleted = true;
 
 		while (isDeleted)
 		{
 			isDeleted = false;
-			//for (auto it = rtree.begin(); it != rtree.end(); ++it)
-			result_i.clear();
-			rtree.query(bgi::covered_by(*(this->covered)), std::back_inserter(result_i));
-			//for (auto it = rtree.qbegin(); it != rtree.qend(); ++it)
-			for (int i = 0; i < result_i.size(); i++)
+
+			//for (int i = 0; i < result_i.size(); i++)
+			for (auto itr = begin(sparseBlocks); itr != end(sparseBlocks); )
 			{
 				result_n.clear();
-				rtree.query(bgi::nearest(result_i[i], 2), std::back_inserter(result_n));
+				rtree.query(bgi::nearest(*itr, 2), std::back_inserter(result_n));
 				std::cout << "pause";
 				double dist = 987654321; // for trace
 				int deletedIndex = -1, k = 0;
 				for (auto p : result_n)
 				{
-					if (result_i[i].max_corner().get<0>() != p.max_corner().get<0>()
-						|| result_i[i].max_corner().get<1>() != p.max_corner().get<1>()
-						|| result_i[i].min_corner().get<0>() != p.min_corner().get<0>()
-						|| result_i[i].min_corner().get<1>() != p.min_corner().get<1>())
+					if (itr->max_corner().get<0>() != p.max_corner().get<0>()
+						|| itr->max_corner().get<1>() != p.max_corner().get<1>()
+						|| itr->min_corner().get<0>() != p.min_corner().get<0>()
+						|| itr->min_corner().get<1>() != p.min_corner().get<1>())
 					{
-						dist = bg::distance(result_i[i], p);
+						dist = bg::distance(*itr, p);
 						deletedIndex = k;
 						break;
 					}
@@ -138,31 +139,46 @@ namespace Common
 				if (dist != 987654321)
 				{
 					// for Debug...
-					double MOOSNSU = 10;
 					if (dist < MOOSNSU)
 					{
-						auto left = min(result_i[i].min_corner().get<0>(), result_n[deletedIndex].min_corner().get<0>());
-						auto right = max(result_i[i].max_corner().get<0>(), result_n[deletedIndex].max_corner().get<0>());
-						auto top = min(result_i[i].min_corner().get<1>(), result_n[deletedIndex].min_corner().get<1>());
-						auto bottom = max(result_i[i].max_corner().get<1>(), result_n[deletedIndex].max_corner().get<1>());
+						auto left = min(itr->min_corner().get<0>(), result_n[deletedIndex].min_corner().get<0>());
+						auto right = max(itr->max_corner().get<0>(), result_n[deletedIndex].max_corner().get<0>());
+						auto top = min(itr->min_corner().get<1>(), result_n[deletedIndex].min_corner().get<1>());
+						auto bottom = max(itr->max_corner().get<1>(), result_n[deletedIndex].max_corner().get<1>());
 
-						rtree.remove(result_i[i]);
+						rtree.remove(*itr);
 						rtree.remove(result_n[deletedIndex]);
 						rtree.insert(box(point(left, top), point(right, bottom)));
 
+						this->sparseBlocks.emplace_back(point(left, top), point(right, bottom));
+						itr = this->sparseBlocks.erase(itr);
+
 						isDeleted = true;
-						break;
 					}
+					else
+						++itr;
 				}
+				else
+					++itr;
 			}
 		}
-		return false;
+		return true;
+	}
+
+	double SparseBlockManager::getWidthAvg()
+	{
+		return this->widthAvg;
+	}
+
+	double SparseBlockManager::getHeightAvg()
+	{
+		return this->heightAvg;
 	}
 
 	std::vector<Common::box> SparseBlockManager::getSparseBlocks()
 	{
 		vector<Common::box> b;
-		for (auto p : rtree)
+		for (auto& p : rtree)
 		{
 			b.push_back(p);
 		}
@@ -172,6 +188,19 @@ namespace Common
 	bool SparseBlockManager::clearSparseBlocks()
 	{
 		this->sparseBlocks.clear();
+		return true;
+	}
+
+	bool SparseBlockManager::initWidthHeight()
+	{
+		heightAvg = widthAvg = 0;
+		for (auto& p : rtree)
+		{
+			heightAvg += -p.min_corner().get<1>() + p.max_corner().get<1>();
+			widthAvg += -p.min_corner().get<0>() + p.max_corner().get<0>();
+		}
+		heightAvg /= rtree.size();
+		widthAvg /= rtree.size();
 		return true;
 	}
 }
