@@ -119,32 +119,40 @@ namespace TableDetection
 		unsigned offsetWidth, unsigned offsetHeight)
 	{
 		if (recDepth >= maxRecDepth || areaWidth < minWidth || areaHeight < minHeight) {
-			table.addCell(offsetHeight, offsetHeight + areaHeight, 
-				offsetWidth, offsetWidth + areaWidth);
 			return true;
 		}
 
 		std::vector<std::tuple<int, int, int, int>> cells;
 
-		if (!xycut(cells, areaWidth, areaHeight, offsetWidth, offsetHeight))
+		if (!xycut(cells, areaWidth, areaHeight, offsetWidth, offsetHeight, recDepth > 0))
 			return false;
 
+		bool valid = true;
+		for (const auto &cell : cells) {
+			int width = std::get<3>(cell) - std::get<2>(cell) + 1;
+			int height = std::get<1>(cell) - std::get<0>(cell) + 1;
+			if (width < minWidth || height < minHeight) {
+				valid = false;
+				break;
+			}
+		}
+
 		// when not splited.
-		if (cells.size() <= 1) {
-			table.addCell(offsetHeight, offsetHeight + areaHeight,
-				offsetWidth, offsetWidth + areaWidth);
+		if (cells.size() <= 1 || !valid) {
+			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
+				offsetWidth, offsetWidth + areaWidth - 1);
 			return true;
 		}
 
 		bool success = true;
 
 		for (const auto &cell : cells) {
-			int top = std::get<0>(cell);
-			int bottom = std::get<1>(cell);
-			int left = std::get<2>(cell);
-			int right = std::get<3>(cell);
+			int top = std::get<0>(cell) + offsetHeight;
+			int bottom = std::get<1>(cell) + offsetHeight;
+			int left = std::get<2>(cell) + offsetWidth;
+			int right = std::get<3>(cell) + offsetWidth;
 
-			success = success && recXycut(recDepth + 1, right - left, bottom - top, left, top);
+			success = success && recXycut(recDepth + 1, right - left + 1, bottom - top + 1, left, top);
 			if (!success)
 				break;
 		}
@@ -153,11 +161,11 @@ namespace TableDetection
 	}
 
 	bool TableDetector::xycut(std::vector<std::tuple<int, int, int, int>>& cells, unsigned areaWidth, unsigned areaHeight,
-		unsigned offsetWidth, unsigned offsetHeight)
+		unsigned offsetWidth, unsigned offsetHeight, bool edgeExist)
 	{
 		bool success = false;
 
-		pHm->setAttr(areaWidth, areaHeight, offsetWidth, offsetHeight);
+		pHm->setAttr(areaWidth, areaHeight, offsetWidth, offsetHeight, edgeExist);
 
 		if (!pHm->makeHistogram(HistogramType::TYPE_X))
 			goto END;

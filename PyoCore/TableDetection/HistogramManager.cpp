@@ -16,15 +16,15 @@ namespace TableDetection
 	/* Histogram */
 
 	Histogram::Histogram(HistogramType type, const Common::PngImage& image,
-		unsigned offsetWidth, unsigned offsetHeight, int length, int valLimit)
+		unsigned offsetWidth, unsigned offsetHeight, int length, int valLimit, bool edgeExist)
 		: type(type), image(image), offsetWidth(offsetWidth), offsetHeight(offsetHeight),
-			values(length), length(length), valLimit(valLimit), extremumList(0)
+			values(length), length(length), valLimit(valLimit), extremumList(0), edgeExist(edgeExist)
 	{
 	}
 
 	Histogram::Histogram(const Histogram& h)
 		: type(h.type), image(h.image), length(h.length), valLimit(h.valLimit),
-			extremumList(h.extremumList)
+			extremumList(h.extremumList), edgeExist(edgeExist)
 	{
 		for (int i = 0; i < length; ++i)
 			values[i] = h.values[i];
@@ -46,10 +46,10 @@ namespace TableDetection
 				switch (type)
 				{
 				case HistogramType::TYPE_X: 
-					v = image[ow + j][oh + i].R;
+					v = image[oh + j][ow + i].R;
 					break;
 				case HistogramType::TYPE_Y:
-					v = image[ow + i][oh + j].R;
+					v = image[oh + i][ow + j].R;
 					break;
 				default:
 					return false;	// return.
@@ -163,13 +163,22 @@ namespace TableDetection
 		}
 		else
 		{
-			if (prevIdx >= 0) {
+			if (prevIdx >= 0) 
+			{
 				// Always, values[prevIdx] != values[notEqualIdx]
 				eList.emplace_back(notEqualIdx, (values[prevIdx] < values[notEqualIdx] ?
 					ExtremumType::TYPE_MAX : ExtremumType::TYPE_MIN));
 			}
 		}
-
+		
+		if (this->edgeExist)
+		{
+			if (eList.empty() || eList.front().first > 0)
+				eList.emplace_front(0, ExtremumType::TYPE_MIN);
+			if (eList.empty() || eList.back().first < length - 1)
+				eList.emplace_back(length - 1, ExtremumType::TYPE_MIN);
+		}
+		
 		// remove non-reasonable value
 		eListMaxV = static_cast<int>(std::ceil(static_cast<double>(eListMaxV) * 0.2));
 		for (auto currItr = begin(eList); currItr != end(eList); )
@@ -353,14 +362,15 @@ namespace TableDetection
 	}
 
 	HistogramManager::HistogramManager(const Common::PngImage& image,
-		unsigned areaWidth, unsigned areaHeight, unsigned offsetWidth, unsigned offsetHeight)
+		unsigned areaWidth, unsigned areaHeight, unsigned offsetWidth, unsigned offsetHeight, bool edgeExist)
 		: image(image), areaWidth(areaWidth), areaHeight(areaHeight), 
-			offsetWidth(offsetWidth), offsetHeight(offsetHeight), pHistogramX(nullptr), pHistogramY(nullptr)
+			offsetWidth(offsetWidth), offsetHeight(offsetHeight), pHistogramX(nullptr), pHistogramY(nullptr),
+			edgeExist(edgeExist)
 	{
 	}
 
 	HistogramManager::HistogramManager(const HistogramManager& h)
-		: HistogramManager(h.image, h.areaWidth, h.areaHeight, h.offsetWidth, h.offsetHeight)
+		: HistogramManager(h.image, h.areaWidth, h.areaHeight, h.offsetWidth, h.offsetHeight, h.edgeExist)
 	{
 	}
 
@@ -382,13 +392,13 @@ namespace TableDetection
 		switch (type)
 		{
 		case HistogramType::TYPE_X:
-			pHistogramX = std::make_shared<Histogram>(type, image, offsetWidth, offsetHeight, areaWidth, areaHeight);
+			pHistogramX = std::make_shared<Histogram>(type, image, offsetWidth, offsetHeight, areaWidth, areaHeight, edgeExist);
 			if (pHistogramX && !(success = pHistogramX->calculateValues()))
 				pHistogramX.reset();
 			break;
 			
 		case HistogramType::TYPE_Y:
-			pHistogramY = std::make_shared<Histogram>(type, image, offsetWidth, offsetHeight, areaHeight, areaWidth);
+			pHistogramY = std::make_shared<Histogram>(type, image, offsetWidth, offsetHeight, areaHeight, areaWidth, edgeExist);
 			if (pHistogramY && !(success = pHistogramY->calculateValues()))
 				pHistogramY.reset();
 			break;
@@ -472,6 +482,19 @@ namespace TableDetection
 			else {
 				++itr;
 			}
+		}
+
+		if (this->edgeExist)
+		{
+			if (xExtremum.empty() || xExtremum.front().first > 0)
+				xExtremum.emplace_front(0, ExtremumType::TYPE_MIN);
+			if (xExtremum.empty() || xExtremum.back().first < this->areaWidth - 1)
+				xExtremum.emplace_back(this->areaWidth - 1, ExtremumType::TYPE_MIN);
+
+			if (yExtremum.empty() || yExtremum.front().first > 0)
+				yExtremum.emplace_front(0, ExtremumType::TYPE_MIN);
+			if (yExtremum.empty() || yExtremum.back().first < this->areaHeight - 1)
+				yExtremum.emplace_back(this->areaHeight - 1, ExtremumType::TYPE_MIN);
 		}
 
 		if (yExtremum.empty() || xExtremum.empty()) 

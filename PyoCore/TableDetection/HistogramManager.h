@@ -29,7 +29,7 @@ namespace TableDetection
 	{
 	public:
 		Histogram(HistogramType type, const Common::PngImage& image, 
-			unsigned offsetWidth, unsigned offsetHeight, int length, int valLimit);
+			unsigned offsetWidth, unsigned offsetHeight, int length, int valLimit, bool edgeExist = false);
 		Histogram(const Histogram& h);
 		~Histogram();
 
@@ -46,6 +46,7 @@ namespace TableDetection
 		HistogramType type;
 		const Common::PngImage& image;
 		unsigned offsetWidth, offsetHeight;
+		bool edgeExist;
 		std::vector<int> values;
 		int length, valLimit;
 		// extremum values
@@ -57,13 +58,13 @@ namespace TableDetection
 	public:
 		HistogramManager(const Common::PngImage& image);
 		HistogramManager(const Common::PngImage& image, unsigned areaWidth, unsigned areaHeight, 
-			unsigned offsetWidth, unsigned offsetHeight);
+			unsigned offsetWidth, unsigned offsetHeight, bool edgeExist = false);
 		HistogramManager(const HistogramManager& h);
 		~HistogramManager();
 
 		void cleanup();
 		inline void setAttr(unsigned areaWidth, unsigned areaHeight, 
-			unsigned offsetWidth, unsigned offsetHeight);
+			unsigned offsetWidth, unsigned offsetHeight, bool edgeExist);
 
 		bool makeHistogram(HistogramType type);
 		bool applyMedianFilter(HistogramType type);
@@ -77,6 +78,7 @@ namespace TableDetection
 		unsigned areaWidth, areaHeight;
 		unsigned offsetWidth, offsetHeight;
 		std::shared_ptr<Histogram> pHistogramX, pHistogramY;
+		bool edgeExist;
 	};
 
 	/* inline methods */
@@ -87,11 +89,12 @@ namespace TableDetection
 	}
 
 	inline void HistogramManager::setAttr(unsigned areaWidth, unsigned areaHeight,
-		unsigned offsetWidth, unsigned offsetHeight)
+		unsigned offsetWidth, unsigned offsetHeight, bool edgeExist)
 	{
 		this->areaWidth = areaWidth;
 		this->areaHeight = areaHeight;
 		this->offsetWidth = offsetWidth;
 		this->offsetHeight = offsetHeight;
+		this->edgeExist = edgeExist;
 	}
 }
