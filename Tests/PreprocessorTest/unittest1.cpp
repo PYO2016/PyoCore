@@ -24,7 +24,7 @@ namespace PreprocessorTest
 		
 		TEST_METHOD(TestSparseBlocksPro)
 		{
-			std::shared_ptr<PngImage> img = PngImage::LoadImage(L"C:/Users/KGWANGMIN/Pictures/10.png");
+			std::shared_ptr<PngImage> img = PngImage::LoadImage(L"C:/Users/KGWANGMIN/Pictures/test4.png");
 			Preprocessor::process(*img);
 			img->storeToFile(L"C:/Users/KGWANGMIN/Pictures/_preprocessed.png");
 
