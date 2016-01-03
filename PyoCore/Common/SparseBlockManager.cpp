@@ -3,6 +3,7 @@
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
+#include <boost/geometry/geometries/segment.hpp>
 
 #include <boost/geometry/index/rtree.hpp>
 
@@ -126,10 +127,10 @@ namespace Common
 	bool SparseBlockManager::mergeSparseBlock()
 	{
 		std::vector<box> result_n;
-		double MOOSNSU = this->getLetterHeightAvg() + this->getLetterWidthAvg();
+		double MOOSNSU = this->getLetterHeightAvg()/2;
 		bool isDeleted = true;
 
-		for (auto& p : rtree)
+		for (auto& p : sparseBlocks)
 		{
 			rtree.insert(p);
 		}
@@ -260,5 +261,13 @@ namespace Common
 
 		success = true;
 		return success;
+	}
+
+	bool SparseBlockManager::hasCollisionWithSparseBlock(int top, int bottom,
+		int left, int right)
+	{
+		std::vector<box> result_n;
+		rtree.query(bgi::intersects(box(point(left, top), point(right, bottom))), std::back_inserter(result_n));
+		return !(result_n.size() == 0);
 	}
 }

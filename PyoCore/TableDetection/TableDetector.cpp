@@ -205,9 +205,49 @@ namespace TableDetection
 
 		// for security.
 		lines.clear();
+		
+		auto itr = std::begin(horList);
+		while (itr != std::end(horList))
+		{
+			auto jtr = std::next(itr);
+			if (jtr != std::end(horList))
+			{
+				if (jtr->getOffset() - itr->getOffset() <= 8)
+				{
+					horList.erase(jtr);
+				}
+				else
+				{
+					++itr;
+				}
+			}
+			else
+			{
+				break;
+			}
+		}
 
+		itr = std::begin(verList);
+		while (itr != std::end(verList))
+		{
+			auto jtr = std::next(itr);
+			if (jtr != std::end(verList))
+			{
+				if (jtr->getOffset() - itr->getOffset() <= 8)
+				{
+					verList.erase(jtr);
+				}
+				else
+				{
+					++itr;
+				}
+			}
+			else
+			{
+				break;
+			}
+		}
 		// some problems...
-
 		//horList.emplace_back(Common::LineType::LINE_HORIZONTAL, offsetHeight + areaHeight - 1);
 		//verList.emplace_back(Common::LineType::LINE_VERTICAL, offsetWidth + areaWidth - 1);
 

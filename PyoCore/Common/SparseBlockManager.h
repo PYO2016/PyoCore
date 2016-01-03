@@ -29,6 +29,7 @@ namespace Common
 		inline double getSparseBlockWidthAvg();
 		inline double getLetterHeightAvg();
 		inline double getLetterWidthAvg();
+		bool hasCollisionWithSparseBlock(int top, int bottom, int left, int right);
 		bool initImageToZero();
 		bool initImageWithSparseBlocks();
 
