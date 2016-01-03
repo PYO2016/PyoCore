@@ -24,15 +24,16 @@ namespace Common
 		~SparseBlockManager();
 		bool makeSparseBlock();
 		bool mergeSparseBlock();
-		inline double getHeightAvg();
-		inline double getWidthAvg();
+		inline double getSparseBlockHeightAvg();
+		inline double getSparseBlockWidthAvg();
+		inline double getLetterHeightAvg();
+		inline double getLetterWidthAvg();
 
 		inline std::list<SparseBlock>& getSparseBlocks();
 		inline const std::list<SparseBlock>& getSparseBlocks() const;
 
 	private:
 		bool clearSparseBlocks();
-		bool initWidthHeight();
 
 		std::vector<SparseBlock> _sparseBlocks;
 		std::list<SparseBlock> sparseBlocks;
@@ -40,7 +41,8 @@ namespace Common
 		boost::geometry::index::rtree<box, boost::geometry::index::quadratic<16>> rtree;
 		box* covered = nullptr;
 
-		double heightAvg = -1, widthAvg = -1;
+		double sparseBlockHeightAvg = -1, sparseBlockWidthAvg = -1;
+		double letterHeightAvg = -1, letterWidthAvg = -1;
 
 		const int directions[8][2] = { { 1, 0 },{ 0, 1 },{ -1, 0 },{ 0, -1 },{ 1, 1 },{ 1, -1 },{ -1, 1 },{ -1, -1 } };
 		const int directionsLength = 8;
@@ -48,13 +50,21 @@ namespace Common
 
 	/* inline functions */
 
-	inline double SparseBlockManager::getWidthAvg()
+	inline double SparseBlockManager::getSparseBlockWidthAvg()
 	{
-		return this->widthAvg;
+		return this->sparseBlockWidthAvg;
 	}
-	inline double SparseBlockManager::getHeightAvg()
+	inline double SparseBlockManager::getSparseBlockHeightAvg()
 	{
-		return this->heightAvg;
+		return this->sparseBlockHeightAvg;
+	}
+	inline double SparseBlockManager::getLetterWidthAvg()
+	{
+		return this->letterWidthAvg;
+	}
+	inline double SparseBlockManager::getLetterHeightAvg()
+	{
+		return this->letterHeightAvg;
 	}
 	inline std::list<SparseBlock>& SparseBlockManager::getSparseBlocks()
 	{
