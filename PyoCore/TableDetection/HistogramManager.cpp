@@ -464,7 +464,7 @@ namespace TableDetection
 		return success;
 	}
 
-	bool HistogramManager::detectVisibleLines(HistogramType type)
+	bool HistogramManager::detectSpecialValues(HistogramType type)
 	{
 		bool success;
 
@@ -544,7 +544,8 @@ namespace TableDetection
 
 		// merge adjacent lines.
 		// * TODO : select middle things.
-		for (auto itr = std::begin(xExtremum); itr != std::prev(std::end(xExtremum)); )
+		for (auto itr = std::begin(xExtremum);
+			itr != std::prev(std::end(xExtremum)) && itr != std::end(xExtremum); )
 		{
 			auto jtr = itr;
 			auto ktr = std::next(jtr);
@@ -554,12 +555,12 @@ namespace TableDetection
 					jtr = ktr;
 					ktr = std::next(ktr);
 				}
-				int r = std::distance(itr, ktr) / 2, l = r + (std::distance(itr, ktr) & 1 == 1) ? 1 : 0;
+				int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
 				jtr = itr;
-				while (l--)
+				while(l-- > 0)
 					jtr = xExtremum.erase(jtr);
 				jtr = std::next(jtr);
-				while (r--)
+				while(r-- > 0)
 					jtr = xExtremum.erase(jtr);
 				itr = jtr;
 			}
@@ -567,7 +568,8 @@ namespace TableDetection
 				++itr;
 			}
 		}
-		for (auto itr = std::begin(yExtremum); itr != std::prev(std::end(yExtremum)); )
+		for (auto itr = std::begin(yExtremum); 
+			itr != std::prev(std::end(yExtremum)) && itr != std::end(yExtremum); )
 		{
 			auto jtr = itr;
 			auto ktr = std::next(jtr);
@@ -577,12 +579,12 @@ namespace TableDetection
 					jtr = ktr;
 					ktr = std::next(ktr);
 				}
-				int r = std::distance(itr, ktr) / 2, l = r + (std::distance(itr, ktr) & 1 == 1) ? 1 : 0;
+				int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
 				jtr = itr;
-				while (l--)
+				while(l-- > 0)
 					jtr = yExtremum.erase(jtr);
 				jtr = std::next(jtr);
-				while (r--)
+				while(r-- > 0)
 					jtr = yExtremum.erase(jtr);
 				itr = jtr;
 			}

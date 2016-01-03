@@ -70,7 +70,7 @@ namespace TableDetection
 			unsigned offsetWidth, unsigned offsetHeight, bool edgeExist);
 
 		bool makeHistogram(HistogramType type);
-		bool detectVisibleLines(HistogramType type);
+		bool detectSpecialValues(HistogramType type);
 		bool applyMedianFilter(HistogramType type);
 		bool filterExtremum(HistogramType type);
 		bool applyKmeans(HistogramType type);
