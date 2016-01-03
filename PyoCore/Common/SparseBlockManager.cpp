@@ -212,7 +212,7 @@ namespace Common
 		while (i != std::end(this->sparseBlocks))
 		{
 			area = i->getRealArea();
-			if (area <= 4)
+			if (area <= 8)
 				i = this->sparseBlocks.erase(i);
 			else
 				++i;
@@ -237,6 +237,7 @@ namespace Common
 		success = true;
 		return success;
 	}
+
 	bool SparseBlockManager::initImageWithSparseBlocks()
 	{
 		bool success = false;

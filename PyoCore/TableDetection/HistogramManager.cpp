@@ -71,13 +71,16 @@ namespace TableDetection
 				minVal = values[i];
 		}
 		
+		int lastValue = 0;
 		// * TODO : select middle things.
 		for (int i = 0; i < length; ++i) {
 			if (values[i] > maxVal * 0.9 ) {
-				this->visibleLines.emplace_back(i, ExtremumType::TYPE_MAX);
+				this->visibleLines.emplace_back((i + lastValue) / 2, ExtremumType::TYPE_MAX);
+				lastValue = i;
 			}
 			else if (values[i] < minVal * 1.1) {
-				this->visibleLines.emplace_back(i, ExtremumType::TYPE_MIN);
+				this->visibleLines.emplace_back((i + lastValue) / 2, ExtremumType::TYPE_MIN);
+				lastValue = i;
 			}
 		}
 		return true;
@@ -543,6 +546,7 @@ namespace TableDetection
 		{
 			auto jtr = std::next(itr);
 			if (itr->first + 1 >= jtr->first) {
+				jtr->first = (itr->first + jtr->first) / 2;
 				itr = xExtremum.erase(itr);
 			}
 			else {
@@ -553,6 +557,7 @@ namespace TableDetection
 		{
 			auto jtr = std::next(itr);
 			if (itr->first + 1 >= jtr->first) {
+				jtr->first = (itr->first + jtr->first) / 2;
 				itr = yExtremum.erase(itr);
 			}
 			else {
