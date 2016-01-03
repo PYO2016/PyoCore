@@ -98,13 +98,20 @@ namespace Common
 		delete [] isConquered;
 		covered = new box(point(leftest, topist), point(rightest, bottomest));
 
-		initWidthHeight();
+		this->letterHeightAvg = this->letterWidthAvg = 0;
+		for (auto& p : rtree)
+		{
+			letterHeightAvg += -p.min_corner().get<1>() + p.max_corner().get<1>();
+			letterWidthAvg += -p.min_corner().get<0>() + p.max_corner().get<0>();
+		}
+		letterHeightAvg /= rtree.size();
+		letterWidthAvg /= rtree.size();
 		return true;
 	}
 	bool SparseBlockManager::mergeSparseBlock()
 	{
 		std::vector<box> result_n;
-		double MOOSNSU = getHeightAvg() / 2;
+		double MOOSNSU = this->getLetterHeightAvg() / 2;
 
 		bool isDeleted = true;
 
@@ -158,25 +165,22 @@ namespace Common
 					++itr;
 			}
 		}
+
+		this->sparseBlockHeightAvg = this->sparseBlockWidthAvg = 0;
+		for (auto& p : rtree)
+		{
+			sparseBlockHeightAvg += -p.min_corner().get<1>() + p.max_corner().get<1>();
+			sparseBlockWidthAvg += -p.min_corner().get<0>() + p.max_corner().get<0>();
+		}
+		sparseBlockHeightAvg /= rtree.size();
+		sparseBlockWidthAvg /= rtree.size();
+
 		return true;
 	}
 
 	bool SparseBlockManager::clearSparseBlocks()
 	{
 		this->sparseBlocks.clear();
-		return true;
-	}
-
-	bool SparseBlockManager::initWidthHeight()
-	{
-		heightAvg = widthAvg = 0;
-		for (auto& p : rtree)
-		{
-			heightAvg += -p.min_corner().get<1>() + p.max_corner().get<1>();
-			widthAvg += -p.min_corner().get<0>() + p.max_corner().get<0>();
-		}
-		heightAvg /= rtree.size();
-		widthAvg /= rtree.size();
 		return true;
 	}
 }
