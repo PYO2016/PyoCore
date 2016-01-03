@@ -34,12 +34,12 @@ namespace Common
 
 	private:
 		bool clearSparseBlocks();
+		bool arrangeSparseBlocks();
 
 		std::vector<SparseBlock> _sparseBlocks;
 		std::list<SparseBlock> sparseBlocks;
 		PngImage& image;
 		boost::geometry::index::rtree<box, boost::geometry::index::quadratic<16>> rtree;
-		box* covered = nullptr;
 
 		double sparseBlockHeightAvg = -1, sparseBlockWidthAvg = -1;
 		double letterHeightAvg = -1, letterWidthAvg = -1;

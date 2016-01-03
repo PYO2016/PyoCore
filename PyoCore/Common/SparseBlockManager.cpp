@@ -22,18 +22,16 @@ namespace Common
 		: image(image)
 	{}
 	SparseBlockManager::~SparseBlockManager()
-	{
-		if (this->covered != nullptr)
-			delete this->covered;
-	}
+	{}
 	bool SparseBlockManager::makeSparseBlock()
 	{
-		this->clearSparseBlocks();
-		// queue for bfs
+		bool success = true;
+		success &= this->clearSparseBlocks();
+
 		int height{ static_cast<int>(image.getHeight()) };
 		int width = image.getWidth();
 		bool** isConquered = new bool*[height];
-		int leftest = 0, rightest = 0, topist = 0, bottomest = 0;
+		int leftest = 0, rightest = 0, topist = 0, bottomest = 0, count;
 		
 		// all elements set to false
 		for (int i = 0; i < height; i++)
@@ -46,8 +44,8 @@ namespace Common
 				if (image[i][j].R == 0
 					&& isConquered[i][j] == false)
 				{
-					
 					int top = i, bottom = i, left = j, right = j;
+					count = 0;
 					std::queue<std::pair<int, int>> q;
 					q.emplace(i, j);
 					isConquered[i][j] = true;
@@ -56,6 +54,8 @@ namespace Common
 					{
 						auto elem = q.front();
 						q.pop();
+
+						++count;
 
 						if (elem.first < top)
 							top = elem.first;
@@ -78,8 +78,8 @@ namespace Common
 							q.emplace(ty, tx);
 						}
 					}
-					rtree.insert(box(point(left, top), point(right, bottom)));
-					this->sparseBlocks.emplace_back(point(left, top), point(right, bottom));
+
+					this->sparseBlocks.emplace_back(point(left, top), point(right, bottom), (right - left) * (-top + bottom));
 					if (left < leftest)
 						leftest = left;
 					if (right > rightest)
@@ -88,7 +88,6 @@ namespace Common
 						topist = top;
 					if (bottom > bottomest)
 						bottomest = bottom;
-					
 				}
 			}
 		}
@@ -96,24 +95,30 @@ namespace Common
 		for (int i = 0; i < height; i++)
 			delete [] *(isConquered + i);
 		delete [] isConquered;
-		covered = new box(point(leftest, topist), point(rightest, bottomest));
+
+		success &= this->arrangeSparseBlocks();
 
 		this->letterHeightAvg = this->letterWidthAvg = 0;
-		for (auto& p : rtree)
+		for (auto& p : this->sparseBlocks)
 		{
 			letterHeightAvg += -p.min_corner().get<1>() + p.max_corner().get<1>();
 			letterWidthAvg += -p.min_corner().get<0>() + p.max_corner().get<0>();
 		}
-		letterHeightAvg /= rtree.size();
-		letterWidthAvg /= rtree.size();
-		return true;
+		letterHeightAvg /= this->sparseBlocks.size();
+		letterWidthAvg /= this->sparseBlocks.size();
+
+		return success;
 	}
 	bool SparseBlockManager::mergeSparseBlock()
 	{
 		std::vector<box> result_n;
-		double MOOSNSU = this->getLetterHeightAvg() / 2;
-
+		double MOOSNSU = this->getLetterHeightAvg() + this->getLetterWidthAvg();
 		bool isDeleted = true;
+
+		for (auto& p : rtree)
+		{
+			rtree.insert(p);
+		}
 
 		while (isDeleted)
 		{
@@ -149,11 +154,12 @@ namespace Common
 						auto top = std::min(itr->min_corner().get<1>(), result_n[deletedIndex].min_corner().get<1>());
 						auto bottom = std::max(itr->max_corner().get<1>(), result_n[deletedIndex].max_corner().get<1>());
 
+						this->sparseBlocks.emplace_back(point(left, top), point(right, bottom));
+
 						rtree.remove(static_cast<box&>(*itr));
 						rtree.remove(result_n[deletedIndex]);
 						rtree.insert(box(point(left, top), point(right, bottom)));
 
-						this->sparseBlocks.emplace_back(point(left, top), point(right, bottom));
 						itr = this->sparseBlocks.erase(itr);
 
 						isDeleted = true;
@@ -181,6 +187,22 @@ namespace Common
 	bool SparseBlockManager::clearSparseBlocks()
 	{
 		this->sparseBlocks.clear();
+		return true;
+	}
+
+	bool SparseBlockManager::arrangeSparseBlocks()
+	{
+		auto i = std::begin(this->sparseBlocks);
+		int area;
+
+		while (i != std::end(this->sparseBlocks))
+		{
+			area = i->getRealArea();
+			if (area <= 4)
+				i = this->sparseBlocks.erase(i);
+			else
+				++i;
+		}
 		return true;
 	}
 }
