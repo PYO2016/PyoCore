@@ -21,10 +21,10 @@ namespace TableDetection
 
 		void cleanup();
 
-		bool process(const std::wstring& imageFile, const std::wstring& outputFile, bool isDebug);
+		bool process(const std::wstring& imageFile, std::wstring& resultString, bool isDebug);
 
 	private:
-		bool process();		// real process function!
+		bool process(std::wstring& resultString);		// real process function!
 		bool registerImage(std::wstring imageFile);
 		bool preprocess(void);
 		bool detectTable(void);		// not tested
@@ -37,13 +37,12 @@ namespace TableDetection
 		/* etc... */
 
 	private:
-		std::wstring imageFile, outputFile;
+		std::wstring imageFile;
 		bool isDebug;
 		std::shared_ptr<Common::PngImage> pImage;
 		std::shared_ptr<Common::SparseBlockManager> pSbm;
 		std::shared_ptr<HistogramManager> pHm;
 		Common::Table table;
-		std::wstring result;
 
 		/* Constants for recursive table detection. */
 		/* These values is determined in preprocess(). */

@@ -142,7 +142,6 @@ namespace Common
 			{
 				result_n.clear();
 				rtree.query(bgi::nearest(static_cast<box&>(*itr), 2), std::back_inserter(result_n));
-				std::cout << "pause";
 				double dist = 987654321; // for trace
 				int deletedIndex = -1, k = 0;
 				for (auto p : result_n)

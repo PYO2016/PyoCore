@@ -43,6 +43,7 @@ namespace HistogramManagerTest
 			h.filterExtremum(TableDetection::HistogramType::TYPE_Y);
 			h.applyKmeans(TableDetection::HistogramType::TYPE_X);
 			h.applyKmeans(TableDetection::HistogramType::TYPE_Y);
+			/*
 			for (auto p : h.getTableInfo())
 			{
 				auto q1 = (std::get<0>(p));
@@ -54,6 +55,8 @@ namespace HistogramManagerTest
 
 				//Logger::WriteMessage((q1 + " " + q2 + " " + q3 + " " + q4 + "\n").c_str());
 			}
+			*/
+			Assert::IsTrue(false);	// this unit test must be modified.
 			std::wstring html = TableDetection::TableExporter::ExportTable(cells);
 			Logger::WriteMessage(html.c_str());
 		}

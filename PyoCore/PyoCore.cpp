@@ -36,26 +36,6 @@ namespace PyoCore
 		return TRUE;
 	}
 
-
-	/************** Processing image file **************/
-
-	BOOL processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileType, LPCWSTR outputFileName, BOOL isDebug)
-	{
-		TableDetection::TableDetector tableDectector;
-
-		return tableDectector.process(imageFileName, outputFileName, static_cast<bool>(isDebug));
-	}
-
-	BOOL processImageFileA(LPCSTR imageFileName, ImageFileType imageFileType, LPCSTR outputFileName, BOOL isDebug)
-	{
-		return processImageFileW(
-			Common::EncodingConverter::s2ws(imageFileName).c_str(),
-			imageFileType,
-			Common::EncodingConverter::s2ws(outputFileName).c_str(),
-			isDebug);
-	}
-
-
 	/************** Handling Error **************/
 
 	int errorCode;
@@ -65,4 +45,76 @@ namespace PyoCore
 		return errorCode;
 	}
 
+	/************** Processing image file **************/
+
+	BOOL processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileType,
+		LPWSTR resultBuffer, UINT32 resultBufferLen, BOOL isDebug)
+	{
+		bool success = false;
+		TableDetection::TableDetector tableDectector;
+		std::wstring resultString;
+
+		if (resultBufferLen == 0) {
+			errorCode = ERROR_UNKNOWN;
+			goto END;
+		}
+
+		if (imageFileType != IMAGE_FILE_TYPE_PNG) {
+			errorCode = ERROR_IMAGE_FILE_TYPE;
+			goto END;
+		}
+
+		if (!tableDectector.process(imageFileName, resultString, static_cast<bool>(isDebug))) {
+			errorCode = ERROR_UNKNOWN;
+			goto END;
+		}
+
+		if (resultString.length() + 1 >= resultBufferLen) {
+			errorCode = ERROR_UNKNOWN;
+			goto END;
+		}
+
+		wcscpy_s(resultBuffer, resultBufferLen, resultString.c_str());
+
+		success = true;
+	END:
+
+		return static_cast<BOOL>(success);
+	}
+
+	BOOL processImageFileA(LPCSTR imageFileName, ImageFileType imageFileType,
+		LPSTR resultBuffer, UINT32 resultBufferLen, BOOL isDebug)
+	{
+		bool success = false;
+		LPWSTR tempString = NULL;
+		
+		if (resultBufferLen == 0) {
+			errorCode = ERROR_UNKNOWN;
+			goto END;
+		}
+		tempString = new WCHAR[resultBufferLen];
+
+		if (!processImageFileW(
+			Common::EncodingConverter::s2ws(imageFileName).c_str(),
+			imageFileType,
+			tempString,
+			resultBufferLen,
+			isDebug))
+			goto END;
+
+		{
+			std::string s = Common::EncodingConverter::ws2s(tempString);
+			if (s.length() + 1 >= resultBufferLen) {
+				errorCode = ERROR_UNKNOWN;
+				goto END;
+			}
+			strcpy_s(resultBuffer, resultBufferLen, s.c_str());
+		}
+		success = true;
+	END:;
+
+		if (tempString)
+			delete[] tempString;
+		return success;
+	}
 }

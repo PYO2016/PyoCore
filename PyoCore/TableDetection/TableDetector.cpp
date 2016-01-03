@@ -46,7 +46,7 @@ namespace TableDetection
 		pHm.reset();
 	}
 
-	bool TableDetector::process(const std::wstring& imageFile, const std::wstring& outputFile, bool isDebug)
+	bool TableDetector::process(const std::wstring& imageFile, std::wstring& resultString, bool isDebug)
 	{
 		DEBUG_MSG("process() start!!");
 
@@ -55,14 +55,13 @@ namespace TableDetection
 		cleanup();
 
 		this->imageFile = imageFile;
-		this->outputFile = outputFile;
 		this->isDebug = isDebug;
 
 		/* real process!! */
-		return process();
+		return process(resultString);
 	}
 
-	bool TableDetector::process()
+	bool TableDetector::process(std::wstring& resultString)
 	{
 		DEBUG_MSG("(real) process() start!!");
 
@@ -92,7 +91,7 @@ namespace TableDetection
 
 		DEBUG_MSG("exportTable() start!!");
 
-		result = TableExporter::ExportTable(table);
+		resultString = TableExporter::ExportTable(table);
 
 		DEBUG_MSG("exportTable() finish!!");
 

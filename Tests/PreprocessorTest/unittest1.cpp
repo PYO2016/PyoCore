@@ -29,7 +29,7 @@ namespace PreprocessorTest
 			img->storeToFile(L"C:/Users/KGWANGMIN/Pictures/_preprocessed.png");
 
 			SparseBlockManager manager(*img);
-			manager.correctImage();
+			manager.process();
 
 			img->storeToFile(L"C:/Users/KGWANGMIN/Pictures/_sparsed.png");
 		}

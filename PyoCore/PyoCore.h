@@ -15,10 +15,6 @@
 /* Interface for Algorithm DLL */
 namespace PyoCore
 {
-	/************** Import Test **************/
-	PYOCORE_API void helloWorld(void);
-
-
 	/************** Processing image file **************/
 
 	typedef int ImageFileType;
@@ -35,24 +31,22 @@ namespace PyoCore
 	 * Parameters *
 	 *		imageFileName : the name of image file.
 	 *		imageFileType : the type of image file.
-	 *		outputFileName : the name of output file which is the result of processing.
+	 *		resultBuffer : the result buffer where the result string of processing is stored.
+	 *		resultBufferLen : the result buffer length. (include null character)
 	 * Return Value *
 	 *		TRUE if success, FALSE otherwise.
 	 *		Use getErrorCode() if you want to know the error code.
 	 * Description *
 	 */
 #ifdef UNICODE
-#define importTest importTestW
 #define processImageFile processImageFileW
 #else
-#define importTest importTestA
 #define processImageFile processImageFileA
 #endif
-	PYOCORE_API BOOL importTestW(LPCWSTR imageFileName, ImageFileType imageFileType, LPWSTR outputFileName);
-	PYOCORE_API BOOL importTestA(LPCSTR imageFileName, ImageFileType imageFileType, LPSTR outputFileName);
-
-	PYOCORE_API BOOL processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileType, LPCWSTR outputFileName, BOOL isDebug);
-	PYOCORE_API BOOL processImageFileA(LPCSTR imageFileName, ImageFileType imageFileType, LPCSTR outputFileName, BOOL isDebug);
+	PYOCORE_API BOOL processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileType, 
+		LPWSTR resultBuffer, UINT32 resultBufferLen, BOOL isDebug);
+	PYOCORE_API BOOL processImageFileA(LPCSTR imageFileName, ImageFileType imageFileType, 
+		LPSTR resultBuffer, UINT32 resultBufferLen, BOOL isDebug);
 
 
 	/************** Handling Error **************/

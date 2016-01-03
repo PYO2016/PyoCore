@@ -29,13 +29,15 @@ namespace TableDetectorTest
 			std::wstring prefix;
 			cif >> prefix;
 			cif.close();
+
+			std::wstring resultString;
 			
 			std::wstring imageFile = dir + prefix + L".png";
 			std::wstring outputFile = dir + prefix + L".html";
-			Logger::WriteMessage(td.process(imageFile, L"junk", true) ? "true" : "false");
-			Logger::WriteMessage(td.result.c_str());
+			Logger::WriteMessage(td.process(imageFile, resultString, true) ? "true" : "false");
+			Logger::WriteMessage(resultString.c_str());
 			std::wofstream of(outputFile);
-			of << td.result.c_str();
+			of << resultString.c_str();
 			of.close();
 			//system(("explorer.exe " + Common::EncodingConverter::ws2s(outputFile)).c_str());
 			
