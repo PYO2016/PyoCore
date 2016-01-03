@@ -22,13 +22,16 @@ namespace PreprocessorTest
 	{
 	public:
 		
-		TEST_METHOD(TestGrayscaling)
+		TEST_METHOD(TestSparseBlocksPro)
 		{
-			// TODO: 테스트 코드를 여기에 입력합니다.
-			//std::shared_ptr<PngImage> img = PngImage::LoadImage(L"C:/Users/JK/Desktop/sample/1.png");
-			//img->storeToFile(L"C:/Users/JK/Desktop/sample/1_copy.png");
-			//Preprocessor::process(*img);
-			//img->storeToFile(L"C:/Users/JK/Desktop/sample/1_gray.png");
+			std::shared_ptr<PngImage> img = PngImage::LoadImage(L"C:/Users/KGWANGMIN/Pictures/10.png");
+			Preprocessor::process(*img);
+			img->storeToFile(L"C:/Users/KGWANGMIN/Pictures/_preprocessed.png");
+
+			SparseBlockManager manager(*img);
+			manager.correctImage();
+
+			img->storeToFile(L"C:/Users/KGWANGMIN/Pictures/_sparsed.png");
 		}
 
 		TEST_METHOD(TestSparseBlocks)
