@@ -30,10 +30,10 @@ namespace TableDetection
 		bool detectTable(void);		// not tested
 		bool recXycut(int recDepth, unsigned areaWidth, unsigned areaHeight,
 			unsigned offsetWidth, unsigned offsetHeight);	// not tested
-		bool xycut(std::vector<std::tuple<int, int, int, int>>& cells, unsigned areaWidth, unsigned areaHeight,
+		bool xycut(std::vector<Common::Line>& lines, unsigned areaWidth, unsigned areaHeight,
 			unsigned offsetWidth, unsigned offsetHeight, bool edgeExist);	// not tested
-		bool xycutPostProcess(std::vector<std::tuple<int, int, int, int>>& cells,
-			unsigned offsetWidth, unsigned offsetHeight);
+		bool xycutPostProcess(std::vector<Common::Line>& lines,
+			unsigned areaWidth, unsigned areaHeight, unsigned offsetWidth, unsigned offsetHeight);
 		/* etc... */
 
 	private:

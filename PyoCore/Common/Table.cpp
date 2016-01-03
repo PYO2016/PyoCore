@@ -2,6 +2,13 @@
 
 namespace Common
 {
+	/* Line */
+
+	Line::Line(LineType type, int offset)
+		: type(type), offset(offset)
+	{
+	}
+
 	/* Cell */
 
 	Cell::Cell(int top, int bottom, int left, int right, const std::wstring& innerString)

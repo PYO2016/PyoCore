@@ -22,13 +22,13 @@ namespace Common
 	public:
 		SparseBlockManager(Common::PngImage& image);
 		~SparseBlockManager();
+		bool process();
 		bool makeSparseBlock();
 		bool mergeSparseBlock();
 		inline double getSparseBlockHeightAvg();
 		inline double getSparseBlockWidthAvg();
 		inline double getLetterHeightAvg();
 		inline double getLetterWidthAvg();
-		bool correctImage();
 		bool initImageToZero();
 		bool initImageWithSparseBlocks();
 

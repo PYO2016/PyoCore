@@ -6,6 +6,26 @@
 
 namespace Common
 {
+	enum class LineType : int
+	{
+		LINE_HORIZONTAL = 0,
+		LINE_VERTICAL
+	};
+
+	class Line
+	{
+	public:
+		Line(LineType type, int offset);
+		~Line() = default;
+
+		inline LineType getType() const;
+		inline int getOffset() const;
+
+	private:
+		LineType type;
+		int offset;
+	};
+
 	class Cell
 	{
 	public:
@@ -63,6 +83,17 @@ namespace Common
 	};
 
 	/* inline functions */
+
+	/* Line */
+
+	inline LineType Line::getType() const
+	{
+		return type;
+	}
+	inline int Line::getOffset() const
+	{
+		return offset;
+	}
 
 	/* Cell */
 
