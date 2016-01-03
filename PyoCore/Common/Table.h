@@ -48,6 +48,8 @@ namespace Common
 		inline void setCol(int col);
 		inline void setRowspan(int rowspan);
 		inline void setColspan(int colspan);
+		inline void setInnerString(const char*);
+		inline void setInnerString(std::wstring);
 
 	private:
 		int top;
@@ -128,6 +130,14 @@ namespace Common
 	inline void Cell::setColspan(int colspan)
 	{
 		this->colspan = colspan;
+	}
+	inline void Cell::setInnerString(const char *text)
+	{
+		this->innerString = EncodingConverter::s2ws(text);
+	}
+	inline void Cell::setInnerString(std::wstring text)
+	{
+		this->innerString = text;
 	}
 	inline int Cell::getTop() const
 	{
