@@ -11,8 +11,11 @@
 
 namespace Common
 {
-	typedef boost::geometry::model::point<int, 2, boost::geometry::cs::cartesian> point;
-	typedef boost::geometry::model::box<point> box;
+	namespace bg = boost::geometry;
+	namespace bgi = boost::geometry::index;
+
+	typedef bg::model::point<int, 2, bg::cs::cartesian> point;
+	typedef bg::model::box<point> box;
 
 	class SparseBlockManager
 	{
@@ -24,15 +27,15 @@ namespace Common
 		inline double getHeightAvg();
 		inline double getWidthAvg();
 
-		inline std::list<Common::box>& getSparseBlocks();
-		inline const std::list<Common::box>& getSparseBlocks() const;
+		inline std::list<SparseBlock>& getSparseBlocks();
+		inline const std::list<SparseBlock>& getSparseBlocks() const;
 
 	private:
 		bool clearSparseBlocks();
 		bool initWidthHeight();
 
 		std::vector<SparseBlock> _sparseBlocks;
-		std::list<box> sparseBlocks;
+		std::list<SparseBlock> sparseBlocks;
 		PngImage& image;
 		boost::geometry::index::rtree<box, boost::geometry::index::quadratic<16>> rtree;
 		box* covered = nullptr;
@@ -53,11 +56,11 @@ namespace Common
 	{
 		return this->heightAvg;
 	}
-	inline std::list<Common::box>& SparseBlockManager::getSparseBlocks()
+	inline std::list<SparseBlock>& SparseBlockManager::getSparseBlocks()
 	{
 		return this->sparseBlocks;
 	}
-	inline const std::list<Common::box>& SparseBlockManager::getSparseBlocks() const
+	inline const std::list<SparseBlock>& SparseBlockManager::getSparseBlocks() const
 	{
 		return this->sparseBlocks;
 	}

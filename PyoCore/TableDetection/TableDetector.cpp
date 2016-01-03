@@ -3,6 +3,10 @@
 #include "../Preprocessing/Preprocessor.h"
 #include <iostream>
 #include "TableExporter.h"
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point.hpp>
+#include <boost/geometry/geometries/box.hpp>
+#include <boost/geometry/index/rtree.hpp>
 
 #define DEBUG_MSG(STR) if(isDebug) { \
 	std::cerr << "[Debug] " STR << std::endl; \
@@ -14,7 +18,13 @@
 
 namespace TableDetection
 {
+	/*
+	namespace bg = boost::geometry;
+	namespace bgi = boost::geometry::index;
 
+	typedef bg::model::point<int, 2, bg::cs::cartesian> point;
+	typedef bg::model::box<point> box;
+	*/
 	/* TableDetector */
 
 	TableDetector::TableDetector()
@@ -108,22 +118,39 @@ namespace TableDetection
 		
 		// do image pre-processing.
 		if (!Preprocessing::Preprocessor::process(*pImage))
-			goto end;
+			goto END;
 
 		// get sparse blocks.
 		pSbm = std::make_shared<Common::SparseBlockManager>(*pImage);
 		
 		if (!pSbm->makeSparseBlock())
-			goto end;
+			goto END;
 
 		if (!pSbm->mergeSparseBlock())
-			goto end;
+			goto END;
 
+		{
+			auto p = pSbm->getSparseBlocks();
+			for (auto pit : p)
+			{
+				auto n = pit.getBottom();
+				auto m = pit.getRight();
+				for (auto i = pit.getTop(); i < n; ++i)
+				{
+					for (auto j = pit.getLeft(); j < m; ++j)
+					{
+						(*pImage)[i][j].B = (*pImage)[i][j].G = (*pImage)[i][j].R = 0;
+					}
+				}
+			}
+		}
 		// determine constants.
-		
+		// 1. minWidth = avg letter size * 1.5
+		// 2. minHeight = avg letter size * 1.5
+		// 3. maxRecDepth = ??
 
 		success = true;
-	end:
+	END:;
 		return success;
 	}
 
@@ -154,17 +181,8 @@ namespace TableDetection
 		if (!xycut(cells, areaWidth, areaHeight, offsetWidth, offsetHeight, recDepth > 0))
 			return false;
 
-		/*
-		bool valid = true;
-		for (const auto &cell : cells) {
-			int width = std::get<3>(cell) - std::get<2>(cell) + 1;
-			int height = std::get<1>(cell) - std::get<0>(cell) + 1;
-			if (width < minWidth || height < minHeight) {
-				valid = false;
-				break;
-			}
-		}
-		*/
+		if (!xycutPostProcess(cells, offsetWidth, offsetHeight))
+			return false;
 
 		// when can't split cell anymore.
 		if (cells.size() <= 1) {
@@ -230,5 +248,40 @@ namespace TableDetection
 		return success;
 	}
 
-	/* etc... */
+	bool TableDetector::xycutPostProcess(std::vector<std::tuple<int, int, int, int>>& cells, 
+		unsigned offsetWidth, unsigned offsetHeight)
+	{
+		return true;
+		bool success = false;/*
+		const std::list<Common::SparseBlock> &sparseBlockList = this->pSbm->getSparseBlocks();
+		std::set<int, std::less<int>> horLineSet, verLineSet;
+		int maxBottom = 0, maxRight = 0;
+
+		for (const auto &cell : cells) {
+
+		}
+
+		
+		for (const auto &cell : cells) {
+			int top = std::get<0>(cell) + offsetHeight;
+			int bottom = std::get<1>(cell) + offsetHeight;
+			int left = std::get<2>(cell) + offsetWidth;
+			int right = std::get<3>(cell) + offsetWidth;
+
+			horLineSet.emplace(top);
+			verLineSet.emplace(left);
+
+			if (maxBottom < bottom)
+				maxBottom = bottom;
+			if (maxRight < right)
+				maxRight = right;
+		}
+		horLineSet.emplace(maxBottom);
+		verLineSet.emplace(maxRight);
+		*/
+
+		success = true;
+	END:;
+		return success;
+	}
 }
