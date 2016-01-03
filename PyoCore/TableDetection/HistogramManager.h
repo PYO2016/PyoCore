@@ -25,7 +25,6 @@ namespace TableDetection
 		TYPE_UPPER
 	};
 
-
 	class Histogram
 	{
 	public:
@@ -35,7 +34,7 @@ namespace TableDetection
 		~Histogram();
 
 		bool calculateValues();		// not tested...
-		bool detectVisibleLines();
+		bool detectSpecialValues();
 		bool applyMedianFilter();	// test pass!
 		bool initFilterExtremum();	// not tested
 		double getKmeansBoundary(ExtremumType type);
@@ -54,7 +53,7 @@ namespace TableDetection
 		int length, valLimit;
 		// extremum values
 		std::list<std::pair<int, ExtremumType>> extremumList;
-		std::vector<std::pair<int, ExtremumType>> visibleLines;
+		std::vector<std::pair<int, ExtremumType>> specialValues;
 	};
 
 	class HistogramManager
