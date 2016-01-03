@@ -127,7 +127,7 @@ namespace Common
 	bool SparseBlockManager::mergeSparseBlock()
 	{
 		std::vector<box> result_n;
-		double MOOSNSU = this->getLetterHeightAvg()/2;
+		double MOOSNSU = this->getLetterWidthAvg() / 2;
 		bool isDeleted = true;
 
 		for (auto& p : sparseBlocks)
