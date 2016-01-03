@@ -25,7 +25,7 @@ namespace HistogramManagerTest
 		TEST_METHOD(TestCalculateValues)
 		{
 			// TODO: 테스트 코드를 여기에 입력합니다.
-			auto img = Common::PngImage::LoadImage(L"C:/Users/KGWANGMIN/git/PYO2016/PyoCore/Tests/HistogramManagerTest/test.png");
+			auto img = Common::PngImage::_LoadImage(L"C:/Users/KGWANGMIN/git/PYO2016/PyoCore/Tests/HistogramManagerTest/test.png");
 			std::vector<Common::Cell> cells;
 			Logger::WriteMessage("Test Started\n");
 			if (img == nullptr)
