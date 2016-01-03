@@ -28,6 +28,9 @@ namespace Common
 		inline double getSparseBlockWidthAvg();
 		inline double getLetterHeightAvg();
 		inline double getLetterWidthAvg();
+		bool correctImage();
+		bool initImageToZero();
+		bool initImageWithSparseBlocks();
 
 		inline std::list<SparseBlock>& getSparseBlocks();
 		inline const std::list<SparseBlock>& getSparseBlocks() const;

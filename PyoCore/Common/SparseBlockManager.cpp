@@ -205,4 +205,57 @@ namespace Common
 		}
 		return true;
 	}
+
+	bool SparseBlockManager::correctImage()
+	{
+		bool success = true;
+
+		success &= this->clearSparseBlocks();
+		success &= this->makeSparseBlock();
+		success &= this->mergeSparseBlock();
+		success &= this->initImageToZero();
+		success &= this->initImageWithSparseBlocks();
+
+		return success;
+	}
+	bool SparseBlockManager::initImageToZero()
+	{
+		bool success = false;
+		int w = this->image.getWidth();
+		int h = this->image.getHeight();
+
+		for (int i = 0; i < h; ++i)
+		{
+			for (int j = 0; j < w; ++j)
+			{
+				(this->image)[i][j].B = (this->image)[i][j].G = (this->image)[i][j].R = 255;
+			}
+		}
+
+		success = true;
+		return success;
+	}
+	bool SparseBlockManager::initImageWithSparseBlocks()
+	{
+		bool success = false;
+		int offsetX, offsetY, edgeX, edgeY;
+
+		for (auto& q : sparseBlocks)
+		{
+			offsetX = q.min_corner().get<0>();
+			offsetY = q.min_corner().get<1>();
+			edgeX = q.max_corner().get<0>();
+			edgeY = q.max_corner().get<1>();
+			for (int i = offsetY; i <= edgeY; ++i)
+			{
+				for (int j = offsetX; j <= edgeX; j++)
+				{
+					(this->image)[i][j].B = (this->image)[i][j].G = (this->image)[i][j].R = 0;
+				}
+			}
+		}
+
+		success = true;
+		return success;
+	}
 }
