@@ -1,8 +1,9 @@
 #pragma once
 
 #include "../Common/PngImage.h"
-
-using namespace Common;
+#include "../Common/SparseBlock.h"
+#include "../Common/Table.h"
+#include <list>
 
 namespace TableDetection
 {
@@ -11,8 +12,8 @@ namespace TableDetection
 	public:
 		OCRManager();
 		~OCRManager();
-		std::wstring getStringFromRect(PngImage, int, int, int, int);
 
-	private:
+		static bool recognize(Common::PngImage&, std::list<Common::SparseBlock>&);
+		static bool recognize(Common::PngImage&, std::list<Common::Cell>&);
 	};
 }
