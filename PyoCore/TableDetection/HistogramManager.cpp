@@ -464,7 +464,7 @@ namespace TableDetection
 		return success;
 	}
 
-	bool HistogramManager::detectVisibleLines(HistogramType type)
+	bool HistogramManager::detectSpecialValues(HistogramType type)
 	{
 		bool success;
 
