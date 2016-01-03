@@ -536,12 +536,11 @@ namespace TableDetection
 	{
 		// top bottom left right
 		std::vector<Common::Line> lineVector;
-
 		pHistogramX->detectLines();
 		pHistogramY->detectLines();
 
-		auto xExtremum  = pHistogramX->getExtremumList();
-		auto yExtremum  = pHistogramY->getExtremumList();
+		auto xExtremum = pHistogramX->getExtremumList();
+		auto yExtremum = pHistogramY->getExtremumList();
 
 		// merge adjacent lines.
 		// * TODO : select middle things.
@@ -557,10 +556,10 @@ namespace TableDetection
 				}
 				int r = std::distance(itr, ktr) / 2, l = r + (std::distance(itr, ktr) & 1 == 1) ? 1 : 0;
 				jtr = itr;
-				while(l--)
+				while (l--)
 					jtr = xExtremum.erase(jtr);
 				jtr = std::next(jtr);
-				while(r--)
+				while (r--)
 					jtr = xExtremum.erase(jtr);
 				itr = jtr;
 			}
@@ -580,10 +579,10 @@ namespace TableDetection
 				}
 				int r = std::distance(itr, ktr) / 2, l = r + (std::distance(itr, ktr) & 1 == 1) ? 1 : 0;
 				jtr = itr;
-				while(l--)
+				while (l--)
 					jtr = yExtremum.erase(jtr);
 				jtr = std::next(jtr);
-				while(r--)
+				while (r--)
 					jtr = yExtremum.erase(jtr);
 				itr = jtr;
 			}
@@ -605,11 +604,14 @@ namespace TableDetection
 				yExtremum.emplace_back(this->areaHeight - 1, ExtremumType::TYPE_MIN);
 		}
 
-		for (const auto &x : xExtremum) {
-			lineVector.emplace_back(Common::LineType::LINE_VERTICAL, x.first);
+		//for (const auto &x : xExtremum)
+		for (auto itr = std::begin(xExtremum); itr != std::end(xExtremum); ++itr)
+		{
+			lineVector.emplace_back(Common::LineType::LINE_VERTICAL, itr->first);
 		}
-		for (const auto &y : yExtremum) {
-			lineVector.emplace_back(Common::LineType::LINE_HORIZONTAL, y.first);
+		for (auto itr = std::begin(yExtremum); itr != std::end(yExtremum); ++itr)
+		{
+			lineVector.emplace_back(Common::LineType::LINE_HORIZONTAL, itr->first);
 		}
 
 		return lineVector;
