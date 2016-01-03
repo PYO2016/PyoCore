@@ -56,10 +56,10 @@ namespace TableDetectorTest
 					result[top][i].B = result[bottom][i].B = 0x99;
 				}
 			}
-			std::wstring resultFile = dir + prefix + L"_result.png";
+			std::wstring resultFile = dir + prefix + L".png_result.png";
 			result.storeToFile(resultFile);
 
-			system(Common::EncodingConverter::ws2s(L"mspaint.exe " + resultFile).c_str());
+			system(Common::EncodingConverter::ws2s(L"start mspaint.exe " + resultFile).c_str());
 		}
 
 	};

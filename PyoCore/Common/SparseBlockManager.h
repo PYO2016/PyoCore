@@ -36,10 +36,14 @@ namespace Common
 		bool clearSparseBlocks();
 		bool arrangeSparseBlocks();
 
-		std::vector<SparseBlock> _sparseBlocks;
 		std::list<SparseBlock> sparseBlocks;
 		PngImage& image;
+<<<<<<< HEAD
 		boost::geometry::index::rtree<box, boost::geometry::index::quadratic<16>> rtree;
+=======
+		bgi::rtree<box, bgi::quadratic<16>> rtree;
+		box* covered = nullptr;
+>>>>>>> 6f8a23bea6ab6c35ba3269473cf05b6beec13f9e
 
 		double sparseBlockHeightAvg = -1, sparseBlockWidthAvg = -1;
 		double letterHeightAvg = -1, letterWidthAvg = -1;

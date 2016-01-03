@@ -3,6 +3,7 @@
 #include "../Preprocessing/Preprocessor.h"
 #include <iostream>
 #include "TableExporter.h"
+#include <algorithm>
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
@@ -80,9 +81,6 @@ namespace TableDetection
 
 		DEBUG_MSG("preprocess() finish!!");
 
-		DEBUG_MSG("After preprocessing, store image file");
-		DEBUG_ACTION(pImage->storeToFile(imageFile + L"_after_preprocessing.png"));
-
 		DEBUG_MSG("detectTable() start!!");
 
 		/////// detectTable()
@@ -120,6 +118,9 @@ namespace TableDetection
 		if (!Preprocessing::Preprocessor::process(*pImage))
 			goto END;
 
+		DEBUG_MSG("After preprocessing, store image file");
+		DEBUG_ACTION(pImage->storeToFile(imageFile + L"_after_preprocessing.png"));
+
 		// get sparse blocks.
 		pSbm = std::make_shared<Common::SparseBlockManager>(*pImage);
 		
@@ -144,10 +145,17 @@ namespace TableDetection
 				}
 			}
 		}
+
+		DEBUG_MSG("After sparse block detection, store image file");
+		DEBUG_ACTION(pImage->storeToFile(imageFile + L"_after_sparseblock.png"));
+
 		// determine constants.
 		// 1. minWidth = avg letter size * 1.5
 		// 2. minHeight = avg letter size * 1.5
 		// 3. maxRecDepth = ??
+		minWidth = 10;
+		minHeight = 10;
+		maxRecDepth = 1;
 
 		success = true;
 	END:;
@@ -251,17 +259,49 @@ namespace TableDetection
 	bool TableDetector::xycutPostProcess(std::vector<std::tuple<int, int, int, int>>& cells, 
 		unsigned offsetWidth, unsigned offsetHeight)
 	{
-		return true;
-		bool success = false;/*
+		bool success = false;
+		bgi::rtree<box, bgi::quadratic<16>> rtree;
 		const std::list<Common::SparseBlock> &sparseBlockList = this->pSbm->getSparseBlocks();
-		std::set<int, std::less<int>> horLineSet, verLineSet;
-		int maxBottom = 0, maxRight = 0;
 
 		for (const auto &cell : cells) {
-
+			int top = std::get<0>(cell) + offsetHeight;
+			int bottom = std::get<1>(cell) + offsetHeight;
+			int left = std::get<2>(cell) + offsetWidth;
+			int right = std::get<3>(cell) + offsetWidth;
+			rtree.insert(box(point(left, top), point(right, bottom)));
+		}
+		
+		for (const auto &block : sparseBlockList) {
+			std::vector<box> result;
+			rtree.query(bgi::intersects(static_cast<const box&>(block)), std::back_inserter(result));
+			int minTop = INT_MAX, maxBottom = INT_MIN, minLeft = INT_MAX, maxRight = INT_MIN;
+			for (const auto &r : result) {
+				int top = r.min_corner().get<1>();
+				int bottom = r.max_corner().get<1>();
+				int left = r.min_corner().get<0>();
+				int right = r.max_corner().get<0>();
+				minTop = std::min(top, minTop);
+				maxBottom = std::max(bottom, maxBottom);
+				minLeft = std::min(left, minLeft);
+				maxRight = std::max(right, maxRight);
+				rtree.remove(r);
+			}
+			if(minTop != INT_MAX)
+				rtree.insert(box(point(minLeft, minTop), point(maxRight, maxBottom)));
 		}
 
-		
+		cells.clear();
+		for (const auto &r : rtree) {
+			int top = r.min_corner().get<1>();
+			int bottom = r.max_corner().get<1>();
+			int left = r.min_corner().get<0>();
+			int right = r.max_corner().get<0>();
+			cells.emplace_back(top, bottom, left, right);
+		}
+
+		/*
+		std::set<int, std::less<int>> horLineSet, verLineSet;
+		int maxBottom = 0, maxRight = 0;
 		for (const auto &cell : cells) {
 			int top = std::get<0>(cell) + offsetHeight;
 			int bottom = std::get<1>(cell) + offsetHeight;
