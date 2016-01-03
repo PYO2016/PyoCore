@@ -154,8 +154,8 @@ namespace TableDetection
 		// 1. minWidth = avg letter size * 1.5
 		// 2. minHeight = avg letter size * 1.5
 		// 3. maxRecDepth = ??
-		minWidth = 10;
-		minHeight = 10;
+		minWidth = pSbm->getLetterWidthAvg() * 1.5;
+		minHeight = pSbm->getLetterHeightAvg() * 1.5;
 		maxRecDepth = 1;
 
 		success = true;
@@ -187,7 +187,7 @@ namespace TableDetection
 
 		std::vector<Common::Line> lines;
 
-		if (!xycut(lines, areaWidth, areaHeight, offsetWidth, offsetHeight, false/*recDepth > 0*/))
+		if (!xycut(lines, areaWidth, areaHeight, offsetWidth, offsetHeight, recDepth > 0))
 			return false;
 
 		if (!xycutPostProcess(lines, areaWidth, areaHeight, offsetWidth, offsetHeight))
@@ -226,16 +226,28 @@ namespace TableDetection
 		lines.clear();
 
 		// some problems...
-		int top = offsetHeight, bottom, left, right;
-		for (const auto &horLine : horList) {
-			bottom = horLine.getOffset();
-			left = offsetWidth;
-			for (const auto &verLine : verList) {
-				right = verLine.getOffset();
-				cells.emplace_back(top,bottom,left,right);
-				left = right;
+
+		//horList.emplace_back(Common::LineType::LINE_HORIZONTAL, offsetHeight + areaHeight - 1);
+		//verList.emplace_back(Common::LineType::LINE_VERTICAL, offsetWidth + areaWidth - 1);
+
+		if (!horList.empty() && !verList.empty()) {
+
+			int top = horList.begin()->getOffset(), bottom, left, right;
+			int initLeft = verList.begin()->getOffset();
+
+			horList.erase(horList.begin());
+			verList.erase(verList.begin());
+
+			for (const auto &horLine : horList) {
+				bottom = horLine.getOffset();
+				left = initLeft;
+				for (const auto &verLine : verList) {
+					right = verLine.getOffset();
+					cells.emplace_back(top, bottom, left, right);
+					left = right;
+				}
+				top = bottom;
 			}
-			top = bottom;
 		}
 
 		bool success = true;
