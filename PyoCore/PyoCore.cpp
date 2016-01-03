@@ -9,33 +9,6 @@
 
 namespace PyoCore
 {
-
-	/************** Import Test **************/
-
-	void helloWorld(void)
-	{
-		printf("hello, world! 안녕, 세상아!\n");
-		wprintf(L"I'm 태국!\n");
-	}
-
-	BOOL importTestW(LPCWSTR imageFileName, ImageFileType imageFileType, LPWSTR outputFileName)
-	{
-		wprintf(L"importTestW() called!\n");
-		wprintf(L"Arg : %s / %d\n", imageFileName, imageFileType);
-		wcscpy(outputFileName, L"WIDE Copy 와이드 카피");
-
-		return TRUE;
-	}
-
-	BOOL importTestA(LPCSTR imageFileName, ImageFileType imageFileType, LPSTR outputFileName)
-	{
-		printf("importTestA() called!\n");
-		printf("Arg : %s / %d\n", imageFileName, imageFileType);
-		strcpy(outputFileName, "ANSI Copy 안시 카피");
-
-		return TRUE;
-	}
-
 	/************** Handling Error **************/
 
 	int errorCode;

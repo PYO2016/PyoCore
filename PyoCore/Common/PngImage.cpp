@@ -49,6 +49,6 @@ namespace Common
 
 	bool PngImage::storeToFile(const std::wstring& targetFilename)
 	{
-		return true;//cv::imwrite(EncodingConverter::ws2s(targetFilename), imageMat);
+		return cv::imwrite(EncodingConverter::ws2s(targetFilename), imageMat);
 	}
 }
