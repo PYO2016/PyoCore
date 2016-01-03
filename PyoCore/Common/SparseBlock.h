@@ -13,7 +13,7 @@ namespace Common
 	{
 	public:
 		SparseBlock(point p1, point p2, int realArea = 0, std::wstring text = L"");
-		~SparseBlock();
+		virtual ~SparseBlock() = default;
 
 		inline int getTop();
 		inline int getLeft();
