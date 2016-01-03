@@ -7,6 +7,7 @@
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
+#include <boost/geometry/geometries/segment.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
 #define DEBUG_MSG(STR) if(isDebug) { \
@@ -19,13 +20,13 @@
 
 namespace TableDetection
 {
-	/*
 	namespace bg = boost::geometry;
 	namespace bgi = boost::geometry::index;
 
 	typedef bg::model::point<int, 2, bg::cs::cartesian> point;
 	typedef bg::model::box<point> box;
-	*/
+	typedef bg::model::segment<point> segment;
+	
 	/* TableDetector */
 
 	TableDetector::TableDetector()
@@ -184,28 +185,66 @@ namespace TableDetection
 			return true;
 		}
 
-		std::vector<std::tuple<int, int, int, int>> cells;
+		std::vector<Common::Line> lines;
 
-		if (!xycut(cells, areaWidth, areaHeight, offsetWidth, offsetHeight, recDepth > 0))
+		if (!xycut(lines, areaWidth, areaHeight, offsetWidth, offsetHeight, false/*recDepth > 0*/))
 			return false;
 
-		if (!xycutPostProcess(cells, offsetWidth, offsetHeight))
+		if (!xycutPostProcess(lines, areaWidth, areaHeight, offsetWidth, offsetHeight))
 			return false;
 
 		// when can't split cell anymore.
-		if (cells.size() <= 1) {
+		if (lines.empty()) {
 			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
 				offsetWidth, offsetWidth + areaWidth - 1);
 			return true;
 		}
 
+		std::vector<Common::Cell> cells;
+		std::list<Common::Line> horList, verList;
+
+		std::sort(lines.begin(), lines.end(), [](const Common::Line &line1, const Common::Line &line2) {
+			return line1.getOffset() < line2.getOffset();
+		});
+
+		for (const auto &line : lines) {
+			switch (line.getType()) {
+			case Common::LineType::LINE_HORIZONTAL:
+				horList.push_back(std::move(line));
+				break;
+
+			case Common::LineType::LINE_VERTICAL:
+				verList.push_back(std::move(line));
+				break;
+
+			default:
+				return false;
+			}
+		}
+
+		// for security.
+		lines.clear();
+
+		// some problems...
+		int top = offsetHeight, bottom, left, right;
+		for (const auto &horLine : horList) {
+			bottom = horLine.getOffset();
+			left = offsetWidth;
+			for (const auto &verLine : verList) {
+				right = verLine.getOffset();
+				cells.emplace_back(top,bottom,left,right);
+				left = right;
+			}
+			top = bottom;
+		}
+
 		bool success = true;
 
 		for (const auto &cell : cells) {
-			int top = std::get<0>(cell) + offsetHeight;
-			int bottom = std::get<1>(cell) + offsetHeight;
-			int left = std::get<2>(cell) + offsetWidth;
-			int right = std::get<3>(cell) + offsetWidth;
+			int top = cell.getTop();
+			int bottom = cell.getBottom();
+			int left = cell.getLeft();
+			int right = cell.getRight();
 
 			success = success && recXycut(recDepth + 1, right - left + 1, bottom - top + 1, left, top);
 			if (!success)
@@ -215,7 +254,7 @@ namespace TableDetection
 		return success;
 	}
 
-	bool TableDetector::xycut(std::vector<std::tuple<int, int, int, int>>& cells, unsigned areaWidth, unsigned areaHeight,
+	bool TableDetector::xycut(std::vector<Common::Line>& lines, unsigned areaWidth, unsigned areaHeight,
 		unsigned offsetWidth, unsigned offsetHeight, bool edgeExist)
 	{
 		bool success = false;
@@ -247,7 +286,7 @@ namespace TableDetection
 		if (!pHm->applyKmeans(HistogramType::TYPE_Y))
 			goto END;
 
-		cells = pHm->getTableInfo();
+		lines = pHm->getTableInfo();
 
 		success = true;
 	END:;
@@ -256,69 +295,65 @@ namespace TableDetection
 		return success;
 	}
 
-	bool TableDetector::xycutPostProcess(std::vector<std::tuple<int, int, int, int>>& cells, 
-		unsigned offsetWidth, unsigned offsetHeight)
+	bool TableDetector::xycutPostProcess(std::vector<Common::Line>& lines,
+		unsigned areaWidth, unsigned areaHeight, unsigned offsetWidth, unsigned offsetHeight)
 	{
 		bool success = false;
-		bgi::rtree<box, bgi::quadratic<16>> rtree;
+		bgi::rtree<segment, bgi::quadratic<16>> rtree;
 		const std::list<Common::SparseBlock> &sparseBlockList = this->pSbm->getSparseBlocks();
 
-		for (const auto &cell : cells) {
-			int top = std::get<0>(cell) + offsetHeight;
-			int bottom = std::get<1>(cell) + offsetHeight;
-			int left = std::get<2>(cell) + offsetWidth;
-			int right = std::get<3>(cell) + offsetWidth;
-			rtree.insert(box(point(left, top), point(right, bottom)));
-		}
-		
-		for (const auto &block : sparseBlockList) {
-			std::vector<box> result;
-			rtree.query(bgi::intersects(static_cast<const box&>(block)), std::back_inserter(result));
-			int minTop = INT_MAX, maxBottom = INT_MIN, minLeft = INT_MAX, maxRight = INT_MIN;
-			for (const auto &r : result) {
-				int top = r.min_corner().get<1>();
-				int bottom = r.max_corner().get<1>();
-				int left = r.min_corner().get<0>();
-				int right = r.max_corner().get<0>();
-				minTop = std::min(top, minTop);
-				maxBottom = std::max(bottom, maxBottom);
-				minLeft = std::min(left, minLeft);
-				maxRight = std::max(right, maxRight);
-				rtree.remove(r);
+		for (const auto &line : lines) {
+			Common::LineType type = line.getType();
+			int offset = line.getOffset();
+			int top, bottom, left, right;
+			
+			switch (type) {
+			case Common::LineType::LINE_HORIZONTAL:
+				top = bottom = offset;
+				left = offsetWidth;
+				right = offsetWidth + areaWidth - 1;
+				break;
+
+			case Common::LineType::LINE_VERTICAL:
+				left = right = offset;
+				top = offsetHeight;
+				bottom = offsetHeight + areaHeight - 1;
+				break;
+
+			default : 
+				return false;
 			}
-			if(minTop != INT_MAX)
-				rtree.insert(box(point(minLeft, minTop), point(maxRight, maxBottom)));
+
+			rtree.insert(segment(point(left, top), point(right, bottom)));
 		}
 
-		cells.clear();
+		for (const auto &block : sparseBlockList) {
+			std::vector<segment> results;
+			rtree.query(bgi::intersects(static_cast<const box&>(block)), std::back_inserter(results));
+			for (const auto &result : results) {
+				rtree.remove(result);
+			}
+		}
+
+		lines.clear();
 		for (const auto &r : rtree) {
-			int top = r.min_corner().get<1>();
-			int bottom = r.max_corner().get<1>();
-			int left = r.min_corner().get<0>();
-			int right = r.max_corner().get<0>();
-			cells.emplace_back(top, bottom, left, right);
+			int top = r.first.get<1>();
+			int bottom = r.second.get<1>();
+			int left = r.first.get<0>();
+			int right = r.second.get<0>();
+
+			Common::LineType type;
+			int offset;
+			if (top == bottom) {
+				type = Common::LineType::LINE_HORIZONTAL;
+				offset = top;
+			}
+			else{
+				type = Common::LineType::LINE_VERTICAL;
+				offset = left;
+			}
+			lines.emplace_back(type, offset);
 		}
-
-		/*
-		std::set<int, std::less<int>> horLineSet, verLineSet;
-		int maxBottom = 0, maxRight = 0;
-		for (const auto &cell : cells) {
-			int top = std::get<0>(cell) + offsetHeight;
-			int bottom = std::get<1>(cell) + offsetHeight;
-			int left = std::get<2>(cell) + offsetWidth;
-			int right = std::get<3>(cell) + offsetWidth;
-
-			horLineSet.emplace(top);
-			verLineSet.emplace(left);
-
-			if (maxBottom < bottom)
-				maxBottom = bottom;
-			if (maxRight < right)
-				maxRight = right;
-		}
-		horLineSet.emplace(maxBottom);
-		verLineSet.emplace(maxRight);
-		*/
 
 		success = true;
 	END:;

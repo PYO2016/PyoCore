@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Common/PngImage.h"
+#include "../Common/Table.h"
 #include <list>
 #include <memory>
 #include <tuple>
@@ -73,7 +74,7 @@ namespace TableDetection
 		bool applyMedianFilter(HistogramType type);
 		bool filterExtremum(HistogramType type);
 		bool applyKmeans(HistogramType type);
-		std::vector<std::tuple<int, int, int, int>> getTableInfo();	// top bottom left right
+		std::vector<Common::Line> getTableInfo();	// top bottom left right
 		/* etc... */
 
 	private:

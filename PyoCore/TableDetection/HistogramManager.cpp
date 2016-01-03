@@ -515,10 +515,10 @@ namespace TableDetection
 
 		return success;
 	}
-	std::vector<std::tuple<int, int, int, int>> HistogramManager::getTableInfo()
+	std::vector<Common::Line> HistogramManager::getTableInfo()
 	{
 		// top bottom left right
-		std::vector<std::tuple<int, int, int, int>> tableVector;
+		std::vector<Common::Line> lineVector;
 
 		auto xExtremum  = pHistogramX->getExtremumList();
 		auto yExtremum  = pHistogramY->getExtremumList();
@@ -558,6 +558,14 @@ namespace TableDetection
 				yExtremum.emplace_back(this->areaHeight - 1, ExtremumType::TYPE_MIN);
 		}
 
+		for (const auto &x : xExtremum) {
+			lineVector.emplace_back(Common::LineType::LINE_VERTICAL, x.first);
+		}
+		for (const auto &y : yExtremum) {
+			lineVector.emplace_back(Common::LineType::LINE_HORIZONTAL, y.first);
+		}
+
+		/*
 		if (yExtremum.empty() || xExtremum.empty()) 
 		{
 			return tableVector;
@@ -575,7 +583,7 @@ namespace TableDetection
 				tableVector.emplace_back(top, bottom, left, right);
 			}
 		}
-
-		return tableVector;
+		*/
+		return lineVector;
 	}
 }
