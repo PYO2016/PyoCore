@@ -555,7 +555,7 @@ namespace TableDetection
 					jtr = ktr;
 					ktr = std::next(ktr);
 				}
-				int r = std::distance(itr, ktr) / 2, l = r + (std::distance(itr, ktr) & 1 == 1) ? 1 : 0;
+				int r = std::distance(itr, ktr) / 2, l = r + ((std::distance(itr, ktr) & 1) == 1 ? 1 : 0);
 				jtr = itr;
 				while(l--)
 					jtr = xExtremum.erase(jtr);
@@ -578,7 +578,7 @@ namespace TableDetection
 					jtr = ktr;
 					ktr = std::next(ktr);
 				}
-				int r = std::distance(itr, ktr) / 2, l = r + (std::distance(itr, ktr) & 1 == 1) ? 1 : 0;
+				int r = std::distance(itr, ktr) / 2, l = r + ((std::distance(itr, ktr) & 1) == 1 ? 1 : 0);
 				jtr = itr;
 				while(l--)
 					jtr = yExtremum.erase(jtr);
