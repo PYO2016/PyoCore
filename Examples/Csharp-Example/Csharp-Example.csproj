@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C2281CD3-2CDF-4FAF-BEB6-A28CEF822AF4}</ProjectGuid>
+    <ProjectGuid>{329ADB80-DEE9-44DB-B293-B87DF01DABD0}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Csharp_Import</RootNamespace>
-    <AssemblyName>Csharp-Import</AssemblyName>
+    <RootNamespace>Csharp_Example</RootNamespace>
+    <AssemblyName>Csharp-Example</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

@@ -46,7 +46,7 @@ namespace TableDetection
 		pHm.reset();
 	}
 
-	bool TableDetector::process(const std::wstring& imageFile, const std::wstring& outputFile, bool isDebug)
+	bool TableDetector::process(const std::wstring& imageFile, std::wstring& resultString, bool isDebug)
 	{
 		DEBUG_MSG("process() start!!");
 
@@ -55,14 +55,13 @@ namespace TableDetection
 		cleanup();
 
 		this->imageFile = imageFile;
-		this->outputFile = outputFile;
 		this->isDebug = isDebug;
 
 		/* real process!! */
-		return process();
+		return process(resultString);
 	}
 
-	bool TableDetector::process()
+	bool TableDetector::process(std::wstring& resultString)
 	{
 		DEBUG_MSG("(real) process() start!!");
 
@@ -92,7 +91,7 @@ namespace TableDetection
 
 		DEBUG_MSG("exportTable() start!!");
 
-		result = TableExporter::ExportTable(table);
+		resultString = TableExporter::ExportTable(table);
 
 		DEBUG_MSG("exportTable() finish!!");
 
@@ -132,9 +131,6 @@ namespace TableDetection
 		DEBUG_ACTION(pImage->storeToFile(imageFile + L"_after_sparseblock.png"));
 
 		// determine constants.
-		// 1. minWidth = avg letter size * 1.5
-		// 2. minHeight = avg letter size * 1.5
-		// 3. maxRecDepth = ??
 		minWidth = pSbm->getLetterWidthAvg() * 1.5;
 		minHeight = pSbm->getLetterHeightAvg() * 1.5;
 		maxRecDepth = 1;

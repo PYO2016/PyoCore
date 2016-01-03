@@ -10,36 +10,15 @@ namespace PyoCore
     class PyoCore
     {
         [DllImport("PyoCore.dll")]
-        public static extern void helloWorld();
-
-        [DllImport("PyoCore.dll")]
-        public static extern int importTestW(
-            [param: MarshalAs(UnmanagedType.LPWStr)]
-            String imageFileName,
-            [param: MarshalAs(UnmanagedType.I4)]
-            ImageFileType imageFileType,
-            [param: MarshalAs(UnmanagedType.LPWStr)]
-            StringBuilder outputFileName
-            );
-
-        [DllImport("PyoCore.dll")]
-        public static extern int importTestA(
-            [param: MarshalAs(UnmanagedType.LPStr)]
-            String imageFileName,
-            [param: MarshalAs(UnmanagedType.I4)]
-            ImageFileType imageFileType,
-            [param: MarshalAs(UnmanagedType.LPStr)]
-            StringBuilder outputFileName
-            );
-
-        [DllImport("PyoCore.dll")]
         public static extern int processImageFileW (
             [param: MarshalAs(UnmanagedType.LPWStr)]
             String imageFileName,
             [param: MarshalAs(UnmanagedType.I4)]
             ImageFileType imageFileType,
             [param: MarshalAs(UnmanagedType.LPWStr)]
-            String outputFileName,
+            StringBuilder resultBuffer,
+            [param: MarshalAs(UnmanagedType.U4)]
+            uint resultBufferLen,
             [param: MarshalAs(UnmanagedType.Bool)]
             Boolean isDebug
             );
@@ -51,7 +30,9 @@ namespace PyoCore
             [param: MarshalAs(UnmanagedType.I4)]
             ImageFileType imageFileType,
             [param: MarshalAs(UnmanagedType.LPStr)]
-            String outputFileName,
+            StringBuilder resultBuffer,
+            [param: MarshalAs(UnmanagedType.U4)]
+            uint resultBufferLen,
             [param: MarshalAs(UnmanagedType.Bool)]
             Boolean isDebug
             );

@@ -400,7 +400,7 @@ namespace TableDetection
 			}
 		}
 
-		// add visible lines to extremumList.
+		// apply special values
 		auto itr = std::begin(this->extremumList);
 		for (const auto &ext : specialValues)
 		{
