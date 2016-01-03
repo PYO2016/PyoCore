@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include "EncodingConverter.h"
 
 namespace Common
 {
