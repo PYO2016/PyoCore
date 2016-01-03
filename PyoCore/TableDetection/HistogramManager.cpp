@@ -23,7 +23,7 @@ namespace TableDetection
 
 	Histogram::Histogram(const Histogram& h)
 		: type(h.type), image(h.image), length(h.length), valLimit(h.valLimit),
-			extremumList(h.extremumList), edgeExist(h.edgeExist), visibleLines(h.visibleLines)
+			extremumList(h.extremumList), edgeExist(h.edgeExist), specialValues(h.specialValues)
 	{
 		for (int i = 0; i < length; ++i)
 			values[i] = h.values[i];
@@ -60,7 +60,7 @@ namespace TableDetection
 		return true;
 	}
 
-	bool Histogram::detectVisibleLines()
+	bool Histogram::detectSpecialValues()
 	{
 		int maxVal = INT_MIN;
 		int minVal = INT_MAX;
@@ -76,13 +76,13 @@ namespace TableDetection
 			if (values[i] > maxVal * 0.9 ) {
 				int j = i;
 				while (j < length && values[j] > maxVal * 0.9)++j;
-				this->visibleLines.emplace_back((j + i) / 2, ExtremumType::TYPE_MAX);
+				this->specialValues.emplace_back((j + i) / 2, ExtremumType::TYPE_MAX);
 				i = j - 1;
 			}
 			else if (values[i] < minVal * 1.1) {
 				int j = i;
 				while (j < length && values[j] < minVal * 1.1)++j;
-				this->visibleLines.emplace_back((j + i) / 2, ExtremumType::TYPE_MIN);
+				this->specialValues.emplace_back((j + i) / 2, ExtremumType::TYPE_MIN);
 				i = j - 1;
 			}
 		}
@@ -382,6 +382,11 @@ namespace TableDetection
 
 	outerLoop:
 
+		return success;
+	}
+
+	void Histogram::detectLines()
+	{
 		// erase all maximums.
 		for (auto itr = std::begin(this->extremumList); itr != std::end(this->extremumList); )
 		{
@@ -397,15 +402,13 @@ namespace TableDetection
 
 		// add visible lines to extremumList.
 		auto itr = std::begin(this->extremumList);
-		for (const auto &line : visibleLines)
+		for (const auto &ext : specialValues)
 		{
-			while (itr != std::end(this->extremumList) && itr->first < line.first) ++itr;
-			if (itr == std::end(this->extremumList) || itr->first != line.first) {
-				this->extremumList.emplace(itr, line.first, line.second);
+			while (itr != std::end(this->extremumList) && itr->first < ext.first) ++itr;
+			if (itr == std::end(this->extremumList) || itr->first != ext.first) {
+				this->extremumList.emplace(itr, ext.first, ext.second);
 			}
 		}
-
-		return success;
 	}
 
 	/* HistogramManager */
@@ -468,11 +471,11 @@ namespace TableDetection
 		switch (type)
 		{
 		case HistogramType::TYPE_X:
-			success = pHistogramX->detectVisibleLines();
+			success = pHistogramX->detectSpecialValues();
 			break;
 
 		case HistogramType::TYPE_Y:
-			success = pHistogramY->detectVisibleLines();
+			success = pHistogramY->detectSpecialValues();
 			break;
 		}
 
@@ -529,10 +532,13 @@ namespace TableDetection
 
 		return success;
 	}
-	std::vector<Common::Line> HistogramManager::getTableInfo()
+	std::vector<Common::Line> HistogramManager::getLineInfo()
 	{
 		// top bottom left right
 		std::vector<Common::Line> lineVector;
+
+		pHistogramX->detectLines();
+		pHistogramY->detectLines();
 
 		auto xExtremum  = pHistogramX->getExtremumList();
 		auto yExtremum  = pHistogramY->getExtremumList();
@@ -606,25 +612,6 @@ namespace TableDetection
 			lineVector.emplace_back(Common::LineType::LINE_HORIZONTAL, y.first);
 		}
 
-		/*
-		if (yExtremum.empty() || xExtremum.empty()) 
-		{
-			return tableVector;
-		}
-
-		int top, bottom, left, right;
-		for (auto itr = begin(yExtremum); itr != prev(end(yExtremum)); ++itr)
-		{
-			top = itr->first;
-			bottom = next(itr)->first;
-			for (auto jtr = begin(xExtremum); jtr != prev(end(xExtremum)); ++jtr)
-			{
-				left = jtr->first;
-				right = next(jtr)->first;
-				tableVector.emplace_back(top, bottom, left, right);
-			}
-		}
-		*/
 		return lineVector;
 	}
 }

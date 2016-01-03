@@ -124,13 +124,7 @@ namespace TableDetection
 
 		// get sparse blocks.
 		pSbm = std::make_shared<Common::SparseBlockManager>(*pImage);
-		/*
-		if (!pSbm->makeSparseBlock())
-			goto END;
 
-		if (!pSbm->mergeSparseBlock())
-			goto END;
-		*/
 		if (!pSbm->process())
 			goto END;
 
@@ -285,7 +279,7 @@ namespace TableDetection
 		if (!pHm->applyKmeans(HistogramType::TYPE_Y))
 			goto END;
 
-		lines = pHm->getTableInfo();
+		lines = pHm->getLineInfo();
 
 		success = true;
 	END:;
