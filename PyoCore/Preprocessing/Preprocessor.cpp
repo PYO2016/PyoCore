@@ -4,7 +4,7 @@
 
 namespace Preprocessing 
 {
-	bool Preprocessor::process(PngImage& image, int blockSize, double c)
+	bool Preprocessor::process(PngImage& image)
 	{
 		static int lowThreshold = 30;
 		static int ratio = 3;
