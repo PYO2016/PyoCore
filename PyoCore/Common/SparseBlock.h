@@ -22,8 +22,8 @@ namespace Common
 		inline int getWidth();
 		inline int getHeight();
 		inline std::wstring getText();
-		inline std::wstring SparseBlock::setText(const char *text);
-		inline std::wstring setText(std::wstring text);
+		inline void setText(const char *text);
+		inline void setText(std::wstring text);
 		inline int getRealArea();
 		inline bool setRealArea(int value);
 
@@ -62,11 +62,11 @@ namespace Common
 	{
 		return text;
 	}
-	inline std::wstring SparseBlock::setText(const char *text)
+	inline void SparseBlock::setText(const char *text)
 	{
 		this->text = EncodingConverter::s2ws(text);
 	}
-	inline std::wstring SparseBlock::setText(std::wstring text)
+	inline void SparseBlock::setText(std::wstring text)
 	{
 		this->text = text;
 	}

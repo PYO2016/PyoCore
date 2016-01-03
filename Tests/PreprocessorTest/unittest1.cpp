@@ -24,23 +24,23 @@ namespace PreprocessorTest
 		
 		TEST_METHOD(TestSparseBlocksPro)
 		{
-			std::shared_ptr<PngImage> img = PngImage::LoadImage(L"C:/Users/KGWANGMIN/Pictures/test4.png");
+			std::shared_ptr<PngImage> img = PngImage::LoadImage(L"..\\..\\testcases\\test4.png");
 			Preprocessor::process(*img);
-			img->storeToFile(L"C:/Users/KGWANGMIN/Pictures/_preprocessed.png");
+			img->storeToFile(L"..\\..\\testcases\\t_preprocessed.png");
 
 			SparseBlockManager manager(*img);
 			manager.process();
 
-			img->storeToFile(L"C:/Users/KGWANGMIN/Pictures/_sparsed.png");
+			img->storeToFile(L"..\\..\\testcases\\t_sparsed.png");
 		}
 
 		TEST_METHOD(TestSparseBlocks)
 		{
 			// TODO: 테스트 코드를 여기에 입력합니다.
-			std::shared_ptr<PngImage> img = PngImage::LoadImage(L"C:/Users/KGWANGMIN/Pictures/10.png");
-			img->storeToFile(L"C:/Users/KGWANGMIN/Pictures/4_copy.png");
+			std::shared_ptr<PngImage> img = PngImage::LoadImage(L"..\\..\\testcases\\test4_1.png");
+			img->storeToFile(L"..\\..\\testcases\\t4_copy.png");
 			Preprocessor::process(*img);
-			img->storeToFile(L"C:/Users/KGWANGMIN/Pictures/4_gray.png");
+			img->storeToFile(L"..\\..\\testcases\\t4_gray.png");
 
 			SparseBlockManager manager(*img);
 			manager.makeSparseBlock();
