@@ -34,10 +34,9 @@ namespace Common
 		bool clearSparseBlocks();
 		bool initWidthHeight();
 
-		std::vector<SparseBlock> _sparseBlocks;
 		std::list<SparseBlock> sparseBlocks;
 		PngImage& image;
-		boost::geometry::index::rtree<box, boost::geometry::index::quadratic<16>> rtree;
+		bgi::rtree<box, bgi::quadratic<16>> rtree;
 		box* covered = nullptr;
 
 		double heightAvg = -1, widthAvg = -1;
