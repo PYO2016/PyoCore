@@ -285,7 +285,7 @@ namespace TableDetection
 		if (!pHm->applyKmeans(HistogramType::TYPE_Y))
 			goto END;
 
-		lines = pHm->getTableInfo();
+		lines = pHm->getLineInfo();
 
 		success = true;
 	END:;

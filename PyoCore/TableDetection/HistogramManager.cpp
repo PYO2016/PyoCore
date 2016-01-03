@@ -376,6 +376,11 @@ namespace TableDetection
 
 	outerLoop:
 
+		return success;
+	}
+
+	void Histogram::detectLines()
+	{
 		// erase all maximums.
 		for (auto itr = std::begin(this->extremumList); itr != std::end(this->extremumList); )
 		{
@@ -398,8 +403,6 @@ namespace TableDetection
 				this->extremumList.emplace(itr, line.first, line.second);
 			}
 		}
-
-		return success;
 	}
 
 	/* HistogramManager */
@@ -523,10 +526,13 @@ namespace TableDetection
 
 		return success;
 	}
-	std::vector<Common::Line> HistogramManager::getTableInfo()
+	std::vector<Common::Line> HistogramManager::getLineInfo()
 	{
 		// top bottom left right
 		std::vector<Common::Line> lineVector;
+
+		pHistogramX->detectLines();
+		pHistogramY->detectLines();
 
 		auto xExtremum  = pHistogramX->getExtremumList();
 		auto yExtremum  = pHistogramY->getExtremumList();

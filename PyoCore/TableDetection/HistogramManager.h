@@ -40,6 +40,7 @@ namespace TableDetection
 		bool initFilterExtremum();	// not tested
 		double getKmeansBoundary(ExtremumType type);
 		bool removeKmeansValues(double minBoundary, double maxBoundary);
+		void detectLines();
 		
 		inline const std::list<std::pair<int, ExtremumType>>& getExtremumList () const;
 
@@ -74,7 +75,7 @@ namespace TableDetection
 		bool applyMedianFilter(HistogramType type);
 		bool filterExtremum(HistogramType type);
 		bool applyKmeans(HistogramType type);
-		std::vector<Common::Line> getTableInfo();	// top bottom left right
+		std::vector<Common::Line> getLineInfo();	// top bottom left right
 		/* etc... */
 
 	private:
