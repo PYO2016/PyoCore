@@ -124,28 +124,15 @@ namespace TableDetection
 
 		// get sparse blocks.
 		pSbm = std::make_shared<Common::SparseBlockManager>(*pImage);
-		
+		/*
 		if (!pSbm->makeSparseBlock())
 			goto END;
 
 		if (!pSbm->mergeSparseBlock())
 			goto END;
-
-		{
-			auto p = pSbm->getSparseBlocks();
-			for (auto pit : p)
-			{
-				auto n = pit.getBottom();
-				auto m = pit.getRight();
-				for (auto i = pit.getTop(); i < n; ++i)
-				{
-					for (auto j = pit.getLeft(); j < m; ++j)
-					{
-						(*pImage)[i][j].B = (*pImage)[i][j].G = (*pImage)[i][j].R = 0;
-					}
-				}
-			}
-		}
+		*/
+		if (!pSbm->process())
+			goto END;
 
 		DEBUG_MSG("After sparse block detection, store image file");
 		DEBUG_ACTION(pImage->storeToFile(imageFile + L"_after_sparseblock.png"));

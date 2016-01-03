@@ -53,7 +53,7 @@ namespace TableDetection
 		int length, valLimit;
 		// extremum values
 		std::list<std::pair<int, ExtremumType>> extremumList;
-		std::vector<int> visibleLines;
+		std::vector<std::pair<int, ExtremumType>> visibleLines;
 	};
 
 	class HistogramManager

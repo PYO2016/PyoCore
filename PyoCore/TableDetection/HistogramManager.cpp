@@ -63,14 +63,21 @@ namespace TableDetection
 	bool Histogram::detectVisibleLines()
 	{
 		int maxVal = INT_MIN;
+		int minVal = INT_MAX;
 		for (int i = 0; i < length; ++i) {
 			if (values[i] > maxVal)
 				maxVal = values[i];
+			if (values[i] < maxVal)
+				minVal = values[i];
 		}
 		
+		// * TODO : select middle things.
 		for (int i = 0; i < length; ++i) {
 			if (values[i] > maxVal * 0.9 ) {
-				this->visibleLines.push_back(i);
+				this->visibleLines.emplace_back(i, ExtremumType::TYPE_MAX);
+			}
+			else if (values[i] < minVal * 1.1) {
+				this->visibleLines.emplace_back(i, ExtremumType::TYPE_MIN);
 			}
 		}
 		return true;
@@ -312,6 +319,7 @@ namespace TableDetection
 		
 		return ((static_cast<double>(lowerMaxValue) + static_cast<double>(upperMinValue)) / 2);
 	}
+
 	bool Histogram::removeKmeansValues(double minBoundary, double maxBoundary)
 	{
 		bool success = true;
@@ -383,11 +391,11 @@ namespace TableDetection
 
 		// add visible lines to extremumList.
 		auto itr = std::begin(this->extremumList);
-		for (const auto &idx : visibleLines)
+		for (const auto &line : visibleLines)
 		{
-			while (itr != std::end(this->extremumList) && itr->first < idx) ++itr;
-			if (itr == std::end(this->extremumList) || itr->first != idx) {
-				this->extremumList.emplace(itr, idx, ExtremumType::TYPE_MAX);
+			while (itr != std::end(this->extremumList) && itr->first < line.first) ++itr;
+			if (itr == std::end(this->extremumList) || itr->first != line.first) {
+				this->extremumList.emplace(itr, line.first, line.second);
 			}
 		}
 
@@ -524,6 +532,7 @@ namespace TableDetection
 		auto yExtremum  = pHistogramY->getExtremumList();
 
 		// merge adjacent lines.
+		// * TODO : select middle things.
 		for (auto itr = std::begin(xExtremum); itr != std::prev(std::end(xExtremum)); )
 		{
 			auto jtr = std::next(itr);

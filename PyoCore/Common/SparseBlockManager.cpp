@@ -23,6 +23,20 @@ namespace Common
 	{}
 	SparseBlockManager::~SparseBlockManager()
 	{}
+
+	bool SparseBlockManager::process()
+	{
+		bool success = true;
+
+		success &= this->clearSparseBlocks();
+		success &= this->makeSparseBlock();
+		success &= this->mergeSparseBlock();
+		success &= this->initImageToZero();
+		success &= this->initImageWithSparseBlocks();
+
+		return success;
+	}
+
 	bool SparseBlockManager::makeSparseBlock()
 	{
 		bool success = true;
@@ -206,18 +220,6 @@ namespace Common
 		return true;
 	}
 
-	bool SparseBlockManager::correctImage()
-	{
-		bool success = true;
-
-		success &= this->clearSparseBlocks();
-		success &= this->makeSparseBlock();
-		success &= this->mergeSparseBlock();
-		success &= this->initImageToZero();
-		success &= this->initImageWithSparseBlocks();
-
-		return success;
-	}
 	bool SparseBlockManager::initImageToZero()
 	{
 		bool success = false;
