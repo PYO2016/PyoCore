@@ -12,7 +12,7 @@ namespace Common
 	class SparseBlock : public box
 	{
 	public:
-		SparseBlock(point p1, point p2, std::wstring text = L"");
+		SparseBlock(point p1, point p2, int realArea = 0, std::wstring text = L"");
 		~SparseBlock();
 
 		inline int getTop();
@@ -24,9 +24,12 @@ namespace Common
 		inline std::wstring getText();
 		inline std::wstring SparseBlock::setText(const char *text);
 		inline std::wstring setText(std::wstring text);
+		inline int getRealArea();
+		inline bool setRealArea(int value);
 
 	private:
 		std::wstring text;
+		int realArea;
 	};
 
 	/* inline functions */
@@ -66,5 +69,14 @@ namespace Common
 	inline std::wstring SparseBlock::setText(std::wstring text)
 	{
 		this->text = text;
+	}
+	inline int SparseBlock::getRealArea()
+	{
+		return this->realArea;
+	}
+	inline bool SparseBlock::setRealArea(int value)
+	{
+		this->realArea = value;
+		return true;
 	}
 }

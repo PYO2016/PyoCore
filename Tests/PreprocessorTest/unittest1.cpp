@@ -34,7 +34,7 @@ namespace PreprocessorTest
 		TEST_METHOD(TestSparseBlocks)
 		{
 			// TODO: 테스트 코드를 여기에 입력합니다.
-			std::shared_ptr<PngImage> img = PngImage::LoadImage(L"C:/Users/KGWANGMIN/Pictures/9.png");
+			std::shared_ptr<PngImage> img = PngImage::LoadImage(L"C:/Users/KGWANGMIN/Pictures/10.png");
 			img->storeToFile(L"C:/Users/KGWANGMIN/Pictures/4_copy.png");
 			Preprocessor::process(*img);
 			img->storeToFile(L"C:/Users/KGWANGMIN/Pictures/4_gray.png");
