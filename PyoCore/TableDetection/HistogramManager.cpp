@@ -67,20 +67,23 @@ namespace TableDetection
 		for (int i = 0; i < length; ++i) {
 			if (values[i] > maxVal)
 				maxVal = values[i];
-			if (values[i] < maxVal)
+			if (values[i] < minVal)
 				minVal = values[i];
 		}
 		
-		int lastValue = 0;
 		// * TODO : select middle things.
 		for (int i = 0; i < length; ++i) {
 			if (values[i] > maxVal * 0.9 ) {
-				this->specialValues.emplace_back((i + lastValue) / 2, ExtremumType::TYPE_MAX);
-				lastValue = i;
+				int j = i;
+				while (j < length && values[j] > maxVal * 0.9)++j;
+				this->specialValues.emplace_back((j - i) / 2, ExtremumType::TYPE_MAX);
+				i = j - 1;
 			}
 			else if (values[i] < minVal * 1.1) {
-				this->specialValues.emplace_back((i + lastValue) / 2, ExtremumType::TYPE_MIN);
-				lastValue = i;
+				int j = i;
+				while (j < length && values[j] < minVal * 0.9)++j;
+				this->specialValues.emplace_back((j - i) / 2, ExtremumType::TYPE_MIN);
+				i = j - 1;
 			}
 		}
 		return true;
@@ -544,10 +547,22 @@ namespace TableDetection
 		// * TODO : select middle things.
 		for (auto itr = std::begin(xExtremum); itr != std::prev(std::end(xExtremum)); )
 		{
-			auto jtr = std::next(itr);
-			if (itr->first + 1 >= jtr->first) {
-				jtr->first = (itr->first + jtr->first) / 2;
-				itr = xExtremum.erase(itr);
+			auto jtr = itr;
+			auto ktr = std::next(jtr);
+
+			if (jtr->first + 1 >= ktr->first) {
+				while (ktr != std::end(xExtremum) && jtr->first + 1 >= ktr->first) {
+					jtr = ktr;
+					ktr = std::next(ktr);
+				}
+				int r = std::distance(itr, ktr) / 2, l = r + (std::distance(itr, ktr) & 1 == 1) ? 1 : 0;
+				jtr = itr;
+				while(l--)
+					jtr = xExtremum.erase(jtr);
+				jtr = std::next(jtr);
+				while(r--)
+					jtr = xExtremum.erase(jtr);
+				itr = jtr;
 			}
 			else {
 				++itr;
@@ -555,10 +570,22 @@ namespace TableDetection
 		}
 		for (auto itr = std::begin(yExtremum); itr != std::prev(std::end(yExtremum)); )
 		{
-			auto jtr = std::next(itr);
-			if (itr->first + 1 >= jtr->first) {
-				jtr->first = (itr->first + jtr->first) / 2;
-				itr = yExtremum.erase(itr);
+			auto jtr = itr;
+			auto ktr = std::next(jtr);
+
+			if (jtr->first + 1 >= ktr->first) {
+				while (ktr != std::end(yExtremum) && jtr->first + 1 >= ktr->first) {
+					jtr = ktr;
+					ktr = std::next(ktr);
+				}
+				int r = std::distance(itr, ktr) / 2, l = r + (std::distance(itr, ktr) & 1 == 1) ? 1 : 0;
+				jtr = itr;
+				while(l--)
+					jtr = yExtremum.erase(jtr);
+				jtr = std::next(jtr);
+				while(r--)
+					jtr = yExtremum.erase(jtr);
+				itr = jtr;
 			}
 			else {
 				++itr;
