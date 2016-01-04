@@ -423,6 +423,41 @@ namespace TableDetection
 					this->extremumList.emplace(itr, ext.first, ext.second);
 			}
 		}
+
+		// merge adjacent lines. (select middle thing)
+		for (auto itr = std::begin(this->extremumList); itr != std::end(this->extremumList); )
+		{
+			auto jtr = itr;
+			auto ktr = std::next(jtr);
+
+			while (ktr != std::end(this->extremumList) && jtr->first + 1 >= ktr->first) {
+				jtr = ktr;
+				ktr = std::next(ktr);
+			}
+			int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
+			jtr = itr;
+			while (l-- > 0)
+				jtr = this->extremumList.erase(jtr);
+			jtr = std::next(jtr);
+			while (r-- > 0)
+				jtr = this->extremumList.erase(jtr);
+			itr = jtr;
+		}
+
+		/*
+		if (this->edgeExist)
+		{
+		if (xExtremum.empty() || xExtremum.front().first > 0)
+		xExtremum.emplace_front(0, ExtremumType::TYPE_MIN);
+		if (xExtremum.empty() || xExtremum.back().first < this->areaWidth - 1)
+		xExtremum.emplace_back(this->areaWidth - 1, ExtremumType::TYPE_MIN);
+
+		if (yExtremum.empty() || yExtremum.front().first > 0)
+		yExtremum.emplace_front(0, ExtremumType::TYPE_MIN);
+		if (yExtremum.empty() || yExtremum.back().first < this->areaHeight - 1)
+		yExtremum.emplace_back(this->areaHeight - 1, ExtremumType::TYPE_MIN);
+		}
+		*/
 	}
 
 	/* HistogramManager */
@@ -556,67 +591,11 @@ namespace TableDetection
 		auto xExtremum = pHistogramX->getExtremumList();
 		auto yExtremum = pHistogramY->getExtremumList();
 
-		// merge adjacent lines. (select middle thing)
-		for (auto itr = std::begin(xExtremum); itr != std::end(xExtremum); )
-		{
-			auto jtr = itr;
-			auto ktr = std::next(jtr);
-
-			while (ktr != std::end(xExtremum) && jtr->first + 1 >= ktr->first) {
-				jtr = ktr;
-				ktr = std::next(ktr);
-			}
-			int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
-			jtr = itr;
-			while(l-- > 0)
-				jtr = xExtremum.erase(jtr);
-			jtr = std::next(jtr);
-			while(r-- > 0)
-				jtr = xExtremum.erase(jtr);
-			itr = jtr;
+		for (const auto &x : xExtremum) {
+			lineVector.emplace_back(Common::LineType::LINE_VERTICAL, this->offsetWidth + x.first);
 		}
-		for (auto itr = std::begin(yExtremum); itr != std::end(yExtremum); )
-		{
-			auto jtr = itr;
-			auto ktr = std::next(jtr);
-
-			while (ktr != std::end(yExtremum) && jtr->first + 1 >= ktr->first) {
-				jtr = ktr;
-				ktr = std::next(ktr);
-			}
-			int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
-			jtr = itr;
-			while(l-- > 0)
-				jtr = yExtremum.erase(jtr);
-			jtr = std::next(jtr);
-			while(r-- > 0)
-				jtr = yExtremum.erase(jtr);
-			itr = jtr;
-		}
-
-		/*
-		if (this->edgeExist)
-		{
-			if (xExtremum.empty() || xExtremum.front().first > 0)
-				xExtremum.emplace_front(0, ExtremumType::TYPE_MIN);
-			if (xExtremum.empty() || xExtremum.back().first < this->areaWidth - 1)
-				xExtremum.emplace_back(this->areaWidth - 1, ExtremumType::TYPE_MIN);
-
-			if (yExtremum.empty() || yExtremum.front().first > 0)
-				yExtremum.emplace_front(0, ExtremumType::TYPE_MIN);
-			if (yExtremum.empty() || yExtremum.back().first < this->areaHeight - 1)
-				yExtremum.emplace_back(this->areaHeight - 1, ExtremumType::TYPE_MIN);
-		}
-		*/
-
-		//for (const auto &x : xExtremum)
-		for (auto itr = std::begin(xExtremum); itr != std::end(xExtremum); ++itr)
-		{
-			lineVector.emplace_back(Common::LineType::LINE_VERTICAL, this->offsetWidth + itr->first);
-		}
-		for (auto itr = std::begin(yExtremum); itr != std::end(yExtremum); ++itr)
-		{
-			lineVector.emplace_back(Common::LineType::LINE_HORIZONTAL, this->offsetHeight + itr->first);
+		for (const auto &y : yExtremum) {
+			lineVector.emplace_back(Common::LineType::LINE_HORIZONTAL, this->offsetHeight + y.first);
 		}
 
 		return lineVector;

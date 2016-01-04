@@ -172,8 +172,12 @@ namespace TableDetection
 		if (!xycutPostProcess(lines, areaWidth, areaHeight, offsetWidth, offsetHeight))
 			return false;
 
-		std::vector<Common::Cell> cells;
+		const int adjHorLineConstant = this->pSbm->getLetterHeightAvg() * 1.2;
+		const int adjVerLineConstant = this->pSbm->getLetterWidthAvg() * 1.2;
 		std::list<Common::Line> horList, verList;
+		std::pair<std::list<Common::Line>*, Common::LineType> lineListPairArray[2]
+			= { { &horList, Common::LineType::LINE_HORIZONTAL },
+			{ &verList, Common::LineType::LINE_VERTICAL } };
 
 		std::sort(lines.begin(), lines.end(), [](const Common::Line &line1, const Common::Line &line2) {
 			return line1.getOffset() < line2.getOffset();
@@ -197,41 +201,39 @@ namespace TableDetection
 		// for security. "lines" must not be used after this line.
 		lines.clear();
 
-		const int adjHorLineConstant = this->pSbm->getLetterHeightAvg() * 1.2;
-		const int adjVerLineConstant = this->pSbm->getLetterWidthAvg() * 1.2;
-
-		// select boundary 4 lines. And remove lines near boundary lines.
 		if (!firstRecursive) {
-			unsigned base = offsetHeight;
-			while (!horList.empty() &&
-				horList.front().getOffset() - base <= adjHorLineConstant) {
-				base = horList.front().getOffset();
-				horList.pop_front();
-			}
-			base = offsetWidth;
-			while (!verList.empty() &&
-				verList.front().getOffset() - base <= adjVerLineConstant) {
-				base = verList.front().getOffset();
-				verList.pop_front();
-			}
+			// select boundary 4 lines. And remove lines near boundary lines.
+			for (auto lineListPair : lineListPairArray) {
+				auto &lineList = *(lineListPair.first);
+				auto lineType = lineListPair.second;
+				const int adjLineConstant =
+					(lineType == Common::LineType::LINE_HORIZONTAL ? adjHorLineConstant : adjVerLineConstant);
+				unsigned boundary[2];
 
-			base = offsetHeight + areaHeight - 1;
-			while (!horList.empty() &&
-				base - horList.back().getOffset() <= adjHorLineConstant) {
-				base = horList.back().getOffset();
-				horList.pop_back();
-			}
-			base = offsetWidth + areaWidth - 1;
-			while (!verList.empty() &&
-				base - verList.back().getOffset() <= adjVerLineConstant) {
-				base = verList.back().getOffset();
-				verList.pop_back();
-			}
+				if (lineType == Common::LineType::LINE_HORIZONTAL) {
+					boundary[0] = offsetHeight;
+					boundary[1] = offsetHeight + areaHeight - 1;
+				}
+				else {	// vertical line
+					boundary[0] = offsetWidth;
+					boundary[1] = offsetWidth + areaWidth - 1;
+				}
 
-			horList.emplace_front(Common::LineType::LINE_HORIZONTAL, offsetHeight);
-			verList.emplace_front(Common::LineType::LINE_VERTICAL, offsetWidth);
-			horList.emplace_back(Common::LineType::LINE_HORIZONTAL, offsetHeight + areaHeight - 1);
-			verList.emplace_back(Common::LineType::LINE_VERTICAL, offsetWidth + areaWidth - 1);
+				unsigned base = boundary[0];
+				while (!lineList.empty() &&
+					lineList.front().getOffset() - base <= adjLineConstant) {
+					base = lineList.front().getOffset();
+					lineList.pop_front();
+				}
+				base = boundary[1];
+				while (!lineList.empty() &&
+					base - lineList.back().getOffset() <= adjLineConstant) {
+					base = lineList.back().getOffset();
+					lineList.pop_back();
+				}
+				lineList.emplace_front(lineType, boundary[0]);
+				lineList.emplace_back(lineType, boundary[1]);
+			}
 		}
 
 		/// when can't split cell anymore. ///////////
@@ -242,42 +244,34 @@ namespace TableDetection
 		}
 
 		// merge adjecent lines. (select middle thing)
-		auto itr = std::begin(horList);
-		while (itr != std::end(horList))
-		{
-			auto jtr = itr;
-			auto ktr = std::next(jtr);
-			while (ktr != std::end(horList) && ktr->getOffset() - jtr->getOffset() <= adjHorLineConstant) {
-				jtr = ktr;
-				ktr = std::next(ktr);
+		for (auto lineListPair : lineListPairArray) {
+			auto &lineList = *(lineListPair.first);
+			auto lineType = lineListPair.second;
+			const int adjLineConstant =
+				(lineType == Common::LineType::LINE_HORIZONTAL ? adjHorLineConstant : adjVerLineConstant);
+			
+			auto itr = std::begin(lineList);
+			while (itr != std::end(lineList))
+			{
+				auto jtr = itr;
+				auto ktr = std::next(jtr);
+				while (ktr != std::end(lineList) && ktr->getOffset() - jtr->getOffset() <= adjLineConstant) {
+					jtr = ktr;
+					ktr = std::next(ktr);
+				}
+				int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
+				jtr = itr;
+				while (l-- > 0)
+					jtr = lineList.erase(jtr);
+				jtr = std::next(jtr);
+				while (r-- > 0)
+					jtr = lineList.erase(jtr);
+				itr = jtr;
 			}
-			int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
-			jtr = itr;
-			while (l-- > 0)
-				jtr = horList.erase(jtr);
-			jtr = std::next(jtr);
-			while (r-- > 0)
-				jtr = horList.erase(jtr);
-			itr = jtr;
 		}
-		itr = std::begin(verList);
-		while (itr != std::end(verList))
-		{
-			auto jtr = itr;
-			auto ktr = std::next(jtr);
-			while (ktr != std::end(verList) && ktr->getOffset() - jtr->getOffset() <= adjVerLineConstant) {
-				jtr = ktr;
-				ktr = std::next(ktr);
-			}
-			int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
-			jtr = itr;
-			while (l-- > 0)
-				jtr = verList.erase(jtr);
-			jtr = std::next(jtr);
-			while (r-- > 0)
-				jtr = verList.erase(jtr);
-			itr = jtr;
-		}
+
+		// get cells by lines.
+		std::vector<Common::Cell> cells;
 
 		if (!horList.empty() && !verList.empty()) {
 
