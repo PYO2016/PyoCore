@@ -201,47 +201,46 @@ namespace TableDetection
 
 		// for security.
 		lines.clear();
+
+		const int adjHorLineConstant = this->pSbm->getLetterHeightAvg() * 1.2;
+		const int adjVerLineConstant = this->pSbm->getLetterWidthAvg() * 1.2;
 		
+		// merge adjecent lines. (select middle thing)
 		auto itr = std::begin(horList);
 		while (itr != std::end(horList))
 		{
-			auto jtr = std::next(itr);
-			if (jtr != std::end(horList))
-			{
-				if (jtr->getOffset() - itr->getOffset() <= 8)
-				{
-					horList.erase(jtr);
-				}
-				else
-				{
-					++itr;
-				}
+			auto jtr = itr;
+			auto ktr = std::next(jtr);
+			while (ktr != std::end(horList) && ktr->getOffset() - jtr->getOffset() <= adjHorLineConstant) {
+				jtr = ktr;
+				ktr = std::next(ktr);
 			}
-			else
-			{
-				break;
-			}
+			int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
+			jtr = itr;
+			while (l-- > 0)
+				jtr = horList.erase(jtr);
+			jtr = std::next(jtr);
+			while (r-- > 0)
+				jtr = horList.erase(jtr);
+			itr = jtr;
 		}
-
 		itr = std::begin(verList);
 		while (itr != std::end(verList))
 		{
-			auto jtr = std::next(itr);
-			if (jtr != std::end(verList))
-			{
-				if (jtr->getOffset() - itr->getOffset() <= 8)
-				{
-					verList.erase(jtr);
-				}
-				else
-				{
-					++itr;
-				}
+			auto jtr = itr;
+			auto ktr = std::next(jtr);
+			while (ktr != std::end(verList) && ktr->getOffset() - jtr->getOffset() <= adjVerLineConstant) {
+				jtr = ktr;
+				ktr = std::next(ktr);
 			}
-			else
-			{
-				break;
-			}
+			int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
+			jtr = itr;
+			while (l-- > 0)
+				jtr = verList.erase(jtr);
+			jtr = std::next(jtr);
+			while (r-- > 0)
+				jtr = verList.erase(jtr);
+			itr = jtr;
 		}
 		// some problems...
 		//horList.emplace_back(Common::LineType::LINE_HORIZONTAL, offsetHeight + areaHeight - 1);

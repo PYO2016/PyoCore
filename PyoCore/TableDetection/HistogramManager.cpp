@@ -554,55 +554,42 @@ namespace TableDetection
 		auto xExtremum = pHistogramX->getExtremumList();
 		auto yExtremum = pHistogramY->getExtremumList();
 
-		// merge adjacent lines.
-		// * TODO : select middle things.
-		for (auto itr = std::begin(xExtremum);
-			itr != std::prev(std::end(xExtremum)) && itr != std::end(xExtremum); )
+		// merge adjacent lines. (select middle thing)
+		for (auto itr = std::begin(xExtremum); itr != std::end(xExtremum); )
 		{
 			auto jtr = itr;
 			auto ktr = std::next(jtr);
 
-			if (jtr->first + 1 >= ktr->first) {
-				while (ktr != std::end(xExtremum) && jtr->first + 1 >= ktr->first) {
-					jtr = ktr;
-					ktr = std::next(ktr);
-				}
-				int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
-				jtr = itr;
-				while(l-- > 0)
-					jtr = xExtremum.erase(jtr);
-				jtr = std::next(jtr);
-				while(r-- > 0)
-					jtr = xExtremum.erase(jtr);
-				itr = jtr;
+			while (ktr != std::end(xExtremum) && jtr->first + 1 >= ktr->first) {
+				jtr = ktr;
+				ktr = std::next(ktr);
 			}
-			else {
-				++itr;
-			}
+			int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
+			jtr = itr;
+			while(l-- > 0)
+				jtr = xExtremum.erase(jtr);
+			jtr = std::next(jtr);
+			while(r-- > 0)
+				jtr = xExtremum.erase(jtr);
+			itr = jtr;
 		}
-		for (auto itr = std::begin(yExtremum); 
-			itr != std::prev(std::end(yExtremum)) && itr != std::end(yExtremum); )
+		for (auto itr = std::begin(yExtremum); itr != std::end(yExtremum); )
 		{
 			auto jtr = itr;
 			auto ktr = std::next(jtr);
 
-			if (jtr->first + 1 >= ktr->first) {
-				while (ktr != std::end(yExtremum) && jtr->first + 1 >= ktr->first) {
-					jtr = ktr;
-					ktr = std::next(ktr);
-				}
-				int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
-				jtr = itr;
-				while(l-- > 0)
-					jtr = yExtremum.erase(jtr);
-				jtr = std::next(jtr);
-				while(r-- > 0)
-					jtr = yExtremum.erase(jtr);
-				itr = jtr;
+			while (ktr != std::end(yExtremum) && jtr->first + 1 >= ktr->first) {
+				jtr = ktr;
+				ktr = std::next(ktr);
 			}
-			else {
-				++itr;
-			}
+			int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
+			jtr = itr;
+			while(l-- > 0)
+				jtr = yExtremum.erase(jtr);
+			jtr = std::next(jtr);
+			while(r-- > 0)
+				jtr = yExtremum.erase(jtr);
+			itr = jtr;
 		}
 
 		if (this->edgeExist)
