@@ -47,7 +47,7 @@ namespace TableDetection
 		/* Constants for recursive table detection. */
 		/* These values is determined in preprocess(). */
 		unsigned maxRecDepth;
-		int minWidth;
-		int minHeight;
+		int minRecWidth;
+		int minRecHeight;
 	};
 }

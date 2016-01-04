@@ -35,13 +35,23 @@ namespace TableDetectorTest
 				if (prefix[0] == L'#')
 					continue;
 
+				Logger::WriteMessage((L"---- Test for \"" + prefix + L"\" ----\n").c_str());
+
 				TableDetection::TableDetector td;
 				std::wstring resultString;
 
 				std::wstring imageFile = dir + prefix + L".png";
 				std::wstring outputFile = dir + prefix + L".html";
-				Logger::WriteMessage(td.process(imageFile, resultString, true) ? "true" : "false");
-				Logger::WriteMessage(resultString.c_str());
+
+				bool success = td.process(imageFile, resultString, true);
+				if (!success)
+					Logger::WriteMessage("processing fail!\n");
+				else
+					Logger::WriteMessage("processing success!\n");
+
+				Assert::IsTrue(success);
+				
+				//Logger::WriteMessage(resultString.c_str());
 				std::wofstream of(outputFile);
 				of << resultString.c_str();
 				of.close();
