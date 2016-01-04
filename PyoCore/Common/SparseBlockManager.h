@@ -23,20 +23,21 @@ namespace Common
 		SparseBlockManager(Common::PngImage& image);
 		~SparseBlockManager();
 		bool process();
-		bool makeSparseBlock();
-		bool mergeSparseBlock();
+
 		inline double getSparseBlockHeightAvg();
 		inline double getSparseBlockWidthAvg();
 		inline double getLetterHeightAvg();
 		inline double getLetterWidthAvg();
 		bool hasCollisionWithSparseBlock(int top, int bottom, int left, int right);
-		bool initImageToZero();
-		bool initImageWithSparseBlocks();
 
 		inline std::list<SparseBlock>& getSparseBlocks();
 		inline const std::list<SparseBlock>& getSparseBlocks() const;
 
 	private:
+		bool makeSparseBlock();
+		bool mergeSparseBlock();
+		bool initImageToZero();
+		bool initImageWithSparseBlocks();
 		bool clearSparseBlocks();
 		bool arrangeSparseBlocks();
 

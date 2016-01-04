@@ -176,6 +176,14 @@ namespace TableDetection
 			return true;
 		}
 
+		/// when no sparse block in cell. ///////////
+		if (!this->pSbm->hasCollisionWithSparseBlock(offsetHeight, offsetHeight + areaHeight - 1,
+			offsetWidth, offsetWidth + areaWidth - 1)) {
+			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
+				offsetWidth, offsetWidth + areaWidth - 1);
+			return true;
+		}
+
 		bool firstRecursive = (recDepth == 0);
 		std::vector<Common::Line> lines;
 
