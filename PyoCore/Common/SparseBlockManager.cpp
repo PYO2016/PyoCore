@@ -168,19 +168,15 @@ namespace Common
 				if (dist != -1 && dist < STANDARD_VALUE)
 				{
 					double rate = 3;
+					// need height
 					if (itr->min_corner().get<1>() < result_n[deletedIndex].max_corner().get<1>()
 						|| result_n[deletedIndex].min_corner().get<1>() < itr->max_corner().get<1>())
-					{
-						// need height
 						rate = static_cast<double>(itr->getHeight()) / (static_cast<double>(result_n[deletedIndex].max_corner().get<1>()) - static_cast<double>(result_n[deletedIndex].min_corner().get<1>()) + 1);
-					}
+					// else need width
 					else if (itr->min_corner().get<0>() < result_n[deletedIndex].max_corner().get<0>()
 						|| result_n[deletedIndex].min_corner().get<0>() < itr->max_corner().get<0>())
-					{
-						// need width
-						rate = itr->getWidth() / (result_n[deletedIndex].max_corner().get<0>() - result_n[deletedIndex].min_corner().get<0>() + 1);
-					}
-					if (rate > 2 || rate < 0.2)
+						rate = static_cast<double>(itr->getWidth()) / (static_cast<double>(result_n[deletedIndex].max_corner().get<0>()) - static_cast<double>(result_n[deletedIndex].min_corner().get<0>()) + 1);
+					if (rate > 5.0 || rate < 0.2)
 					{
 						// cant merge
 						++itr;
@@ -193,9 +189,7 @@ namespace Common
 
 					this->sparseBlocks.emplace_back(point(left, top), point(right, bottom));
 
-					auto p = std::find(std::begin(sparseBlocks), std::end(sparseBlocks), SparseBlock(result_n[deletedIndex]));
-					sparseBlocks.erase(p);
-
+					sparseBlocks.erase(std::find(std::begin(sparseBlocks), std::end(sparseBlocks), SparseBlock(result_n[deletedIndex])));
 					rtree.remove(static_cast<box&>(*itr));
 					rtree.remove(result_n[deletedIndex]);
 					rtree.insert(box(point(left, top), point(right, bottom)));
