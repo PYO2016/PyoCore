@@ -219,6 +219,17 @@ namespace TableDetection
 			else
 				++currItr;
 		}
+
+		// apply minimum special values
+		auto itr = std::begin(this->extremumList);
+		for (const auto &ext : specialValues)
+		{
+			while (itr != std::end(this->extremumList) && itr->first < ext.first) ++itr;
+			if (itr == std::end(this->extremumList) || itr->first != ext.first) {
+				if (ext.second == ExtremumType::TYPE_MIN)
+					this->extremumList.emplace(itr, ext.first, ext.second);
+			}
+		}
 		
 		// data align
 		for (auto currItr = begin(eList); currItr != end(eList); ++currItr)
@@ -400,13 +411,14 @@ namespace TableDetection
 			}
 		}
 
-		// apply special values
+		// apply maximum special values
 		auto itr = std::begin(this->extremumList);
 		for (const auto &ext : specialValues)
 		{
 			while (itr != std::end(this->extremumList) && itr->first < ext.first) ++itr;
 			if (itr == std::end(this->extremumList) || itr->first != ext.first) {
-				this->extremumList.emplace(itr, ext.first, ext.second);
+				if (ext.second == ExtremumType::TYPE_MAX)
+					this->extremumList.emplace(itr, ext.first, ext.second);
 			}
 		}
 	}
