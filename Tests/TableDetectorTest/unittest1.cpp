@@ -56,7 +56,7 @@ namespace TableDetectorTest
 				of << resultString.c_str();
 				of.close();
 				//system(("explorer.exe " + Common::EncodingConverter::ws2s(outputFile)).c_str());
-
+				/*
 				Common::PngImage result(*td.pImage);
 				for (auto &cell : td.table.getCells()) {
 					int top = cell.getTop();
@@ -75,8 +75,10 @@ namespace TableDetectorTest
 					}
 				}
 				std::wstring resultFile = dir + prefix + L".png_result.png";
+				
 				result.storeToFile(resultFile);
-
+				*/
+				std::wstring resultFile = dir + prefix + L".png_result.png";
 				system(Common::EncodingConverter::ws2s(L"start mspaint.exe " + resultFile).c_str());
 				Sleep(1000);
 			}

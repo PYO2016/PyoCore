@@ -10,11 +10,11 @@
 #include <boost/geometry/geometries/segment.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
-#define DEBUG_MSG(STR) if(isDebug) { \
+#define DEBUG_MSG(STR) if(this->isDebug) { \
 	std::cerr << "[Debug] " STR << std::endl; \
 }
 
-#define DEBUG_ACTION(ACT) if(isDebug) { \
+#define DEBUG_ACTION(ACT) if(this->isDebug) { \
 	ACT;	\
 }
 
@@ -150,7 +150,21 @@ namespace TableDetection
 			// nothing to process.
 			return true;
 		}
-		return recXycut(0, pImage->getWidth(), pImage->getHeight(), 0, 0);
+		
+		DEBUG_ACTION(pResultImage = std::make_shared<Common::PngImage>(*pImage));
+		
+		bool success = false;
+		
+		if (!recXycut(0, pImage->getWidth(), pImage->getHeight(), 0, 0))
+			goto END;
+
+		DEBUG_MSG("After table detection, store result file to image.");
+		DEBUG_ACTION(pResultImage->storeToFile(imageFile + L"_result.png"));
+
+		success = true;
+	END:;
+
+		return success;
 	}
 
 	bool TableDetector::recXycut(int recDepth, unsigned areaWidth, unsigned areaHeight,
@@ -251,8 +265,7 @@ namespace TableDetection
 				(lineType == Common::LineType::LINE_HORIZONTAL ? adjHorLineConstant : adjVerLineConstant);
 			
 			auto itr = std::begin(lineList);
-			while (itr != std::end(lineList))
-			{
+			while (itr != std::end(lineList)) {
 				auto jtr = itr;
 				auto ktr = std::next(jtr);
 				while (ktr != std::end(lineList) && ktr->getOffset() - jtr->getOffset() <= adjLineConstant) {
@@ -270,6 +283,8 @@ namespace TableDetection
 			}
 		}
 
+		/// Do cell merging...
+
 		// get cells by lines.
 		std::vector<Common::Cell> cells;
 
@@ -278,14 +293,11 @@ namespace TableDetection
 			int top = horList.begin()->getOffset(), bottom, left, right;
 			int initLeft = verList.begin()->getOffset();
 
-			horList.erase(horList.begin());
-			verList.erase(verList.begin());
-
-			for (const auto &horLine : horList) {
-				bottom = horLine.getOffset();
+			for (auto horLine = std::next(std::begin(horList)); horLine != std::end(horList); ++horLine) {
+				bottom = horLine->getOffset();
 				left = initLeft;
-				for (const auto &verLine : verList) {
-					right = verLine.getOffset();
+				for (auto verLine = std::next(std::begin(verList)); verLine != std::end(verList); ++verLine) {
+					right = verLine->getOffset();
 					cells.emplace_back(top, bottom, left, right);
 					left = right;
 				}
@@ -300,6 +312,34 @@ namespace TableDetection
 				cell.getWidth(), cell.getHeight(), cell.getLeft(), cell.getTop());
 			if (!success)
 				break;
+		}
+
+		// For Debugging
+		if (this->isDebug) {
+			int left = verList.front().getOffset();
+			int right = verList.back().getOffset();
+			int top = horList.front().getOffset();
+			int bottom = horList.back().getOffset();
+
+			unsigned color =
+				this->recColor[(recDepth < this->recColorCnt - 1 ? recDepth : this->recColorCnt - 1)];
+			unsigned char R = ((color & 0x00ff0000) >> 16),
+				G = ((color & 0x0000ff00) >> 8), B = (color & 0x00000ff);
+
+			for (const auto &line : horList) {
+				for (int i = left; i <= right; ++i) {
+					(*this->pResultImage)[line.getOffset()][i].R = R;
+					(*this->pResultImage)[line.getOffset()][i].G = G;
+					(*this->pResultImage)[line.getOffset()][i].B = B;
+				}
+			}
+			for (const auto &line : verList) {
+				for (int i = top; i <= bottom; ++i) {
+					(*this->pResultImage)[i][line.getOffset()].R = R;
+					(*this->pResultImage)[i][line.getOffset()].G = G;
+					(*this->pResultImage)[i][line.getOffset()].B = B;
+				}
+			}
 		}
 
 		return success;
