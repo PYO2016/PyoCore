@@ -444,6 +444,8 @@ namespace TableDetection
 			itr = jtr;
 		}
 
+		/// Finally, "this->extremumList" means lines. ////////
+
 		/*
 		if (this->edgeExist)
 		{
