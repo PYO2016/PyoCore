@@ -55,11 +55,11 @@ namespace Common
 	}
 	inline int SparseBlock::getWidth()
 	{
-		return (getLeft() < getRight() ? getRight() - getLeft() : getLeft() - getRight());
+		return getRight() - getLeft() + 1;
 	}
 	inline int SparseBlock::getHeight()
 	{
-		return (getBottom() < getTop() ? getTop() - getBottom() : getBottom() - getTop());
+		return getBottom() - getTop() + 1;
 	}
 	inline std::wstring SparseBlock::getText()
 	{

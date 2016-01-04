@@ -158,11 +158,11 @@ namespace Common
 	}
 	inline int Cell::getWidth() const
 	{
-		return (left < right ? right - left : left - right);
+		return right - left + 1;
 	}
 	inline int Cell::getHeight() const
 	{
-		return (bottom < top ? top - bottom : bottom - top);
+		return bottom - top + 1;
 	}
 	inline std::wstring Cell::getInnerString() const
 	{
