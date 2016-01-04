@@ -13,9 +13,7 @@
 #include <queue>
 #include <algorithm>
 
-// just for output
-#include <iostream>
-#include <boost/foreach.hpp>
+#include "../TableDetection/HistogramManager.h"
 
 namespace Common
 {
@@ -24,6 +22,8 @@ namespace Common
 	{}
 	SparseBlockManager::~SparseBlockManager()
 	{}
+
+	typedef bg::model::segment<point> segment;
 
 	bool SparseBlockManager::process()
 	{
@@ -135,6 +135,7 @@ namespace Common
 		std::vector<box> result_n;
 		const double STANDARD_VALUE = this->getLetterWidthAvg() / 2;
 		bool isDeleted = true;
+		int left, right, top, bottom;
 
 		for (auto& p : sparseBlocks)
 		{
@@ -182,10 +183,10 @@ namespace Common
 						++itr;
 						continue;
 					}
-					auto left = std::min(itr->min_corner().get<0>(), result_n[deletedIndex].min_corner().get<0>());
-					auto right = std::max(itr->max_corner().get<0>(), result_n[deletedIndex].max_corner().get<0>());
-					auto top = std::min(itr->min_corner().get<1>(), result_n[deletedIndex].min_corner().get<1>());
-					auto bottom = std::max(itr->max_corner().get<1>(), result_n[deletedIndex].max_corner().get<1>());
+					left = std::min(itr->min_corner().get<0>(), result_n[deletedIndex].min_corner().get<0>());
+					right = std::max(itr->max_corner().get<0>(), result_n[deletedIndex].max_corner().get<0>());
+					top = std::min(itr->min_corner().get<1>(), result_n[deletedIndex].min_corner().get<1>());
+					bottom = std::max(itr->max_corner().get<1>(), result_n[deletedIndex].max_corner().get<1>());
 
 					this->sparseBlocks.emplace_back(point(left, top), point(right, bottom));
 
@@ -202,16 +203,111 @@ namespace Common
 					++itr;
 			}
 		}
+		isDeleted = true;
+		while (isDeleted)
+		{
+			isDeleted = false;
+			for (auto itr = std::begin(sparseBlocks); itr != std::end(sparseBlocks); )
+			{
+				result_n.clear();
+				rtree.query(bgi::intersects(static_cast<box&>(*itr)), std::back_inserter(result_n));
 
-		//this->sparseBlockHeightAvg = this->sparseBlockWidthAvg = 0;
+				if (result_n.size() > 1)
+				{
+					left = top = INT_MAX;
+					right = bottom = INT_MIN;
+					isDeleted = true;
+					for (auto& a : result_n)
+					{
+						left = std::min(left, a.min_corner().get<0>());
+						right = std::max(right, a.max_corner().get<0>());
+						top = std::min(top, a.min_corner().get<1>());
+						bottom = std::max(bottom, a.max_corner().get<1>());
 
-		//for (auto& p : rtree)
-		//{
-		//	sparseBlockHeightAvg += -p.min_corner().get<1>() + p.max_corner().get<1>();
-		//	sparseBlockWidthAvg += -p.min_corner().get<0>() + p.max_corner().get<0>();
-		//}
-		//sparseBlockHeightAvg /= rtree.size();
-		//sparseBlockWidthAvg /= rtree.size();
+						for (auto jtr = std::begin(sparseBlocks); jtr != std::end(sparseBlocks); ++jtr)
+							if (a.max_corner().get<1>() == jtr->max_corner().get<1>() && a.min_corner().get<0>() == jtr->min_corner().get<0>()
+								&& a.min_corner().get<1>() == jtr->min_corner().get<1>() && a.max_corner().get<0>() == jtr->max_corner().get<0>())
+							{
+								sparseBlocks.erase(jtr);
+								break;
+							}
+						rtree.remove(static_cast<box&>(a));
+					}
+					rtree.insert(box(point(left, top), point(right, bottom)));
+					this->sparseBlocks.emplace_back(point(left, top), point(right, bottom));
+					itr = std::begin(sparseBlocks);
+				}
+				else
+					++itr;
+			}
+		}
+
+		std::list<box> l;
+		result_n.clear();
+		for (const auto& p : rtree)
+		{
+			result_n.push_back(p);
+		}
+		std::sort(begin(result_n), end(result_n), [](const box& a, const box& b)
+		{
+			if (a.min_corner().get<1>() == b.min_corner().get<1>())
+				return a.min_corner().get<0>() < b.min_corner().get<0>();
+			return a.min_corner().get<1>() < b.min_corner().get<1>();
+		});
+
+		for (const auto& p : result_n)
+		{
+			l.push_back(p);
+		}
+		double kmeansboundary = 0;
+		int addedN = 0;
+		std::vector<int> v;
+
+		for (auto itr = std::begin(l); itr != std::end(l);)
+		{
+			result_n.clear();
+			auto currentBox = box(point(0, itr->min_corner().get<1>()), point(image.getWidth(), itr->max_corner().get<1>()));
+			rtree.query(bgi::intersects(currentBox), std::back_inserter(result_n));
+			std::sort(begin(result_n), end(result_n), [](const box& a, const box& b)
+			{
+				return a.min_corner().get<0>() < b.min_corner().get<0>();
+			});
+			for (int i = 0; i < result_n.size() - 1; ++i)
+			{
+				v.emplace_back(result_n[i + 1].min_corner().get<0>() -result_n[i].max_corner().get<0>() - 1);
+			}
+
+			for (const auto& a : result_n)
+			{
+				for (auto jtr = std::begin(l); jtr != std::end(l); ++jtr)
+					if (a.max_corner().get<1>() == jtr->max_corner().get<1>() && a.min_corner().get<0>() == jtr->min_corner().get<0>()
+						&& a.min_corner().get<1>() == jtr->min_corner().get<1>() && a.max_corner().get<0>() == jtr->max_corner().get<0>())
+					{
+						l.erase(jtr);
+						break;
+					}
+					
+			}
+			itr = std::begin(l);
+		}
+		double ret = getKmeansBoundary(v);
+		if (ret != INT_MAX)
+		{
+			kmeansboundary += ret;
+			kmeansboundary /= addedN;
+		}
+
+		// segment seg(point(itr->getRight() - itr->getWidth() / 2, itr->getBottom() - itr->getHeight() / 2), point(itr->getRight(), itr->getBottom()));
+
+		this->sparseBlockHeightAvg = this->sparseBlockWidthAvg = 0;
+
+		for (auto& p : rtree)
+		{
+			sparseBlockHeightAvg += -p.min_corner().get<1>() + p.max_corner().get<1>();
+			sparseBlockWidthAvg += -p.min_corner().get<0>() + p.max_corner().get<0>();
+		}
+		sparseBlockHeightAvg /= rtree.size();
+		sparseBlockWidthAvg /= rtree.size();
 
 		return true;
 	}
@@ -306,9 +402,9 @@ namespace Common
 			offsetY = q.min_corner().get<1>();
 			edgeX = q.max_corner().get<0>();
 			edgeY = q.max_corner().get<1>();
-			for (int i = offsetY; i <= edgeY; ++i)
+			for (int i = offsetY; i < edgeY; ++i)
 			{
-				for (int j = offsetX; j <= edgeX; j++)
+				for (int j = offsetX; j < edgeX; j++)
 				{
 					(this->image)[i][j].B = (this->image)[i][j].G = (this->image)[i][j].R = 0;
 				}
@@ -325,5 +421,77 @@ namespace Common
 		std::vector<box> result_n;
 		rtree.query(bgi::intersects(box(point(left, top), point(right, bottom))), std::back_inserter(result_n));
 		return !(result_n.size() == 0);
+	}
+
+
+
+
+
+
+
+	static double getKmeansBoundary(std::vector<int>& v)
+	{
+		std::vector<int> forCluster;
+		for (const auto& p : v)
+		{
+			forCluster.emplace_back(p);
+		}
+
+		if (forCluster.empty())
+		{
+			// no meaning return value.
+			return 0;
+		}
+
+		std::vector<TableDetection::KmeansType> clustered(forCluster.size());
+		// for get 1/4th value, 3/4th value
+		std::vector<int> forClusterTemp{ forCluster };
+
+		std::sort(begin(forClusterTemp), end(forClusterTemp));
+
+		double currentLow = static_cast<double>(forClusterTemp[0]);
+		double currentUpper = static_cast<double>(forClusterTemp[forClusterTemp.size()-1]);
+		double lower, upper;
+
+		// actually this while loop must divide as 2 group(xCluster, yCluser) but... just my tiresome
+		do
+		{
+			int lowCnt = 0, upperCnt = 0;
+			lower = currentLow;
+			upper = currentUpper;
+			currentUpper = currentLow = 0;
+			for (int i = 0; i < forCluster.size(); i++)
+			{
+				clustered[i] = (abs(lower - forCluster[i]) >= abs(upper - forCluster[i])) ?
+					TableDetection::KmeansType::TYPE_UPPER : TableDetection::KmeansType::TYPE_LOWER;
+				// if clustered as lower
+				if (clustered[i] == TableDetection::KmeansType::TYPE_LOWER)
+				{
+					currentLow += forCluster[i];
+					++lowCnt;
+				}
+				else
+				{
+					currentUpper += forCluster[i];
+					++upperCnt;
+				}
+			}
+			if (lowCnt > 0) currentLow /= lowCnt;
+			if (upperCnt > 0) currentUpper /= upperCnt;
+		}while (lower != currentLow || upper != currentUpper);
+
+		int lowerMaxValue = INT_MIN;
+		int upperMinValue = INT_MAX;
+		for (int i = 0; i < clustered.size(); i++)
+		{
+			if (clustered[i] == TableDetection::KmeansType::TYPE_LOWER && forCluster[i] > lowerMaxValue)
+				lowerMaxValue = forCluster[i];
+			else if (clustered[i] == TableDetection::KmeansType::TYPE_UPPER && forCluster[i] < upperMinValue)
+				upperMinValue = forCluster[i];
+		}
+		if (lowerMaxValue == INT_MIN || upperMinValue == INT_MAX)
+			return INT_MAX;
+		
+		return static_cast<double>(lowerMaxValue);
 	}
 }
