@@ -8,4 +8,9 @@ namespace Common
 		: box(p1, p2), text(text), realArea(realArea)
 	{
 	}
+	SparseBlock::SparseBlock(box b)
+		: box(b)
+	{
+	}
+
 }
