@@ -356,24 +356,23 @@ namespace TableDetection
 				offsetWidth, offsetWidth + areaWidth - 1);
 			return true;
 		}
+
+		/// must be "td::size(horList) >= 2 and std::size(verList) >= 2." after this line!!!!! /////////
 		
 		// get cells by lines.
 		std::vector<Common::Cell> cells;
 
-		if (!horList.empty() && !verList.empty()) {
+		int top = topBoundary, bottom, left, right;
 
-			int top = topBoundary, bottom, left, right;
-
-			for (auto horLine = std::next(std::begin(horList)); horLine != std::end(horList); ++horLine) {
-				bottom = horLine->getOffset();
-				left = leftBoundary;
-				for (auto verLine = std::next(std::begin(verList)); verLine != std::end(verList); ++verLine) {
-					right = verLine->getOffset();
-					cells.emplace_back(top, bottom, left, right);
-					left = right;
-				}
-				top = bottom;
+		for (auto horLine = std::next(std::begin(horList)); horLine != std::end(horList); ++horLine) {
+			bottom = horLine->getOffset();
+			left = leftBoundary;
+			for (auto verLine = std::next(std::begin(verList)); verLine != std::end(verList); ++verLine) {
+				right = verLine->getOffset();
+				cells.emplace_back(top, bottom, left, right);
+				left = right;
 			}
+			top = bottom;
 		}
 
 		bool success = true;
