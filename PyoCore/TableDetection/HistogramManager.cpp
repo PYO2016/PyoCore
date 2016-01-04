@@ -71,7 +71,7 @@ namespace TableDetection
 				minVal = values[i];
 		}
 		
-		// * TODO : select middle things.
+		// select middle things.
 		for (int i = 0; i < length; ++i) {
 			if (values[i] >= maxVal * 0.9 ) {
 				int j = i + 1;
@@ -191,7 +191,7 @@ namespace TableDetection
 		}
 		else
 		{
-			if (prevIdx >= 0) 
+			if (prevIdx >= 0)
 			{
 				// Always, values[prevIdx] != values[notEqualIdx]
 				eList.emplace_back(notEqualIdx, (values[prevIdx] < values[notEqualIdx] ?
@@ -199,6 +199,7 @@ namespace TableDetection
 			}
 		}
 		
+		/*
 		if (this->edgeExist)
 		{
 			if (eList.empty() || eList.front().first > 0)
@@ -206,6 +207,7 @@ namespace TableDetection
 			if (eList.empty() || eList.back().first < length - 1)
 				eList.emplace_back(length - 1, ExtremumType::TYPE_MIN);
 		}
+		*/
 		
 		// remove non-reasonable value
 		eListMaxV = static_cast<int>(std::ceil(static_cast<double>(eListMaxV) * 0.2));
@@ -592,6 +594,7 @@ namespace TableDetection
 			itr = jtr;
 		}
 
+		/*
 		if (this->edgeExist)
 		{
 			if (xExtremum.empty() || xExtremum.front().first > 0)
@@ -604,15 +607,16 @@ namespace TableDetection
 			if (yExtremum.empty() || yExtremum.back().first < this->areaHeight - 1)
 				yExtremum.emplace_back(this->areaHeight - 1, ExtremumType::TYPE_MIN);
 		}
+		*/
 
 		//for (const auto &x : xExtremum)
 		for (auto itr = std::begin(xExtremum); itr != std::end(xExtremum); ++itr)
 		{
-			lineVector.emplace_back(Common::LineType::LINE_VERTICAL, itr->first);
+			lineVector.emplace_back(Common::LineType::LINE_VERTICAL, this->offsetWidth + itr->first);
 		}
 		for (auto itr = std::begin(yExtremum); itr != std::end(yExtremum); ++itr)
 		{
-			lineVector.emplace_back(Common::LineType::LINE_HORIZONTAL, itr->first);
+			lineVector.emplace_back(Common::LineType::LINE_HORIZONTAL, this->offsetHeight + itr->first);
 		}
 
 		return lineVector;

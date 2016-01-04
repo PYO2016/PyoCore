@@ -131,9 +131,9 @@ namespace TableDetection
 		DEBUG_ACTION(pImage->storeToFile(imageFile + L"_after_sparseblock.png"));
 
 		// determine constants.
-		minWidth = pSbm->getLetterWidthAvg() * 1.5;
-		minHeight = pSbm->getLetterHeightAvg() * 1.5;
-		maxRecDepth = 1;
+		minRecWidth = pSbm->getLetterWidthAvg() * 1.5;
+		minRecHeight = pSbm->getLetterHeightAvg() * 1.5;
+		maxRecDepth = 2;
 
 		success = true;
 	END:;
@@ -146,7 +146,7 @@ namespace TableDetection
 	bool TableDetector::detectTable(void)
 	{
 		pHm = std::make_shared<HistogramManager>(*pImage);
-		if (pImage->getWidth() < minWidth || pImage->getHeight() < minHeight) {
+		if (pImage->getWidth() < minRecWidth || pImage->getHeight() < minRecHeight) {
 			// nothing to process.
 			return true;
 		}
@@ -156,26 +156,21 @@ namespace TableDetection
 	bool TableDetector::recXycut(int recDepth, unsigned areaWidth, unsigned areaHeight,
 		unsigned offsetWidth, unsigned offsetHeight)
 	{
-		if (recDepth >= maxRecDepth || areaWidth < minWidth || areaHeight < minHeight) {
+		if (recDepth >= maxRecDepth || areaWidth < minRecWidth || areaHeight < minRecHeight) {
 			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
 				offsetWidth, offsetWidth + areaWidth - 1);
 			return true;
 		}
 
+		bool firstRecursive = (recDepth == 0);
 		std::vector<Common::Line> lines;
 
-		if (!xycut(lines, areaWidth, areaHeight, offsetWidth, offsetHeight, recDepth > 0))
+		/// notice : 5th arg is not used now...
+		if (!xycut(lines, areaWidth, areaHeight, offsetWidth, offsetHeight, !firstRecursive))
 			return false;
 
 		if (!xycutPostProcess(lines, areaWidth, areaHeight, offsetWidth, offsetHeight))
 			return false;
-
-		// when can't split cell anymore.
-		if (lines.empty()) {
-			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
-				offsetWidth, offsetWidth + areaWidth - 1);
-			return true;
-		}
 
 		std::vector<Common::Cell> cells;
 		std::list<Common::Line> horList, verList;
@@ -199,12 +194,53 @@ namespace TableDetection
 			}
 		}
 
-		// for security.
+		// for security. "lines" must not be used after this line.
 		lines.clear();
 
 		const int adjHorLineConstant = this->pSbm->getLetterHeightAvg() * 1.2;
 		const int adjVerLineConstant = this->pSbm->getLetterWidthAvg() * 1.2;
-		
+
+		// select boundary 4 lines. And remove lines near boundary lines.
+		if (!firstRecursive) {
+			unsigned base = offsetHeight;
+			while (!horList.empty() &&
+				horList.front().getOffset() - base <= adjHorLineConstant) {
+				base = horList.front().getOffset();
+				horList.pop_front();
+			}
+			base = offsetWidth;
+			while (!verList.empty() &&
+				verList.front().getOffset() - base <= adjVerLineConstant) {
+				base = verList.front().getOffset();
+				verList.pop_front();
+			}
+
+			base = offsetHeight + areaHeight - 1;
+			while (!horList.empty() &&
+				base - horList.back().getOffset() <= adjHorLineConstant) {
+				base = horList.back().getOffset();
+				horList.pop_back();
+			}
+			base = offsetWidth + areaWidth - 1;
+			while (!verList.empty() &&
+				base - verList.back().getOffset() <= adjVerLineConstant) {
+				base = verList.back().getOffset();
+				verList.pop_back();
+			}
+
+			horList.emplace_front(Common::LineType::LINE_HORIZONTAL, offsetHeight);
+			verList.emplace_front(Common::LineType::LINE_VERTICAL, offsetWidth);
+			horList.emplace_back(Common::LineType::LINE_HORIZONTAL, offsetHeight + areaHeight - 1);
+			verList.emplace_back(Common::LineType::LINE_VERTICAL, offsetWidth + areaWidth - 1);
+		}
+
+		/// when can't split cell anymore. ///////////
+		if (std::size(horList) < 2 || std::size(verList) < 2) {
+			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
+				offsetWidth, offsetWidth + areaWidth - 1);
+			return true;
+		}
+
 		// merge adjecent lines. (select middle thing)
 		auto itr = std::begin(horList);
 		while (itr != std::end(horList))
@@ -242,9 +278,6 @@ namespace TableDetection
 				jtr = verList.erase(jtr);
 			itr = jtr;
 		}
-		// some problems...
-		//horList.emplace_back(Common::LineType::LINE_HORIZONTAL, offsetHeight + areaHeight - 1);
-		//verList.emplace_back(Common::LineType::LINE_VERTICAL, offsetWidth + areaWidth - 1);
 
 		if (!horList.empty() && !verList.empty()) {
 
@@ -269,12 +302,8 @@ namespace TableDetection
 		bool success = true;
 
 		for (const auto &cell : cells) {
-			int top = cell.getTop();
-			int bottom = cell.getBottom();
-			int left = cell.getLeft();
-			int right = cell.getRight();
-
-			success = success && recXycut(recDepth + 1, right - left + 1, bottom - top + 1, left, top);
+			success = success && recXycut(recDepth + 1,
+				cell.getWidth(), cell.getHeight(), cell.getLeft(), cell.getTop());
 			if (!success)
 				break;
 		}
@@ -293,7 +322,7 @@ namespace TableDetection
 			goto END;
 		if (!pHm->makeHistogram(HistogramType::TYPE_Y))
 			goto END;
-
+		
 		if (!pHm->detectSpecialValues(HistogramType::TYPE_X))
 			goto END;
 		if (!pHm->detectSpecialValues(HistogramType::TYPE_Y))
