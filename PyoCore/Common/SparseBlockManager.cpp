@@ -203,6 +203,8 @@ namespace Common
 					++itr;
 			}
 		}
+
+		// merge unsparsed cells
 		isDeleted = true;
 		while (isDeleted)
 		{
@@ -274,7 +276,25 @@ namespace Common
 			});
 			for (int i = 0; i < result_n.size() - 1; ++i)
 			{
-				v.emplace_back(result_n[i + 1].min_corner().get<0>() -result_n[i].max_corner().get<0>() - 1);
+				double rate = 3;
+				// need height
+				if (itr->min_corner().get<1>() < result_n[i].max_corner().get<1>()
+					|| result_n[i].min_corner().get<1>() < itr->max_corner().get<1>())
+					rate = (static_cast<double>(itr->max_corner().get<1>()) - static_cast<double>(itr->min_corner().get<1>()))
+						/ (static_cast<double>(result_n[i].max_corner().get<1>()) - static_cast<double>(result_n[i].min_corner().get<1>()) + 1);
+				// else need width
+				else if (itr->min_corner().get<0>() < result_n[i].max_corner().get<0>()
+					|| result_n[i].min_corner().get<0>() < itr->max_corner().get<0>())
+					rate = (static_cast<double>(itr->max_corner().get<0>()) - static_cast<double>(itr->min_corner().get<0>()))
+						/ (static_cast<double>(result_n[i].max_corner().get<0>()) - static_cast<double>(result_n[i].min_corner().get<0>()) + 1);
+				if (rate > 5.0 || rate < 0.2)
+				{
+					// cant merge
+					++itr;
+					continue;
+				}
+				if(result_n[i + 1].min_corner().get<0>() -result_n[i].max_corner().get<0>() - 1 > 0)
+					v.emplace_back(result_n[i + 1].min_corner().get<0>() -result_n[i].max_corner().get<0>() - 1);
 			}
 
 			for (const auto& a : result_n)
@@ -294,7 +314,6 @@ namespace Common
 		if (ret != INT_MAX)
 		{
 			kmeansboundary += ret;
-			kmeansboundary /= addedN;
 		}
 
 		// segment seg(point(itr->getRight() - itr->getWidth() / 2, itr->getBottom() - itr->getHeight() / 2), point(itr->getRight(), itr->getBottom()));
