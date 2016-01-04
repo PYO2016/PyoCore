@@ -31,7 +31,7 @@ namespace Common
 		// only create image by LoadImage() or copy constructor.
 		PngImage(const PngImage& image);
 		PngImage& operator=(const PngImage &) = delete;
-		static std::shared_ptr<PngImage> LoadImage(const std::wstring& filename);
+		static std::shared_ptr<PngImage> _LoadImage(const std::wstring& filename);
 
 		PixelArray& operator[] (int idx);
 		const PixelArray& operator[] (int idx) const;

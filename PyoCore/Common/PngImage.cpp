@@ -22,7 +22,7 @@ namespace Common
 	{
 	}
 
-	std::shared_ptr<PngImage> PngImage::LoadImage(const std::wstring& filename)	// static member function
+	std::shared_ptr<PngImage> PngImage::_LoadImage(const std::wstring& filename)	// static member function
 	{
 		std::shared_ptr<PngImage> pImage = std::make_shared<PngImage>(CreationKey());
 		pImage->_isCopy = false;
