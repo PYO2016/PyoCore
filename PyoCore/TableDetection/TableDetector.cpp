@@ -133,7 +133,7 @@ namespace TableDetection
 		// determine constants.
 		minRecWidth = pSbm->getLetterWidthAvg() * 1.5;
 		minRecHeight = pSbm->getLetterHeightAvg() * 1.5;
-		maxRecDepth = 2;
+		maxRecDepth = 5;
 
 		success = true;
 	END:;
@@ -232,13 +232,17 @@ namespace TableDetection
 					(lineType == Common::LineType::LINE_HORIZONTAL ? adjHorLineConstant : adjVerLineConstant);
 				unsigned boundary[2];
 
-				if (lineType == Common::LineType::LINE_HORIZONTAL) {
+				switch (lineType) {
+				case Common::LineType::LINE_HORIZONTAL:
 					boundary[0] = offsetHeight;
 					boundary[1] = offsetHeight + areaHeight - 1;
-				}
-				else {	// vertical line
+					break;
+				case Common::LineType::LINE_VERTICAL:
 					boundary[0] = offsetWidth;
 					boundary[1] = offsetWidth + areaWidth - 1;
+					break;
+				default:
+					return false;
 				}
 
 				unsigned base = boundary[0];
@@ -256,13 +260,6 @@ namespace TableDetection
 				lineList.emplace_front(lineType, boundary[0]);
 				lineList.emplace_back(lineType, boundary[1]);
 			}
-		}
-
-		/// when can't split cell anymore. ///////////
-		if (std::size(horList) < 2 || std::size(verList) < 2) {
-			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
-				offsetWidth, offsetWidth + areaWidth - 1);
-			return true;
 		}
 
 		// merge adjecent lines. (select middle thing)
@@ -291,19 +288,128 @@ namespace TableDetection
 			}
 		}
 
+		/// when can't split cell anymore. ///////////
+		if (std::size(horList) < 2 || std::size(verList) < 2) {
+			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
+				offsetWidth, offsetWidth + areaWidth - 1);
+			return true;
+		}
+		
 		/// Do cell merging...
+		
+		int leftBoundary = verList.front().getOffset();
+		int rightBoundary = verList.back().getOffset();
+		int topBoundary = horList.front().getOffset();
+		int bottomBoundary = horList.back().getOffset();
+		
+		auto curSparseBlocks = this->pSbm->getSparseBlocksInRange(
+			topBoundary, bottomBoundary, leftBoundary, rightBoundary);
+		bgi::rtree<box, bgi::quadratic<16>> rtree;
+		
+		for (const auto &curSparseBlock : curSparseBlocks) {
+			rtree.insert(static_cast<box>(curSparseBlock));
+		}
 
+		for (auto lineListPair : lineListPairArray) {
+			auto &lineList = *(lineListPair.first);
+			auto lineType = lineListPair.second;
+
+			auto itr = std::next(std::begin(lineList));
+			while (itr != std::prev(std::end(lineList))) {
+				int offset = itr->getOffset();
+				point p1, p2;
+
+				switch (lineType) {
+				case Common::LineType::LINE_HORIZONTAL:
+					p1 = point(rightBoundary, offset);
+					p2 = point(leftBoundary, offset);
+					break;
+				case Common::LineType::LINE_VERTICAL:
+					p1 = point(offset, bottomBoundary);
+					p2 = point(offset, topBoundary);
+					break;
+				default:
+					return false;
+				}
+
+				std::vector<box> result_n;
+				rtree.query(bgi::intersects(box(point(leftBoundary, topBoundary), p1)), 
+					std::back_inserter(result_n));
+				if (result_n.empty()) {
+					itr = lineList.erase(itr);
+					continue;
+				}
+				result_n.clear();
+				rtree.query(bgi::intersects(box(p2, point(rightBoundary, bottomBoundary))), 
+					std::back_inserter(result_n));
+				if (result_n.empty()) {
+					itr = lineList.erase(itr);
+					continue;
+				}
+				++itr;
+			}
+		}
+
+		/*
+		for (auto horLine = std::next(std::begin(horList));
+		horLine != std::prev(std::end(horList));) {
+
+			int offset = horLine->getOffset();
+			std::vector<box> result_n;
+			rtree.query(bgi::intersects(box(point(leftBoundary, topBoundary),
+				point(rightBoundary, offset))), std::back_inserter(result_n));
+			if (result_n.empty()) {
+				horLine = horList.erase(horLine);
+				continue;
+			}
+			result_n.clear();
+			rtree.query(bgi::intersects(box(point(leftBoundary, offset),
+				point(rightBoundary, bottomBoundary))), std::back_inserter(result_n));
+			if (result_n.empty()) {
+				horLine = horList.erase(horLine);
+				continue;
+			}
+			++horLine;
+		}
+		for (auto verLine = std::next(std::begin(verList));
+		verLine != std::prev(std::end(verList));) {
+
+			int offset = verLine->getOffset();
+			std::vector<box> result_n;
+			rtree.query(bgi::intersects(box(point(leftBoundary, topBoundary),
+				point(offset, bottomBoundary))), std::back_inserter(result_n));
+			if (result_n.empty()) {
+				verLine = verList.erase(verLine);
+				continue;
+			}
+			result_n.clear();
+			rtree.query(bgi::intersects(box(point(offset, topBoundary),
+				point(rightBoundary, bottomBoundary))), std::back_inserter(result_n));
+			if (result_n.empty()) {
+				verLine = verList.erase(verLine);
+				continue;
+			}
+			++verLine;
+		}
+		*/
+
+		/// when can't split cell anymore. ///////////
+		if (std::size(horList) < 2 || std::size(verList) < 2) {
+			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
+				offsetWidth, offsetWidth + areaWidth - 1);
+			return true;
+		}
+		
 		// get cells by lines.
 		std::vector<Common::Cell> cells;
 
 		if (!horList.empty() && !verList.empty()) {
 
-			int top = horList.begin()->getOffset(), bottom, left, right;
-			int initLeft = verList.begin()->getOffset();
+			int top = topBoundary, bottom, left, right;
 
 			for (auto horLine = std::next(std::begin(horList)); horLine != std::end(horList); ++horLine) {
 				bottom = horLine->getOffset();
-				left = initLeft;
+				left = leftBoundary;
 				for (auto verLine = std::next(std::begin(verList)); verLine != std::end(verList); ++verLine) {
 					right = verLine->getOffset();
 					cells.emplace_back(top, bottom, left, right);
@@ -324,10 +430,6 @@ namespace TableDetection
 
 		// For Debugging
 		if (this->isDebug) {
-			int left = verList.front().getOffset();
-			int right = verList.back().getOffset();
-			int top = horList.front().getOffset();
-			int bottom = horList.back().getOffset();
 
 			unsigned color =
 				this->recColor[(recDepth < this->recColorCnt - 1 ? recDepth : this->recColorCnt - 1)];
@@ -335,14 +437,14 @@ namespace TableDetection
 				G = ((color & 0x0000ff00) >> 8), B = (color & 0x00000ff);
 
 			for (const auto &line : horList) {
-				for (int i = left; i <= right; ++i) {
+				for (int i = leftBoundary; i <= rightBoundary; ++i) {
 					(*this->pResultImage)[line.getOffset()][i].R = R;
 					(*this->pResultImage)[line.getOffset()][i].G = G;
 					(*this->pResultImage)[line.getOffset()][i].B = B;
 				}
 			}
 			for (const auto &line : verList) {
-				for (int i = top; i <= bottom; ++i) {
+				for (int i = topBoundary; i <= bottomBoundary; ++i) {
 					(*this->pResultImage)[i][line.getOffset()].R = R;
 					(*this->pResultImage)[i][line.getOffset()].G = G;
 					(*this->pResultImage)[i][line.getOffset()].B = B;

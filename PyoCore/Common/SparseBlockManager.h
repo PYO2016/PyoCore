@@ -29,6 +29,8 @@ namespace Common
 		inline double getLetterHeightAvg();
 		inline double getLetterWidthAvg();
 		bool hasCollisionWithSparseBlock(int top, int bottom, int left, int right);
+		std::vector<SparseBlock> SparseBlockManager::getSparseBlocksInRange(
+			int top, int bottom, int left, int right);
 
 		inline std::list<SparseBlock>& getSparseBlocks();
 		inline const std::list<SparseBlock>& getSparseBlocks() const;

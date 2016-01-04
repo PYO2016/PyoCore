@@ -326,4 +326,12 @@ namespace Common
 		rtree.query(bgi::intersects(box(point(left, top), point(right, bottom))), std::back_inserter(result_n));
 		return !(result_n.size() == 0);
 	}
+
+	std::vector<SparseBlock> SparseBlockManager::getSparseBlocksInRange(
+		int top, int bottom, int left, int right)
+	{
+		std::vector<SparseBlock> result_n;
+		rtree.query(bgi::intersects(box(point(left, top), point(right, bottom))), std::back_inserter(result_n));
+		return result_n;
+	}
 }
