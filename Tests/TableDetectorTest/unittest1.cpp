@@ -31,6 +31,10 @@ namespace TableDetectorTest
 				std::wstring prefix;
 				cif >> prefix;
 
+				// if comment
+				if (prefix[0] == L'#')
+					continue;
+
 				TableDetection::TableDetector td;
 				std::wstring resultString;
 
@@ -64,7 +68,7 @@ namespace TableDetectorTest
 				result.storeToFile(resultFile);
 
 				system(Common::EncodingConverter::ws2s(L"start mspaint.exe " + resultFile).c_str());
-				Sleep(2000);
+				Sleep(1000);
 			}
 			cif.close();
 		}
