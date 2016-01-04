@@ -33,6 +33,8 @@ namespace Common
 		inline std::list<SparseBlock>& getSparseBlocks();
 		inline const std::list<SparseBlock>& getSparseBlocks() const;
 
+		double letterWidthMin = -1;
+
 	private:
 		bool makeSparseBlock();
 		bool mergeSparseBlock();
