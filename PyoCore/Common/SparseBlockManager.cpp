@@ -114,11 +114,17 @@ namespace Common
 		success &= this->arrangeSparseBlocks();
 
 		this->letterHeightAvg = this->letterWidthAvg = 0;
+		auto minWidth = INT_MAX;
 		for (auto& p : this->sparseBlocks)
 		{
 			letterHeightAvg += -p.min_corner().get<1>() + p.max_corner().get<1>();
 			letterWidthAvg += -p.min_corner().get<0>() + p.max_corner().get<0>();
+			if (-p.min_corner().get<0>() + p.max_corner().get<0>() < minWidth)
+			{
+				minWidth = -p.min_corner().get<0>() + p.max_corner().get<0>();
+			}
 		}
+		this->letterWidthMin = minWidth;
 		letterHeightAvg /= this->sparseBlocks.size();
 		letterWidthAvg /= this->sparseBlocks.size();
 
@@ -127,7 +133,7 @@ namespace Common
 	bool SparseBlockManager::mergeSparseBlock()
 	{
 		std::vector<box> result_n;
-		const double STANDARD_VALUE = static_cast<double>(static_cast<int>(this->getLetterWidthAvg() / 2 + 0.5));
+		const double STANDARD_VALUE = this->getLetterWidthAvg() / 2;
 		bool isDeleted = true;
 
 		for (auto& p : sparseBlocks)
@@ -143,7 +149,8 @@ namespace Common
 			{
 				result_n.clear();
 				rtree.query(bgi::nearest(static_cast<box&>(*itr), 2), std::back_inserter(result_n));
-				double dist = 987654321; // for trace
+
+				double dist = -1; // for trace
 				int deletedIndex = -1, k = 0;
 				for (auto p : result_n)
 				{
@@ -158,46 +165,59 @@ namespace Common
 					}
 					++k;
 				}
-				if (dist != 987654321)
+				if (dist != -1 && dist < STANDARD_VALUE)
 				{
-					// for Debug...
-					if (dist < STANDARD_VALUE)
+					double rate = 3;
+					if (itr->min_corner().get<1>() < result_n[deletedIndex].max_corner().get<1>()
+						|| result_n[deletedIndex].min_corner().get<1>() < itr->max_corner().get<1>())
 					{
-						auto left = std::min(itr->min_corner().get<0>(), result_n[deletedIndex].min_corner().get<0>());
-						auto right = std::max(itr->max_corner().get<0>(), result_n[deletedIndex].max_corner().get<0>());
-						auto top = std::min(itr->min_corner().get<1>(), result_n[deletedIndex].min_corner().get<1>());
-						auto bottom = std::max(itr->max_corner().get<1>(), result_n[deletedIndex].max_corner().get<1>());
-
-						this->sparseBlocks.emplace_back(point(left, top), point(right, bottom));
-
-						auto p = std::find(std::begin(sparseBlocks), std::end(sparseBlocks), SparseBlock(result_n[deletedIndex]));
-						sparseBlocks.erase(p);
-
-						rtree.remove(static_cast<box&>(*itr));
-						rtree.remove(result_n[deletedIndex]);
-						rtree.insert(box(point(left, top), point(right, bottom)));
-
-						itr = this->sparseBlocks.erase(itr);
-
-
-						isDeleted = true;
+						// need height
+						rate = static_cast<double>(itr->getHeight()) / (static_cast<double>(result_n[deletedIndex].max_corner().get<1>()) - static_cast<double>(result_n[deletedIndex].min_corner().get<1>()) + 1);
 					}
-					else
+					else if (itr->min_corner().get<0>() < result_n[deletedIndex].max_corner().get<0>()
+						|| result_n[deletedIndex].min_corner().get<0>() < itr->max_corner().get<0>())
+					{
+						// need width
+						rate = itr->getWidth() / (result_n[deletedIndex].max_corner().get<0>() - result_n[deletedIndex].min_corner().get<0>() + 1);
+					}
+					if (rate > 2 || rate < 0.2)
+					{
+						// cant merge
 						++itr;
+						continue;
+					}
+					auto left = std::min(itr->min_corner().get<0>(), result_n[deletedIndex].min_corner().get<0>());
+					auto right = std::max(itr->max_corner().get<0>(), result_n[deletedIndex].max_corner().get<0>());
+					auto top = std::min(itr->min_corner().get<1>(), result_n[deletedIndex].min_corner().get<1>());
+					auto bottom = std::max(itr->max_corner().get<1>(), result_n[deletedIndex].max_corner().get<1>());
+
+					this->sparseBlocks.emplace_back(point(left, top), point(right, bottom));
+
+					auto p = std::find(std::begin(sparseBlocks), std::end(sparseBlocks), SparseBlock(result_n[deletedIndex]));
+					sparseBlocks.erase(p);
+
+					rtree.remove(static_cast<box&>(*itr));
+					rtree.remove(result_n[deletedIndex]);
+					rtree.insert(box(point(left, top), point(right, bottom)));
+
+					itr = this->sparseBlocks.erase(itr);
+
+					isDeleted = true;
 				}
 				else
 					++itr;
 			}
 		}
 
-		this->sparseBlockHeightAvg = this->sparseBlockWidthAvg = 0;
-		for (auto& p : rtree)
-		{
-			sparseBlockHeightAvg += -p.min_corner().get<1>() + p.max_corner().get<1>();
-			sparseBlockWidthAvg += -p.min_corner().get<0>() + p.max_corner().get<0>();
-		}
-		sparseBlockHeightAvg /= rtree.size();
-		sparseBlockWidthAvg /= rtree.size();
+		//this->sparseBlockHeightAvg = this->sparseBlockWidthAvg = 0;
+
+		//for (auto& p : rtree)
+		//{
+		//	sparseBlockHeightAvg += -p.min_corner().get<1>() + p.max_corner().get<1>();
+		//	sparseBlockWidthAvg += -p.min_corner().get<0>() + p.max_corner().get<0>();
+		//}
+		//sparseBlockHeightAvg /= rtree.size();
+		//sparseBlockWidthAvg /= rtree.size();
 
 		return true;
 	}

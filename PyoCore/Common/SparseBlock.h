@@ -9,6 +9,7 @@ namespace Common
 {
 	typedef boost::geometry::model::point<int, 2, boost::geometry::cs::cartesian> point;
 	typedef boost::geometry::model::box<point> box;
+
 	class SparseBlock : public box
 	{
 	public:
@@ -27,9 +28,8 @@ namespace Common
 		inline void setText(std::wstring text);
 		inline int getRealArea();
 		inline bool setRealArea(int value);
-		inline bool operator==(SparseBlock r);
-		inline bool operator!=(SparseBlock r);
-
+		inline bool SparseBlock::operator==(SparseBlock r);
+		inline bool SparseBlock::operator!=(SparseBlock r);
 	private:
 		std::wstring text;
 		int realArea;
