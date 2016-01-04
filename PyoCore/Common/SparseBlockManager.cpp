@@ -127,7 +127,7 @@ namespace Common
 	bool SparseBlockManager::mergeSparseBlock()
 	{
 		std::vector<box> result_n;
-		const double STANDARD_VALUE = this->getLetterWidthAvg() / 2;
+		const double STANDARD_VALUE = static_cast<double>(static_cast<int>(this->getLetterWidthAvg() / 2 + 0.5));
 		bool isDeleted = true;
 
 		for (auto& p : sparseBlocks)
@@ -170,11 +170,15 @@ namespace Common
 
 						this->sparseBlocks.emplace_back(point(left, top), point(right, bottom));
 
+						auto p = std::find(std::begin(sparseBlocks), std::end(sparseBlocks), SparseBlock(result_n[deletedIndex]));
+						sparseBlocks.erase(p);
+
 						rtree.remove(static_cast<box&>(*itr));
 						rtree.remove(result_n[deletedIndex]);
 						rtree.insert(box(point(left, top), point(right, bottom)));
 
 						itr = this->sparseBlocks.erase(itr);
+
 
 						isDeleted = true;
 					}
@@ -206,12 +210,13 @@ namespace Common
 
 	bool SparseBlockManager::arrangeSparseBlocks()
 	{
-		const int BOUNDARY = 2;
+		const int BOUNDARY = 1;
 		auto itr = std::begin(this->sparseBlocks);
 		int area;
 		int i, j;
 		int maxYBoundary = this->image.getHeight();
 		int maxXBoundary = this->image.getWidth();
+		int dotCounter;
 
 		int offsetX, offsetY, edgeX, edgeY;
 		while (itr != std::end(this->sparseBlocks))
@@ -225,25 +230,30 @@ namespace Common
 				edgeY = itr->getBottom();
 
 				i = ((offsetY - BOUNDARY > 0) ? offsetY - BOUNDARY : 0);
-				for (i = offsetY; i < maxYBoundary && i <= edgeY + BOUNDARY; ++i)
+				dotCounter = 0;
+				for (; i < maxYBoundary && i <= edgeY + BOUNDARY; ++i)
 				{
 					j = ((offsetX - BOUNDARY > 0) ? offsetX - BOUNDARY : 0);
 
-					for (int j = offsetX; j < maxXBoundary && j <= edgeX + BOUNDARY; j++)
+					for (; j < maxXBoundary && j <= edgeX + BOUNDARY; ++j)
 					{
 						if (offsetY <= i && i <= edgeY
 							&& offsetX <= j && j <= edgeX)
 							continue;
 						if (image[i][j].R == 0)
-							goto nonDelete;
+							++dotCounter;
 					}
 				}
 
-				itr = this->sparseBlocks.erase(itr);
-				continue;
-
-			nonDelete:
-				++itr;
+				if (dotCounter < 4)
+				{
+					itr = this->sparseBlocks.erase(itr);
+					continue;
+				}
+				else
+				{
+					++itr;
+				}
 			}
 			else
 			{
