@@ -23,15 +23,14 @@ namespace Common
 		SparseBlockManager(Common::PngImage& image);
 		~SparseBlockManager();
 		bool process();
-		bool makeSparseBlock();
-		bool mergeSparseBlock();
+
 		inline double getSparseBlockHeightAvg();
 		inline double getSparseBlockWidthAvg();
 		inline double getLetterHeightAvg();
 		inline double getLetterWidthAvg();
 		bool hasCollisionWithSparseBlock(int top, int bottom, int left, int right);
-		bool initImageToZero();
-		bool initImageWithSparseBlocks();
+		std::vector<SparseBlock> SparseBlockManager::getSparseBlocksInRange(
+			int top, int bottom, int left, int right);
 
 		inline std::list<SparseBlock>& getSparseBlocks();
 		inline const std::list<SparseBlock>& getSparseBlocks() const;
@@ -39,6 +38,10 @@ namespace Common
 		double letterWidthMin = -1;
 
 	private:
+		bool makeSparseBlock();
+		bool mergeSparseBlock();
+		bool initImageToZero();
+		bool initImageWithSparseBlocks();
 		bool clearSparseBlocks();
 		bool arrangeSparseBlocks();
 

@@ -450,7 +450,7 @@ namespace Common
 		std::sort(begin(forClusterTemp), end(forClusterTemp));
 
 		double currentLow = static_cast<double>(forClusterTemp[0]);
-		double currentUpper = static_cast<double>(forClusterTemp[forClusterTemp.size()-1]);
+		double currentUpper = static_cast<double>(forClusterTemp[forClusterTemp.size() - 1]);
 		double lower, upper;
 
 		// actually this while loop must divide as 2 group(xCluster, yCluser) but... just my tiresome
@@ -478,7 +478,7 @@ namespace Common
 			}
 			if (lowCnt > 0) currentLow /= lowCnt;
 			if (upperCnt > 0) currentUpper /= upperCnt;
-		}while (lower != currentLow || upper != currentUpper);
+		} while (lower != currentLow || upper != currentUpper);
 
 		int lowerMaxValue = INT_MIN;
 		int upperMinValue = INT_MAX;
@@ -491,7 +491,14 @@ namespace Common
 		}
 		if (lowerMaxValue == INT_MIN || upperMinValue == INT_MAX)
 			return INT_MAX;
-		
+
 		return static_cast<double>(lowerMaxValue);
+	}
+	std::vector<SparseBlock> SparseBlockManager::getSparseBlocksInRange(
+		int top, int bottom, int left, int right)
+	{
+		std::vector<SparseBlock> result_n;
+		rtree.query(bgi::intersects(box(point(left, top), point(right, bottom))), std::back_inserter(result_n));
+		return result_n;
 	}
 }

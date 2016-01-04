@@ -10,11 +10,11 @@
 #include <boost/geometry/geometries/segment.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
-#define DEBUG_MSG(STR) if(isDebug) { \
+#define DEBUG_MSG(STR) if(this->isDebug) { \
 	std::cerr << "[Debug] " STR << std::endl; \
 }
 
-#define DEBUG_ACTION(ACT) if(isDebug) { \
+#define DEBUG_ACTION(ACT) if(this->isDebug) { \
 	ACT;	\
 }
 
@@ -133,7 +133,7 @@ namespace TableDetection
 		// determine constants.
 		minRecWidth = pSbm->getLetterWidthAvg() * 1.5;
 		minRecHeight = pSbm->getLetterHeightAvg() * 1.5;
-		maxRecDepth = 2;
+		maxRecDepth = 5;
 
 		success = true;
 	END:;
@@ -150,13 +150,35 @@ namespace TableDetection
 			// nothing to process.
 			return true;
 		}
-		return recXycut(0, pImage->getWidth(), pImage->getHeight(), 0, 0);
+		
+		DEBUG_ACTION(pResultImage = std::make_shared<Common::PngImage>(*pImage));
+		
+		bool success = false;
+		
+		if (!recXycut(0, pImage->getWidth(), pImage->getHeight(), 0, 0))
+			goto END;
+
+		DEBUG_MSG("After table detection, store result file to image.");
+		DEBUG_ACTION(pResultImage->storeToFile(imageFile + L"_result.png"));
+
+		success = true;
+	END:;
+
+		return success;
 	}
 
 	bool TableDetector::recXycut(int recDepth, unsigned areaWidth, unsigned areaHeight,
 		unsigned offsetWidth, unsigned offsetHeight)
 	{
 		if (recDepth >= maxRecDepth || areaWidth < minRecWidth || areaHeight < minRecHeight) {
+			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
+				offsetWidth, offsetWidth + areaWidth - 1);
+			return true;
+		}
+
+		/// when no sparse block in cell. ///////////
+		if (!this->pSbm->hasCollisionWithSparseBlock(offsetHeight, offsetHeight + areaHeight - 1,
+			offsetWidth, offsetWidth + areaWidth - 1)) {
 			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
 				offsetWidth, offsetWidth + areaWidth - 1);
 			return true;
@@ -210,13 +232,17 @@ namespace TableDetection
 					(lineType == Common::LineType::LINE_HORIZONTAL ? adjHorLineConstant : adjVerLineConstant);
 				unsigned boundary[2];
 
-				if (lineType == Common::LineType::LINE_HORIZONTAL) {
+				switch (lineType) {
+				case Common::LineType::LINE_HORIZONTAL:
 					boundary[0] = offsetHeight;
 					boundary[1] = offsetHeight + areaHeight - 1;
-				}
-				else {	// vertical line
+					break;
+				case Common::LineType::LINE_VERTICAL:
 					boundary[0] = offsetWidth;
 					boundary[1] = offsetWidth + areaWidth - 1;
+					break;
+				default:
+					return false;
 				}
 
 				unsigned base = boundary[0];
@@ -236,13 +262,6 @@ namespace TableDetection
 			}
 		}
 
-		/// when can't split cell anymore. ///////////
-		if (std::size(horList) < 2 || std::size(verList) < 2) {
-			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
-				offsetWidth, offsetWidth + areaWidth - 1);
-			return true;
-		}
-
 		// merge adjecent lines. (select middle thing)
 		for (auto lineListPair : lineListPairArray) {
 			auto &lineList = *(lineListPair.first);
@@ -251,8 +270,7 @@ namespace TableDetection
 				(lineType == Common::LineType::LINE_HORIZONTAL ? adjHorLineConstant : adjVerLineConstant);
 			
 			auto itr = std::begin(lineList);
-			while (itr != std::end(lineList))
-			{
+			while (itr != std::end(lineList)) {
 				auto jtr = itr;
 				auto ktr = std::next(jtr);
 				while (ktr != std::end(lineList) && ktr->getOffset() - jtr->getOffset() <= adjLineConstant) {
@@ -270,27 +288,91 @@ namespace TableDetection
 			}
 		}
 
+		/// when can't split cell anymore. ///////////
+		if (std::size(horList) < 2 || std::size(verList) < 2) {
+			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
+				offsetWidth, offsetWidth + areaWidth - 1);
+			return true;
+		}
+		
+		/// Do cell merging...
+		
+		int leftBoundary = verList.front().getOffset();
+		int rightBoundary = verList.back().getOffset();
+		int topBoundary = horList.front().getOffset();
+		int bottomBoundary = horList.back().getOffset();
+		
+		auto curSparseBlocks = this->pSbm->getSparseBlocksInRange(
+			topBoundary, bottomBoundary, leftBoundary, rightBoundary);
+		bgi::rtree<box, bgi::quadratic<16>> rtree;
+		
+		for (const auto &curSparseBlock : curSparseBlocks) {
+			rtree.insert(static_cast<box>(curSparseBlock));
+		}
+
+		for (auto lineListPair : lineListPairArray) {
+			auto &lineList = *(lineListPair.first);
+			auto lineType = lineListPair.second;
+
+			auto itr = std::next(std::begin(lineList));
+			while (itr != std::prev(std::end(lineList))) {
+				int offset = itr->getOffset();
+				point p1, p2;
+
+				switch (lineType) {
+				case Common::LineType::LINE_HORIZONTAL:
+					p1 = point(rightBoundary, offset);
+					p2 = point(leftBoundary, offset);
+					break;
+				case Common::LineType::LINE_VERTICAL:
+					p1 = point(offset, bottomBoundary);
+					p2 = point(offset, topBoundary);
+					break;
+				default:
+					return false;
+				}
+
+				std::vector<box> result_n;
+				rtree.query(bgi::intersects(box(point(leftBoundary, topBoundary), p1)), 
+					std::back_inserter(result_n));
+				if (result_n.empty()) {
+					itr = lineList.erase(itr);
+					continue;
+				}
+				result_n.clear();
+				rtree.query(bgi::intersects(box(p2, point(rightBoundary, bottomBoundary))), 
+					std::back_inserter(result_n));
+				if (result_n.empty()) {
+					itr = lineList.erase(itr);
+					continue;
+				}
+				++itr;
+			}
+		}
+
+		/// when can't split cell anymore. ///////////
+		if (std::size(horList) < 2 || std::size(verList) < 2) {
+			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
+				offsetWidth, offsetWidth + areaWidth - 1);
+			return true;
+		}
+
+		/// must be "td::size(horList) >= 2 and std::size(verList) >= 2." after this line!!!!! /////////
+		
 		// get cells by lines.
 		std::vector<Common::Cell> cells;
 
-		if (!horList.empty() && !verList.empty()) {
+		int top = topBoundary, bottom, left, right;
 
-			int top = horList.begin()->getOffset(), bottom, left, right;
-			int initLeft = verList.begin()->getOffset();
-
-			horList.erase(horList.begin());
-			verList.erase(verList.begin());
-
-			for (const auto &horLine : horList) {
-				bottom = horLine.getOffset();
-				left = initLeft;
-				for (const auto &verLine : verList) {
-					right = verLine.getOffset();
-					cells.emplace_back(top, bottom, left, right);
-					left = right;
-				}
-				top = bottom;
+		for (auto horLine = std::next(std::begin(horList)); horLine != std::end(horList); ++horLine) {
+			bottom = horLine->getOffset();
+			left = leftBoundary;
+			for (auto verLine = std::next(std::begin(verList)); verLine != std::end(verList); ++verLine) {
+				right = verLine->getOffset();
+				cells.emplace_back(top, bottom, left, right);
+				left = right;
 			}
+			top = bottom;
 		}
 
 		bool success = true;
@@ -300,6 +382,30 @@ namespace TableDetection
 				cell.getWidth(), cell.getHeight(), cell.getLeft(), cell.getTop());
 			if (!success)
 				break;
+		}
+
+		// For Debugging
+		if (this->isDebug) {
+
+			unsigned color =
+				this->recColor[(recDepth < this->recColorCnt - 1 ? recDepth : this->recColorCnt - 1)];
+			unsigned char R = ((color & 0x00ff0000) >> 16),
+				G = ((color & 0x0000ff00) >> 8), B = (color & 0x00000ff);
+
+			for (const auto &line : horList) {
+				for (int i = leftBoundary; i <= rightBoundary; ++i) {
+					(*this->pResultImage)[line.getOffset()][i].R = R;
+					(*this->pResultImage)[line.getOffset()][i].G = G;
+					(*this->pResultImage)[line.getOffset()][i].B = B;
+				}
+			}
+			for (const auto &line : verList) {
+				for (int i = topBoundary; i <= bottomBoundary; ++i) {
+					(*this->pResultImage)[i][line.getOffset()].R = R;
+					(*this->pResultImage)[i][line.getOffset()].G = G;
+					(*this->pResultImage)[i][line.getOffset()].B = B;
+				}
+			}
 		}
 
 		return success;
