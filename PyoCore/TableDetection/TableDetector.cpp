@@ -350,49 +350,6 @@ namespace TableDetection
 			}
 		}
 
-		/*
-		for (auto horLine = std::next(std::begin(horList));
-		horLine != std::prev(std::end(horList));) {
-
-			int offset = horLine->getOffset();
-			std::vector<box> result_n;
-			rtree.query(bgi::intersects(box(point(leftBoundary, topBoundary),
-				point(rightBoundary, offset))), std::back_inserter(result_n));
-			if (result_n.empty()) {
-				horLine = horList.erase(horLine);
-				continue;
-			}
-			result_n.clear();
-			rtree.query(bgi::intersects(box(point(leftBoundary, offset),
-				point(rightBoundary, bottomBoundary))), std::back_inserter(result_n));
-			if (result_n.empty()) {
-				horLine = horList.erase(horLine);
-				continue;
-			}
-			++horLine;
-		}
-		for (auto verLine = std::next(std::begin(verList));
-		verLine != std::prev(std::end(verList));) {
-
-			int offset = verLine->getOffset();
-			std::vector<box> result_n;
-			rtree.query(bgi::intersects(box(point(leftBoundary, topBoundary),
-				point(offset, bottomBoundary))), std::back_inserter(result_n));
-			if (result_n.empty()) {
-				verLine = verList.erase(verLine);
-				continue;
-			}
-			result_n.clear();
-			rtree.query(bgi::intersects(box(point(offset, topBoundary),
-				point(rightBoundary, bottomBoundary))), std::back_inserter(result_n));
-			if (result_n.empty()) {
-				verLine = verList.erase(verLine);
-				continue;
-			}
-			++verLine;
-		}
-		*/
-
 		/// when can't split cell anymore. ///////////
 		if (std::size(horList) < 2 || std::size(verList) < 2) {
 			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
