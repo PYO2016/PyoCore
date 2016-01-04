@@ -105,7 +105,7 @@ namespace TableDetection
 	bool TableDetector::registerImage(std::wstring imageFile)
 	{
 		cleanup();
-		if ((pImage = Common::PngImage::_LoadImage(imageFile)) == nullptr)
+		if ((pImage = Common::PngImage::LoadPngImage(imageFile)) == nullptr)
 			return false;
 		return true;
 	}
