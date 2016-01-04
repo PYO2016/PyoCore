@@ -127,7 +127,7 @@ namespace Common
 	bool SparseBlockManager::mergeSparseBlock()
 	{
 		std::vector<box> result_n;
-		double MOOSNSU = this->getLetterWidthAvg() / 2;
+		const double STANDARD_VALUE = this->getLetterWidthAvg() / 2;
 		bool isDeleted = true;
 
 		for (auto& p : sparseBlocks)
@@ -161,7 +161,7 @@ namespace Common
 				if (dist != 987654321)
 				{
 					// for Debug...
-					if (dist < MOOSNSU)
+					if (dist < STANDARD_VALUE)
 					{
 						auto left = std::min(itr->min_corner().get<0>(), result_n[deletedIndex].min_corner().get<0>());
 						auto right = std::max(itr->max_corner().get<0>(), result_n[deletedIndex].max_corner().get<0>());
@@ -206,16 +206,49 @@ namespace Common
 
 	bool SparseBlockManager::arrangeSparseBlocks()
 	{
-		auto i = std::begin(this->sparseBlocks);
+		const int BOUNDARY = 2;
+		auto itr = std::begin(this->sparseBlocks);
 		int area;
+		int i, j;
+		int maxYBoundary = this->image.getHeight();
+		int maxXBoundary = this->image.getWidth();
 
-		while (i != std::end(this->sparseBlocks))
+		int offsetX, offsetY, edgeX, edgeY;
+		while (itr != std::end(this->sparseBlocks))
 		{
-			area = i->getRealArea();
+			area = itr->getRealArea();
 			if (area <= 8)
-				i = this->sparseBlocks.erase(i);
+			{
+				offsetX = itr->getLeft();
+				offsetY = itr->getTop();
+				edgeX = itr->getRight();
+				edgeY = itr->getBottom();
+
+				i = ((offsetY - BOUNDARY > 0) ? offsetY - BOUNDARY : 0);
+				for (i = offsetY; i < maxYBoundary && i <= edgeY + BOUNDARY; ++i)
+				{
+					j = ((offsetX - BOUNDARY > 0) ? offsetX - BOUNDARY : 0);
+
+					for (int j = offsetX; j < maxXBoundary && j <= edgeX + BOUNDARY; j++)
+					{
+						if (offsetY <= i && i <= edgeY
+							&& offsetX <= j && j <= edgeX)
+							continue;
+						if (image[i][j].R == 0)
+							goto nonDelete;
+					}
+				}
+
+				itr = this->sparseBlocks.erase(itr);
+				continue;
+
+			nonDelete:
+				++itr;
+			}
 			else
-				++i;
+			{
+				++itr;
+			}
 		}
 		return true;
 	}

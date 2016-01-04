@@ -20,7 +20,7 @@ namespace PngImageTest
 		TEST_METHOD(TestCase1)
 		{
 			// TODO: 테스트 코드를 여기에 입력합니다.
-			std::shared_ptr<Common::PngImage> img = Common::PngImage::LoadImage(L"C:/Users/JK/Desktop/sample/aa.png");
+			std::shared_ptr<Common::PngImage> img = Common::PngImage::_LoadImage(L"C:/Users/JK/Desktop/sample/aa.png");
 
 			PngImage copy(*img);
 

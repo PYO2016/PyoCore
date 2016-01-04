@@ -77,13 +77,13 @@ namespace TableDetection
 				int j = i + 1;
 				while (j < length && values[j] >= maxVal * 0.9)++j;
 				this->specialValues.emplace_back((j + i) / 2, ExtremumType::TYPE_MAX);
-				i = j - 1;
+				i = j;
 			}
 			else if (values[i] <= minVal * 1.1) {
 				int j = i + 1;
 				while (j < length && values[j] <= minVal * 1.1)++j;
 				this->specialValues.emplace_back((j + i) / 2, ExtremumType::TYPE_MIN);
-				i = j - 1;
+				i = j;
 			}
 		}
 		return true;
