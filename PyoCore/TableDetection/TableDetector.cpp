@@ -361,19 +361,28 @@ namespace TableDetection
 		
 		// get cells by lines.
 		std::vector<Common::Cell> cells;
+		std::vector<std::list<Common::Cell*>> horCellList(std::size(horList) - 1), 
+			verCellList(std::size(verList) - 1);
 
 		int top = topBoundary, bottom, left, right;
-
+		int hIdx = 0, vIdx;
 		for (auto horLine = std::next(std::begin(horList)); horLine != std::end(horList); ++horLine) {
 			bottom = horLine->getOffset();
 			left = leftBoundary;
+			vIdx = 0;
 			for (auto verLine = std::next(std::begin(verList)); verLine != std::end(verList); ++verLine) {
 				right = verLine->getOffset();
 				cells.emplace_back(top, bottom, left, right);
+				horCellList[hIdx].emplace_back(&cells.back());
+				verCellList[vIdx].emplace_back(&cells.back());
 				left = right;
+				++vIdx;
 			}
 			top = bottom;
+			++hIdx;
 		}
+
+
 
 		bool success = true;
 

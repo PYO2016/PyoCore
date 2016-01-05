@@ -253,10 +253,21 @@ namespace TableDetection
 				}
 				else if (currItr->second == ExtremumType::TYPE_MIN)
 				{
-					if (values[nextItr->first] < values[currItr->first] || 
-						checkSpecialValues.find(nextItr->first) != std::end(checkSpecialValues))
-					{
+					bool currSpecial = (checkSpecialValues.find(currItr->first) != std::end(checkSpecialValues));
+					bool nextSpecial = (checkSpecialValues.find(nextItr->first) != std::end(checkSpecialValues));
+
+					if (values[currItr->first] > values[nextItr->first])
 						currItr->first = nextItr->first;
+					else if (values[currItr->first] < values[nextItr->first])
+						;
+					else {
+						if (currSpecial && nextSpecial) {
+							currItr = nextItr;
+							nextItr = next(currItr, 1);
+							continue;
+						}
+						if (!currSpecial && nextSpecial)
+							currItr->first = nextItr->first;
 					}
 				}
 				eList.erase(nextItr);
