@@ -24,7 +24,7 @@ namespace PreprocessorTest
 		
 		TEST_METHOD(TestSparseBlocksPro)
 		{
-			std::shared_ptr<PngImage> img = PngImage::_LoadImage(L"..\\..\\testcases\\test8.png");
+			std::shared_ptr<PngImage> img = PngImage::LoadPngImage(L"..\\..\\testcases\\test8.png");
 			Preprocessor::process(*img);
 			img->storeToFile(L"..\\..\\testcases\\t_preprocessed.png");
 
@@ -37,7 +37,7 @@ namespace PreprocessorTest
 		TEST_METHOD(TestSparseBlocks)
 		{
 			// TODO: 테스트 코드를 여기에 입력합니다.
-			std::shared_ptr<PngImage> img = PngImage::_LoadImage(L"..\\..\\testcases\\test4_1.png");
+			std::shared_ptr<PngImage> img = PngImage::LoadPngImage(L"..\\..\\testcases\\test4_1.png");
 			img->storeToFile(L"..\\..\\testcases\\t4_copy.png");
 			Preprocessor::process(*img);
 			img->storeToFile(L"..\\..\\testcases\\t4_gray.png");

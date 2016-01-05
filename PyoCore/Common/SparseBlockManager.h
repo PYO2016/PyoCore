@@ -54,10 +54,9 @@ namespace Common
 
 		const int directions[8][2] = { { 1, 0 },{ 0, 1 },{ -1, 0 },{ 0, -1 },{ 1, 1 },{ 1, -1 },{ -1, 1 },{ -1, -1 } };
 		const int directionsLength = 8;
-		//const int directions[24][2] = { { 2, 2 },{ 2, 1 },{ 2, 0 },{ 2, -1 },{ 2, -2 },{ 1, 2 },{ 1, 1 },{ 1, 0 },{ 1, -1 },{ 1, -2 },{ 0, 2 },{ 0, 1 },{ 0, -1 },{ 0, -2 },{ -1, 2 },{ -1, 1 },{ -1, 0 },{ -1, -1 },{ -1, -2 },{ -2, 2 },{ -2, 1 },{ -2, 0 },{ -2, -1 },{ -2, -2 } };
-		//const int directionsLength = 24;
 	};
 
+	static double getKmeansBoundary(std::vector<int>& v);
 	/* inline functions */
 
 	inline double SparseBlockManager::getSparseBlockWidthAvg()
