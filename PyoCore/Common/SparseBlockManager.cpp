@@ -326,8 +326,8 @@ namespace Common
 		double ret1 = 12341234;// em.getMaxInMinClusterVal();
 		double ret2 = getKmeansBoundary(v);
 		//kmeansboundary = std::min(ret1, ret2);
-		//kmeansboundary = 12;
-		kmeansboundary = getKmeansBoundary(v);
+		kmeansboundary = 15;
+		//kmeansboundary = getKmeansBoundary(v);
 
 
 
@@ -664,7 +664,7 @@ namespace Common
 			return INT_MAX;
 		std::sort(std::begin(forCluster), std::end(forCluster));
 
-		return static_cast<double>(lowerVector[lowerVector.size() / 2]);
+		return static_cast<double>(lowerVector[0]+10);
 	}
 	std::vector<SparseBlock> SparseBlockManager::getSparseBlocksInRange(
 		int top, int bottom, int left, int right)
