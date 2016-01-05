@@ -18,6 +18,8 @@
 	ACT;	\
 }
 
+/* We can do it. Start of revolution. */
+
 namespace TableDetection
 {
 	namespace bg = boost::geometry;
