@@ -5,6 +5,7 @@
 #include <list>
 #include <memory>
 #include <tuple>
+#include <map>
 
 namespace TableDetection
 {
@@ -54,6 +55,7 @@ namespace TableDetection
 		// extremum values
 		std::list<std::pair<int, ExtremumType>> extremumList;
 		std::vector<std::pair<int, ExtremumType>> specialValues;
+		std::map<int, ExtremumType> checkSpecialValues;
 	};
 
 	class HistogramManager

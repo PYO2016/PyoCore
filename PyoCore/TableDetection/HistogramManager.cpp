@@ -23,7 +23,8 @@ namespace TableDetection
 
 	Histogram::Histogram(const Histogram& h)
 		: type(h.type), image(h.image), length(h.length), valLimit(h.valLimit),
-			extremumList(h.extremumList), edgeExist(h.edgeExist), specialValues(h.specialValues)
+			extremumList(h.extremumList), edgeExist(h.edgeExist), specialValues(h.specialValues),
+			checkSpecialValues(h.checkSpecialValues)
 	{
 		for (int i = 0; i < length; ++i)
 			values[i] = h.values[i];
@@ -77,12 +78,14 @@ namespace TableDetection
 				int j = i + 1;
 				while (j < length && values[j] >= maxVal * 0.9) ++j;
 				this->specialValues.emplace_back((j + i) / 2, ExtremumType::TYPE_MAX);
+				checkSpecialValues.emplace((j + i) / 2, ExtremumType::TYPE_MAX);
 				i = j - 1;
 			}
 			else if (values[i] <= minVal * 1.1) {
 				int j = i + 1;
 				while (j < length && values[j] <= minVal * 1.1) ++j;
 				this->specialValues.emplace_back((j + i) / 2, ExtremumType::TYPE_MIN);
+				checkSpecialValues.emplace((j + i) / 2, ExtremumType::TYPE_MIN);
 				i = j - 1;
 			}
 		}
@@ -241,16 +244,17 @@ namespace TableDetection
 				break;
 			while (nextItr != end(eList) && currItr->second == nextItr->second)
 			{
-				if (nextItr != end(eList) && currItr->second == ExtremumType::TYPE_MAX)
+				if (currItr->second == ExtremumType::TYPE_MAX)
 				{
 					if (values[currItr->first] < values[nextItr->first])
 					{
 						currItr->first = nextItr->first;
 					}
 				}
-				else if (nextItr != end(eList) && currItr->second == ExtremumType::TYPE_MIN)
+				else if (currItr->second == ExtremumType::TYPE_MIN)
 				{
-					if (values[nextItr->first] < values[currItr->first])
+					if (values[nextItr->first] < values[currItr->first] || 
+						checkSpecialValues.find(nextItr->first) != std::end(checkSpecialValues))
 					{
 						currItr->first = nextItr->first;
 					}

@@ -357,7 +357,7 @@ namespace TableDetection
 			return true;
 		}
 
-		/// must be "td::size(horList) >= 2 and std::size(verList) >= 2." after this line!!!!! /////////
+		/// must be "std::size(horList) >= 2 and std::size(verList) >= 2." after this line!!!!! /////////
 		
 		// get cells by lines.
 		std::vector<Common::Cell> cells;
