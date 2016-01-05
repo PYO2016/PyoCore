@@ -154,6 +154,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Common\EM.cpp" />
     <ClCompile Include="Common\EncodingConverter.cpp" />
     <ClCompile Include="Common\PngImage.cpp" />
     <ClCompile Include="Common\SparseBlock.cpp" />
@@ -168,6 +169,7 @@
     <ClCompile Include="TableDetection\TableExporter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Common\EM.h" />
     <ClInclude Include="Common\EncodingConverter.h" />
     <ClInclude Include="Common\PngImage.h" />
     <ClInclude Include="Common\SparseBlock.h" />
