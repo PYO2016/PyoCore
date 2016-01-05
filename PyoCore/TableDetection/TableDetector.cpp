@@ -193,10 +193,10 @@ namespace TableDetection
 		if (!xycut(lines, areaWidth, areaHeight, offsetWidth, offsetHeight, !firstRecursive))
 			return false;
 
-		
+		/*
 		if (!xycutPostProcess(lines, areaWidth, areaHeight, offsetWidth, offsetHeight))
 			return false;
-		
+		*/
 
 		const int adjHorLineConstant = this->pSbm->getLetterHeightAvg() * 1.2;
 		const int adjVerLineConstant = this->pSbm->getLetterWidthAvg() * 1.2;
@@ -267,28 +267,30 @@ namespace TableDetection
 		}
 
 		// merge adjecent lines. (select middle thing)
-		for (auto lineListPair : lineListPairArray) {
-			auto &lineList = *(lineListPair.first);
-			auto lineType = lineListPair.second;
-			const int adjLineConstant =
-				(lineType == Common::LineType::LINE_HORIZONTAL ? adjHorLineConstant : adjVerLineConstant);
-			
-			auto itr = std::begin(lineList);
-			while (itr != std::end(lineList)) {
-				auto jtr = itr;
-				auto ktr = std::next(jtr);
-				while (ktr != std::end(lineList) && ktr->getOffset() - jtr->getOffset() <= adjLineConstant) {
-					jtr = ktr;
-					ktr = std::next(ktr);
+		{
+			for (auto lineListPair : lineListPairArray) {
+				auto &lineList = *(lineListPair.first);
+				auto lineType = lineListPair.second;
+				const int adjLineConstant =
+					(lineType == Common::LineType::LINE_HORIZONTAL ? adjHorLineConstant : adjVerLineConstant);
+
+				auto itr = std::begin(lineList);
+				while (itr != std::end(lineList)) {
+					auto jtr = itr;
+					auto ktr = std::next(jtr);
+					while (ktr != std::end(lineList) && ktr->getOffset() - jtr->getOffset() <= adjLineConstant) {
+						jtr = ktr;
+						ktr = std::next(ktr);
+					}
+					int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
+					jtr = itr;
+					while (l-- > 0)
+						jtr = lineList.erase(jtr);
+					jtr = std::next(jtr);
+					while (r-- > 0)
+						jtr = lineList.erase(jtr);
+					itr = jtr;
 				}
-				int r = std::distance(itr, ktr) / 2, l = std::distance(itr, ktr) - r - 1;
-				jtr = itr;
-				while (l-- > 0)
-					jtr = lineList.erase(jtr);
-				jtr = std::next(jtr);
-				while (r-- > 0)
-					jtr = lineList.erase(jtr);
-				itr = jtr;
 			}
 		}
 
@@ -299,58 +301,60 @@ namespace TableDetection
 			return true;
 		}
 		
-		/// Do cell merging...
 		
 		int leftBoundary = verList.front().getOffset();
 		int rightBoundary = verList.back().getOffset();
 		int topBoundary = horList.front().getOffset();
 		int bottomBoundary = horList.back().getOffset();
-		
+
 		auto curSparseBlocks = this->pSbm->getSparseBlocksInRange(
 			topBoundary, bottomBoundary, leftBoundary, rightBoundary);
-		bgi::rtree<box, bgi::quadratic<16>> rtree;
-		
+		bgi::rtree<box, bgi::quadratic<16>> sparseBlockRtree;
+
 		for (const auto &curSparseBlock : curSparseBlocks) {
-			rtree.insert(static_cast<box>(curSparseBlock));
+			sparseBlockRtree.insert(static_cast<box>(curSparseBlock));
 		}
 
-		for (auto lineListPair : lineListPairArray) {
-			auto &lineList = *(lineListPair.first);
-			auto lineType = lineListPair.second;
+		// delete non-meaning lines.
+		{
+			for (auto lineListPair : lineListPairArray) {
+				auto &lineList = *(lineListPair.first);
+				auto lineType = lineListPair.second;
 
-			auto itr = std::next(std::begin(lineList));
-			while (itr != std::prev(std::end(lineList))) {
-				int offset = itr->getOffset();
-				point p1, p2;
+				auto itr = std::next(std::begin(lineList));
+				while (itr != std::prev(std::end(lineList))) {
+					int offset = itr->getOffset();
+					point p1, p2;
 
-				switch (lineType) {
-				case Common::LineType::LINE_HORIZONTAL:
-					p1 = point(rightBoundary, offset);
-					p2 = point(leftBoundary, offset);
-					break;
-				case Common::LineType::LINE_VERTICAL:
-					p1 = point(offset, bottomBoundary);
-					p2 = point(offset, topBoundary);
-					break;
-				default:
-					return false;
-				}
+					switch (lineType) {
+					case Common::LineType::LINE_HORIZONTAL:
+						p1 = point(rightBoundary, offset);
+						p2 = point(leftBoundary, offset);
+						break;
+					case Common::LineType::LINE_VERTICAL:
+						p1 = point(offset, bottomBoundary);
+						p2 = point(offset, topBoundary);
+						break;
+					default:
+						return false;
+					}
 
-				std::vector<box> result_n;
-				rtree.query(bgi::intersects(box(point(leftBoundary, topBoundary), p1)), 
-					std::back_inserter(result_n));
-				if (result_n.empty()) {
-					itr = lineList.erase(itr);
-					continue;
+					std::vector<box> result_n;
+					sparseBlockRtree.query(bgi::intersects(box(point(leftBoundary, topBoundary), p1)),
+						std::back_inserter(result_n));
+					if (result_n.empty()) {
+						itr = lineList.erase(itr);
+						continue;
+					}
+					result_n.clear();
+					sparseBlockRtree.query(bgi::intersects(box(p2, point(rightBoundary, bottomBoundary))),
+						std::back_inserter(result_n));
+					if (result_n.empty()) {
+						itr = lineList.erase(itr);
+						continue;
+					}
+					++itr;
 				}
-				result_n.clear();
-				rtree.query(bgi::intersects(box(p2, point(rightBoundary, bottomBoundary))), 
-					std::back_inserter(result_n));
-				if (result_n.empty()) {
-					itr = lineList.erase(itr);
-					continue;
-				}
-				++itr;
 			}
 		}
 
@@ -360,18 +364,7 @@ namespace TableDetection
 			int a = 3;
 		}
 
-		enum class BiasType : int {
-			JUNK = 0,
-			BIAS_NOT,
-			BIAS_LOW,
-			BIAS_CENTER,
-			BIAS_HIGH
-		};
-		int verMinGap = this->pSbm->getLetterWidthAvg() * 1.5;
-		int horMinGap = this->pSbm->getLetterHeightAvg() * 1.5;
-
 		std::vector<Common::Cell> cells;
-		bool deleted = true;
 
 		/// when can't split cell anymore. ///////////
 		if (std::size(horList) < 2 || std::size(verList) < 2) {
@@ -396,296 +389,60 @@ namespace TableDetection
 			top = bottom;
 			++hIdx;
 		}
-		/*
-		while (deleted) {
 
-			/// when can't split cell anymore. ///////////
-			if (std::size(horList) < 2 || std::size(verList) < 2) {
-				table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
-					offsetWidth, offsetWidth + areaWidth - 1);
-				return true;
+		// merge cells.
+		{
+			bgi::rtree<box, bgi::quadratic<16>> cellRtree;
+
+			// construct rtree.
+			for (const auto &cell : cells) {
+				cellRtree.insert(box(point(cell.getLeft(), cell.getTop()), 
+					point(cell.getRight(), cell.getBottom())));
 			}
 
-			/// must be "std::size(horList) >= 2 and std::size(verList) >= 2." after this line!!!!! /////////
+			// merge cells by sparse blocks.
+			for (const auto &curSparseBlock : curSparseBlocks) {
+				std::vector<box> result_n;
+				cellRtree.query(bgi::intersects(static_cast<const box&>(curSparseBlock)),
+					std::back_inserter(result_n));
+				if (std::size(result_n) < 2)
+					continue;
+				int lb = INT_MAX, rb = INT_MIN, tb = INT_MAX, bb = INT_MIN;
+				for (const auto &b : result_n) {
+					if (lb > b.min_corner().get<0>())
+						lb = b.min_corner().get<0>();
+					if (rb < b.max_corner().get<0>())
+						rb = b.max_corner().get<0>();
+					if (tb > b.min_corner().get<1>())
+						tb = b.min_corner().get<1>();
+					if (bb < b.max_corner().get<1>())
+						bb = b.max_corner().get<1>();
+				}
+				result_n.clear();
 
-			deleted = false;
+				cellRtree.query(bgi::intersects(box(point(lb+1, tb+1),point(rb-1, bb-1))),
+					std::back_inserter(result_n));
+				
+				for (const auto &b : result_n) {
+					cellRtree.remove(b);
+				}
+				cellRtree.insert(box(point(lb, tb), point(rb, bb)));
+			}
+
+			// RE : get cells by modified rtree.
 			cells.clear();
+			for (const auto &b : cellRtree) {
+				int top = b.min_corner().get<1>();
+				int bottom = b.max_corner().get<1>();
+				int left = b.min_corner().get<0>();
+				int right = b.max_corner().get<0>();
 
-			std::vector<std::list<Common::Cell>> horCellLists(std::size(horList) - 1),
-				verCellLists(std::size(verList) - 1);
-
-			{
-				// get cells by lines.
-				int top = topBoundary, bottom, left, right;
-				int hIdx = 0, vIdx;
-				for (auto horLine = std::next(std::begin(horList)); horLine != std::end(horList); ++horLine) {
-					bottom = horLine->getOffset();
-					left = leftBoundary;
-					vIdx = 0;
-					for (auto verLine = std::next(std::begin(verList)); verLine != std::end(verList); ++verLine) {
-						right = verLine->getOffset();
-						cells.emplace_back(top, bottom, left, right);
-						horCellLists[hIdx].emplace_back(cells.back());
-						verCellLists[vIdx].emplace_back(cells.back());
-						left = right;
-						++vIdx;
-					}
-					top = bottom;
-					++hIdx;
-				}
-			}
-
-			// delete vertical lines by bias.
-			{
-				auto curIter = std::next(std::begin(verList));
-				BiasType stateBiasType = BiasType::JUNK;
-				decltype(curIter) stateIter;
-
-				std::vector<std::list<Common::Cell>::iterator> horCellIters(std::size(horCellLists));
-
-				for (int i = 0; i < std::size(horCellLists); ++i) {
-					horCellIters[i] = std::begin(horCellLists[i]);
-				}
-
-				for (int i = 0; i < std::size(horCellLists[0]); ++i, ++curIter) {
-
-					BiasType curBiasType = BiasType::JUNK;
-
-					for (int j = 0; j < std::size(horCellLists); ++horCellIters[j], ++j) {
-
-						std::vector<box> result_n;
-						const auto &cell = *horCellIters[j];
-
-						rtree.query(bgi::intersects(box(point(cell.getLeft(), cell.getTop()),
-							point(cell.getRight(), cell.getBottom()))),
-							std::back_inserter(result_n));
-
-						if (result_n.empty())
-							continue;
-
-						BiasType biasType = BiasType::JUNK;
-						for (const auto &b : result_n) {
-							int left = b.min_corner().get<0>();
-							int right = b.max_corner().get<0>();
-
-							BiasType bt, tmpBt;
-							int maxGap, minGap;
-							//int curVerMinGap = verMinGap;
-
-							if (left - cell.getLeft() > cell.getRight() - right) {
-								maxGap = left - cell.getLeft();
-								minGap = cell.getRight() - right;
-								tmpBt = BiasType::BIAS_HIGH;
-							}
-							else {
-								maxGap = cell.getRight() - right;
-								minGap = left - cell.getLeft();
-								tmpBt = BiasType::BIAS_LOW;
-							}
-
-							if (maxGap > verMinGap && maxGap > minGap * 2.0)
-								bt = tmpBt;
-							else if (maxGap > verMinGap && minGap > verMinGap)
-								bt = BiasType::BIAS_CENTER;
-							else
-								bt = BiasType::BIAS_NOT;
-
-							if (biasType == BiasType::JUNK)
-								biasType = bt;
-							else if (biasType != bt) {
-								biasType = BiasType::JUNK;
-								break;
-							}
-						}
-
-						if (curBiasType == BiasType::JUNK)
-							curBiasType = biasType;
-						else if (curBiasType != biasType) {
-							curBiasType = BiasType::JUNK;
-							break;
-						}
-					}
-
-					switch (curBiasType) {
-					case BiasType::JUNK:
-						// do nothing
-						break;
-					case BiasType::BIAS_NOT:
-						if (stateBiasType == BiasType::BIAS_NOT ||
-							stateBiasType == BiasType::BIAS_HIGH) {
-							;
-						}
-						else {
-							stateBiasType = curBiasType;
-							stateIter = curIter;
-						}
-						break;
-					case BiasType::BIAS_CENTER:
-						stateBiasType = BiasType::JUNK;
-						break;
-					case BiasType::BIAS_LOW:
-						if (stateBiasType == BiasType::BIAS_NOT ||
-							stateBiasType == BiasType::BIAS_HIGH) {
-							// remove lines.
-							while (stateIter != curIter) {
-								stateIter = verList.erase(stateIter);
-							}
-							stateBiasType = BiasType::JUNK;
-							deleted = true;
-						}
-						else {
-							stateBiasType = BiasType::JUNK;
-						}
-						break;
-					case BiasType::BIAS_HIGH:
-						if (stateBiasType == BiasType::BIAS_NOT ||
-							stateBiasType == BiasType::BIAS_HIGH) {
-							// remove lines.
-							while (stateIter != std::prev(curIter)) {
-								stateIter = verList.erase(stateIter);
-							}
-							stateBiasType = curBiasType;
-							stateIter = curIter;
-							deleted = true;
-						}
-						else {
-							stateBiasType = curBiasType;
-							stateIter = curIter;
-						}
-						break;
-					default:
-						return false;
-					}
-				}
-				//if (stateBiasType != BiasType::JUNK)
-			}
-
-			// delete horizontal lines by bias.
-			{
-				auto curIter = std::next(std::begin(horList));
-				BiasType stateBiasType = BiasType::JUNK;
-				decltype(curIter) stateIter;
-
-				std::vector<std::list<Common::Cell>::iterator> verCellIters(std::size(verCellLists));
-
-				for (int i = 0; i < std::size(verCellLists); ++i) {
-					verCellIters[i] = std::begin(verCellLists[i]);
-				}
-
-				for (int i = 0; i < std::size(verCellLists[0]); ++i, ++curIter) {
-
-					BiasType curBiasType = BiasType::JUNK;
-
-					for (int j = 0; j < std::size(verCellLists); ++verCellIters[j], ++j) {
-
-						std::vector<box> result_n;
-						const auto &cell = *verCellIters[j];
-
-						rtree.query(bgi::intersects(box(point(cell.getLeft(), cell.getTop()),
-							point(cell.getRight(), cell.getBottom()))),
-							std::back_inserter(result_n));
-
-						if (result_n.empty())
-							continue;
-
-						BiasType biasType = BiasType::JUNK;
-						for (const auto &b : result_n) {
-							int top = b.min_corner().get<1>();
-							int bottom = b.max_corner().get<1>();
-
-							BiasType bt, tmpBt;
-							int maxGap, minGap;
-							//int curVerMinGap = verMinGap;
-
-							if (top - cell.getTop() > cell.getBottom() - bottom) {
-								maxGap = top - cell.getTop();
-								minGap = cell.getBottom() - bottom;
-								tmpBt = BiasType::BIAS_HIGH;
-							}
-							else {
-								maxGap = cell.getBottom() - bottom;
-								minGap = top - cell.getTop();
-								tmpBt = BiasType::BIAS_LOW;
-							}
-
-							if (maxGap > verMinGap && maxGap > minGap * 2.0)
-								bt = tmpBt;
-							else if (maxGap > verMinGap && minGap > verMinGap)
-								bt = BiasType::BIAS_CENTER;
-							else
-								bt = BiasType::BIAS_NOT;
-
-							if (biasType == BiasType::JUNK)
-								biasType = bt;
-							else if (biasType != bt) {
-								biasType = BiasType::JUNK;
-								break;
-							}
-						}
-
-						if (curBiasType == BiasType::JUNK)
-							curBiasType = biasType;
-						else if (curBiasType != biasType) {
-							curBiasType = BiasType::JUNK;
-							break;
-						}
-					}
-
-					switch (curBiasType) {
-					case BiasType::JUNK:
-						// do nothing
-						break;
-					case BiasType::BIAS_NOT:
-						if (stateBiasType == BiasType::BIAS_NOT ||
-							stateBiasType == BiasType::BIAS_HIGH) {
-							;
-						}
-						else {
-							stateBiasType = curBiasType;
-							stateIter = curIter;
-						}
-						break;
-					case BiasType::BIAS_CENTER:
-						stateBiasType = BiasType::JUNK;
-						break;
-					case BiasType::BIAS_LOW:
-						if (stateBiasType == BiasType::BIAS_NOT ||
-							stateBiasType == BiasType::BIAS_HIGH) {
-							// remove lines.
-							while (stateIter != curIter) {
-								stateIter = horList.erase(stateIter);
-							}
-							stateBiasType = BiasType::JUNK;
-							deleted = true;
-						}
-						else {
-							stateBiasType = BiasType::JUNK;
-						}
-						break;
-					case BiasType::BIAS_HIGH:
-						if (stateBiasType == BiasType::BIAS_NOT ||
-							stateBiasType == BiasType::BIAS_HIGH) {
-							// remove lines.
-							while (stateIter != std::prev(curIter)) {
-								stateIter = horList.erase(stateIter);
-							}
-							stateBiasType = curBiasType;
-							stateIter = curIter;
-							deleted = true;
-						}
-						else {
-							stateBiasType = curBiasType;
-							stateIter = curIter;
-						}
-						break;
-					default:
-						return false;
-					}
-				}
-				//if (stateBiasType != BiasType::JUNK)
+				cells.emplace_back(top, bottom, left, right);
 			}
 		}
-		*/
+
+		/// //////////////////////////////
+		
 		bool success = true;
 
 		for (const auto &cell : cells) {
@@ -694,8 +451,50 @@ namespace TableDetection
 			if (!success)
 				break;
 		}
-
+		/*
 		// For Debugging
+		if (this->isDebug) {
+
+			unsigned color =
+				this->recColor[(recDepth < this->recColorCnt - 1 ? recDepth : this->recColorCnt - 1)];
+			unsigned char R = ((color & 0x00ff0000) >> 16),
+				G = ((color & 0x0000ff00) >> 8), B = (color & 0x00000ff);
+
+			for (const auto &cell : cells) {
+				int top = cell.getTop();
+				int bottom = cell.getBottom();
+				int left = cell.getLeft();
+				int right = cell.getRight();
+				auto &result = *this->pResultImage;
+				for (int i = topBoundary; i <= bottomBoundary; ++i) {
+					if (left != offsetWidth || firstRecursive) {
+						result[i][left].R = R;
+						result[i][left].G = G;
+						result[i][left].B = B;
+					}
+					if (right != offsetWidth + areaWidth - 1 || firstRecursive) {
+						result[i][right].R = R;
+						result[i][right].G = G;
+						result[i][right].B = B;
+					}
+				}
+				for (int i = leftBoundary; i <= rightBoundary; ++i) {
+					if (top != offsetHeight || firstRecursive) {
+						result[top][i].R = R;
+						result[top][i].G = G;
+						result[top][i].B = B;
+					}
+					if (bottom != offsetHeight + areaHeight - 1 || firstRecursive) {
+						result[bottom][i].R = R;
+						result[bottom][i].G = G;
+						result[bottom][i].B = B;
+					}
+				}
+			}
+		}
+		*/
+
+		/*
 		if (this->isDebug) {
 
 			unsigned color =
@@ -718,6 +517,7 @@ namespace TableDetection
 				}
 			}
 		}
+		*/
 
 		return success;
 	}
