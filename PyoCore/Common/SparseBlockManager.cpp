@@ -136,6 +136,7 @@ namespace Common
 		const double STANDARD_VALUE = this->getLetterWidthAvg() / 2;
 		bool isDeleted = true;
 		int left, right, top, bottom;
+		double dist = -1; // for trace
 
 		for (auto& p : sparseBlocks)
 		{
@@ -151,7 +152,7 @@ namespace Common
 				result_n.clear();
 				rtree.query(bgi::nearest(static_cast<box&>(*itr), 2), std::back_inserter(result_n));
 
-				double dist = -1; // for trace
+				dist = -1; // for trace
 				int deletedIndex = -1, k = 0;
 				for (auto p : result_n)
 				{
@@ -274,7 +275,7 @@ namespace Common
 			{
 				return a.min_corner().get<0>() < b.min_corner().get<0>();
 			});
-			for (int i = 0; i < result_n.size() - 1; ++i)
+			for (int i = 0; i < result_n.size() - 1; )
 			{
 				double rate = 3;
 				// need height
@@ -290,11 +291,19 @@ namespace Common
 				if (rate > 5.0 || rate < 0.2)
 				{
 					// cant merge
-					++itr;
+					result_n.erase(std::begin(result_n) + i);
+					// ++itr;
 					continue;
 				}
-				if(result_n[i + 1].min_corner().get<0>() -result_n[i].max_corner().get<0>() - 1 > 0)
-					v.emplace_back(result_n[i + 1].min_corner().get<0>() -result_n[i].max_corner().get<0>() - 1);
+				else
+					++i;
+			}
+			for (int i = 0; i < result_n.size() - 1; ++i)
+			{
+				if (result_n[i + 1].min_corner().get<0>() - result_n[i].max_corner().get<0>() - 1 > 0)
+				{
+					v.emplace_back(result_n[i + 1].min_corner().get<0>() - result_n[i].max_corner().get<0>() - 1);
+				}
 			}
 
 			for (const auto& a : result_n)
@@ -312,11 +321,109 @@ namespace Common
 		}
 		double ret = getKmeansBoundary(v);
 		if (ret != INT_MAX)
-		{
-			kmeansboundary += ret;
-		}
+			kmeansboundary = ret;
 
-		// segment seg(point(itr->getRight() - itr->getWidth() / 2, itr->getBottom() - itr->getHeight() / 2), point(itr->getRight(), itr->getBottom()));
+
+
+		result_n.clear();
+		l.clear();
+		for (const auto& p : rtree)
+			result_n.push_back(p);
+
+		std::sort(begin(result_n), end(result_n), [](const box& a, const box& b)
+		{
+			if (a.min_corner().get<1>() == b.min_corner().get<1>())
+				return a.min_corner().get<0>() < b.min_corner().get<0>();
+			return a.min_corner().get<1>() < b.min_corner().get<1>();
+		});
+
+		for (const auto& p : result_n)
+			l.push_back(p);
+
+		for (auto itr = std::begin(l); itr != std::end(l);)
+		{
+			result_n.clear();
+			auto currentBox = box(point(0, itr->min_corner().get<1>()), point(image.getWidth(), itr->max_corner().get<1>()));
+			rtree.query(bgi::intersects(currentBox), std::back_inserter(result_n));
+			std::sort(begin(result_n), end(result_n), [](const box& a, const box& b)
+			{
+				return a.min_corner().get<0>() < b.min_corner().get<0>();
+			});
+			for (int i = 0; i < result_n.size() - 1; )
+			{
+				double rate = 3;
+				// need height
+				if (itr->min_corner().get<1>() < result_n[i].max_corner().get<1>()
+					|| result_n[i].min_corner().get<1>() < itr->max_corner().get<1>())
+					rate = (static_cast<double>(itr->max_corner().get<1>()) - static_cast<double>(itr->min_corner().get<1>()))
+						/ (static_cast<double>(result_n[i].max_corner().get<1>()) - static_cast<double>(result_n[i].min_corner().get<1>()) + 1);
+				// else need width
+				else if (itr->min_corner().get<0>() < result_n[i].max_corner().get<0>()
+					|| result_n[i].min_corner().get<0>() < itr->max_corner().get<0>())
+					rate = (static_cast<double>(itr->max_corner().get<0>()) - static_cast<double>(itr->min_corner().get<0>()))
+						/ (static_cast<double>(result_n[i].max_corner().get<0>()) - static_cast<double>(result_n[i].min_corner().get<0>()) + 1);
+				if (rate > 5.0 || rate < 0.2)
+				{
+					// cant merge
+					result_n.erase(std::begin(result_n) + i);
+					// ++itr;
+					continue;
+				}
+				else
+					++i;
+			}
+			left = top = INT_MAX;
+			right = bottom = INT_MIN;
+			for (int i = 0; i < result_n.size() - 1; ++i)
+			{
+				dist = bg::distance(static_cast<box&>(result_n[i]), static_cast<box&>(result_n[i + 1]));
+				if (dist >= kmeansboundary)
+				{
+					if (left != INT_MAX)
+					{
+						rtree.insert(box(point(left, top), point(right, bottom)));
+						this->sparseBlocks.emplace_back(point(left, top), point(right, bottom));
+						left = top = INT_MAX;
+						right = bottom = INT_MIN;
+					}
+					continue;
+				}
+				auto& a = result_n[i];
+				left = std::min(left, a.min_corner().get<0>());
+				right = std::max(right, a.max_corner().get<0>());
+				top = std::min(top, a.min_corner().get<1>());
+				bottom = std::max(bottom, a.max_corner().get<1>());
+
+				for (auto jtr = std::begin(sparseBlocks); jtr != std::end(sparseBlocks); ++jtr)
+					if (a.max_corner().get<1>() == jtr->max_corner().get<1>() && a.min_corner().get<0>() == jtr->min_corner().get<0>()
+						&& a.min_corner().get<1>() == jtr->min_corner().get<1>() && a.max_corner().get<0>() == jtr->max_corner().get<0>())
+					{
+						sparseBlocks.erase(jtr);
+						break;
+					}
+				rtree.remove(static_cast<box&>(a));
+			}
+			if (left != INT_MAX)
+			{
+				rtree.insert(box(point(left, top), point(right, bottom)));
+				this->sparseBlocks.emplace_back(point(left, top), point(right, bottom));
+				left = top = INT_MAX;
+				right = bottom = INT_MIN;
+			}
+
+			for (const auto& a : result_n)
+			{
+				for (auto jtr = std::begin(l); jtr != std::end(l); ++jtr)
+					if (a.max_corner().get<1>() == jtr->max_corner().get<1>() && a.min_corner().get<0>() == jtr->min_corner().get<0>()
+						&& a.min_corner().get<1>() == jtr->min_corner().get<1>() && a.max_corner().get<0>() == jtr->max_corner().get<0>())
+					{
+						l.erase(jtr);
+						break;
+					}
+					
+			}
+			itr = std::begin(l);
+		}
 
 		this->sparseBlockHeightAvg = this->sparseBlockWidthAvg = 0;
 
@@ -415,7 +522,7 @@ namespace Common
 		bool success = false;
 		int offsetX, offsetY, edgeX, edgeY;
 
-		for (auto& q : sparseBlocks)
+		for (auto& q : rtree)
 		{
 			offsetX = q.min_corner().get<0>();
 			offsetY = q.min_corner().get<1>();
@@ -501,17 +608,19 @@ namespace Common
 
 		int lowerMaxValue = INT_MIN;
 		int upperMinValue = INT_MAX;
+		std::vector<int> lowerVector;
 		for (int i = 0; i < clustered.size(); i++)
 		{
 			if (clustered[i] == TableDetection::KmeansType::TYPE_LOWER && forCluster[i] > lowerMaxValue)
-				lowerMaxValue = forCluster[i];
+				lowerMaxValue = forCluster[i], lowerVector.push_back(forCluster[i]);
 			else if (clustered[i] == TableDetection::KmeansType::TYPE_UPPER && forCluster[i] < upperMinValue)
 				upperMinValue = forCluster[i];
 		}
 		if (lowerMaxValue == INT_MIN || upperMinValue == INT_MAX)
 			return INT_MAX;
+		std::sort(std::begin(forCluster), std::end(forCluster));
 
-		return static_cast<double>(lowerMaxValue);
+		return static_cast<double>(lowerVector[lowerVector.size() / 4]);
 	}
 	std::vector<SparseBlock> SparseBlockManager::getSparseBlocksInRange(
 		int top, int bottom, int left, int right)

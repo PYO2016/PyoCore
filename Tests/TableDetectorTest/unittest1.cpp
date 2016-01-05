@@ -78,7 +78,7 @@ namespace TableDetectorTest
 				
 				result.storeToFile(resultFile);
 				*/
-				std::wstring resultFile = dir + prefix + L".png_result.png";
+				std::wstring resultFile = imageFile + L"_result.png";
 				system(Common::EncodingConverter::ws2s(L"start mspaint.exe " + resultFile).c_str());
 				Sleep(1000);
 			}
