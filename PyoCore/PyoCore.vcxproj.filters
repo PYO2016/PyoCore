@@ -60,9 +60,6 @@
     <ClCompile Include="Common\SparseBlockManager.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="Common\EM.cpp">
-      <Filter>소스 파일\Common</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PyoCore.h">
@@ -96,9 +93,6 @@
       <Filter>소스 파일\TableDetection</Filter>
     </ClInclude>
     <ClInclude Include="Common\SparseBlockManager.h">
-      <Filter>소스 파일\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\EM.h">
       <Filter>소스 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
