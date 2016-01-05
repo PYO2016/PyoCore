@@ -14,7 +14,6 @@
 #include <algorithm>
 
 #include "../TableDetection/HistogramManager.h"
-#include "EM.h"
 
 namespace Common
 {
