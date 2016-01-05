@@ -191,8 +191,10 @@ namespace TableDetection
 		if (!xycut(lines, areaWidth, areaHeight, offsetWidth, offsetHeight, !firstRecursive))
 			return false;
 
+		
 		if (!xycutPostProcess(lines, areaWidth, areaHeight, offsetWidth, offsetHeight))
 			return false;
+		
 
 		const int adjHorLineConstant = this->pSbm->getLetterHeightAvg() * 1.2;
 		const int adjVerLineConstant = this->pSbm->getLetterWidthAvg() * 1.2;
@@ -350,39 +352,187 @@ namespace TableDetection
 			}
 		}
 
-		/// when can't split cell anymore. ///////////
-		if (std::size(horList) < 2 || std::size(verList) < 2) {
-			table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
-				offsetWidth, offsetWidth + areaWidth - 1);
-			return true;
+		// for debug
+		if (recDepth >= 1 && std::size(horList) >= 2 && std::size(verList) >= 2 &&
+			std::size(horList) + std::size(verList) >= 5) {
+			int a = 3;
 		}
 
-		/// must be "std::size(horList) >= 2 and std::size(verList) >= 2." after this line!!!!! /////////
-		
-		// get cells by lines.
+		enum class BiasType : int {
+			JUNK = 0,
+			BIAS_NOT,
+			BIAS_LOW,
+			BIAS_CENTER,
+			BIAS_HIGH
+		};
+		int verMinGap = this->pSbm->getLetterWidthAvg() * 1.5;
+		int horMinGap = this->pSbm->getLetterHeightAvg() * 1.5;
+
 		std::vector<Common::Cell> cells;
-		std::vector<std::list<Common::Cell*>> horCellList(std::size(horList) - 1), 
-			verCellList(std::size(verList) - 1);
+		bool deleted = true;
 
-		int top = topBoundary, bottom, left, right;
-		int hIdx = 0, vIdx;
-		for (auto horLine = std::next(std::begin(horList)); horLine != std::end(horList); ++horLine) {
-			bottom = horLine->getOffset();
-			left = leftBoundary;
-			vIdx = 0;
-			for (auto verLine = std::next(std::begin(verList)); verLine != std::end(verList); ++verLine) {
-				right = verLine->getOffset();
-				cells.emplace_back(top, bottom, left, right);
-				horCellList[hIdx].emplace_back(&cells.back());
-				verCellList[vIdx].emplace_back(&cells.back());
-				left = right;
-				++vIdx;
+		while (deleted) {
+
+			/// when can't split cell anymore. ///////////
+			if (std::size(horList) < 2 || std::size(verList) < 2) {
+				table.addCell(offsetHeight, offsetHeight + areaHeight - 1,
+					offsetWidth, offsetWidth + areaWidth - 1);
+				return true;
 			}
-			top = bottom;
-			++hIdx;
+
+			/// must be "std::size(horList) >= 2 and std::size(verList) >= 2." after this line!!!!! /////////
+
+			deleted = false;
+			cells.clear();
+
+			std::vector<std::list<Common::Cell>> horCellLists(std::size(horList) - 1),
+				verCellLists(std::size(verList) - 1);
+
+			{
+				// get cells by lines.
+				int top = topBoundary, bottom, left, right;
+				int hIdx = 0, vIdx;
+				for (auto horLine = std::next(std::begin(horList)); horLine != std::end(horList); ++horLine) {
+					bottom = horLine->getOffset();
+					left = leftBoundary;
+					vIdx = 0;
+					for (auto verLine = std::next(std::begin(verList)); verLine != std::end(verList); ++verLine) {
+						right = verLine->getOffset();
+						cells.emplace_back(top, bottom, left, right);
+						horCellLists[hIdx].emplace_back(cells.back());
+						verCellLists[vIdx].emplace_back(cells.back());
+						left = right;
+						++vIdx;
+					}
+					top = bottom;
+					++hIdx;
+				}
+			}
+
+			{
+				auto curIter = std::next(std::begin(verList));
+				BiasType stateBiasType = BiasType::JUNK;
+				decltype(curIter) stateIter;
+
+				std::vector<std::list<Common::Cell>::iterator> horCellIters(std::size(horCellLists));
+
+				for (int i = 0; i < std::size(horCellLists); ++i) {
+					horCellIters[i] = std::begin(horCellLists[i]);
+				}
+
+				for (int i = 0; i < std::size(horCellLists[0]); ++i, ++curIter) {
+
+					BiasType curBiasType = BiasType::JUNK;
+
+					for (int j = 0; j < std::size(horCellLists); ++horCellIters[j], ++j) {
+
+						std::vector<box> result_n;
+						const auto &cell = *horCellIters[j];
+
+						rtree.query(bgi::intersects(box(point(cell.getLeft(), cell.getTop()),
+							point(cell.getRight(), cell.getBottom()))),
+							std::back_inserter(result_n));
+
+						if (result_n.empty())
+							continue;
+
+						BiasType biasType = BiasType::JUNK;
+						for (const auto &b : result_n) {
+							int left = b.min_corner().get<0>();
+							int right = b.max_corner().get<0>();
+
+							BiasType bt, tmpBt;
+							int maxGap, minGap;
+							//int curVerMinGap = verMinGap;
+
+							if (left - cell.getLeft() > cell.getRight() - right) {
+								maxGap = left - cell.getLeft();
+								minGap = cell.getRight() - right;
+								tmpBt = BiasType::BIAS_HIGH;
+							}
+							else {
+								maxGap = cell.getRight() - right;
+								minGap = left - cell.getLeft();
+								tmpBt = BiasType::BIAS_LOW;
+							}
+
+							if (maxGap > verMinGap && maxGap > minGap * 2.0)
+								bt = tmpBt;
+							else if (maxGap > verMinGap && minGap > verMinGap)
+								bt = BiasType::BIAS_CENTER;
+							else
+								bt = BiasType::BIAS_NOT;
+
+							if (biasType == BiasType::JUNK)
+								biasType = bt;
+							else if (biasType != bt) {
+								biasType = BiasType::JUNK;
+								break;
+							}
+						}
+						
+						if (curBiasType == BiasType::JUNK)
+							curBiasType = biasType;
+						else if (curBiasType != biasType) {
+							curBiasType = BiasType::JUNK;
+							break;
+						}
+					}
+
+					switch (curBiasType) {
+					case BiasType::JUNK:
+						// do nothing
+						break;
+					case BiasType::BIAS_NOT:
+						if (stateBiasType == BiasType::BIAS_NOT ||
+							stateBiasType == BiasType::BIAS_HIGH) {
+							;
+						}
+						else {
+							stateBiasType = curBiasType;
+							stateIter = curIter;
+						}
+						break;
+					case BiasType::BIAS_CENTER:
+						stateBiasType = BiasType::JUNK;
+						break;
+					case BiasType::BIAS_LOW:
+						if (stateBiasType == BiasType::BIAS_NOT ||
+							stateBiasType == BiasType::BIAS_HIGH) {
+							// remove lines.
+							while (stateIter != curIter) {
+								stateIter = verList.erase(stateIter);
+							}
+							stateBiasType = BiasType::JUNK;
+							deleted = true;
+						}
+						else {
+							stateBiasType = BiasType::JUNK;
+						}
+						break;
+					case BiasType::BIAS_HIGH:
+						if (stateBiasType == BiasType::BIAS_NOT || 
+							stateBiasType == BiasType::BIAS_HIGH) {
+							// remove lines.
+							while (stateIter != std::prev(curIter)) {
+								stateIter = verList.erase(stateIter);
+							}
+							stateBiasType = curBiasType;
+							stateIter = curIter;
+							deleted = true;
+						}
+						else {
+							stateBiasType = curBiasType;
+							stateIter = curIter;
+						}
+						break;
+					default:
+						return false;
+					}
+				}
+				//if (stateBiasType != BiasType::JUNK)
+			}
 		}
-
-
 
 		bool success = true;
 
@@ -436,12 +586,12 @@ namespace TableDetection
 			goto END;
 		if (!pHm->detectSpecialValues(HistogramType::TYPE_Y))
 			goto END;
-
+		
 		if (!pHm->applyMedianFilter(HistogramType::TYPE_X))
 			goto END;
 		if (!pHm->applyMedianFilter(HistogramType::TYPE_Y))
 			goto END;
-
+		
 		if (!pHm->filterExtremum(HistogramType::TYPE_X))
 			goto END;
 		if (!pHm->filterExtremum(HistogramType::TYPE_Y))
