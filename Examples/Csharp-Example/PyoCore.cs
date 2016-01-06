@@ -10,7 +10,7 @@ namespace PyoCore
     class PyoCore
     {
         [DllImport("PyoCore.dll")]
-        public static extern int processImageFileW (
+        public static extern bool processImageFileW (
             [param: MarshalAs(UnmanagedType.LPWStr)]
             String imageFileName,
             [param: MarshalAs(UnmanagedType.I4)]
@@ -24,7 +24,7 @@ namespace PyoCore
             );
         
         [DllImport("PyoCore.dll")]
-        public static extern int processImageFileA (
+        public static extern bool processImageFileA (
             [param: MarshalAs(UnmanagedType.LPStr)]
             String imageFileName,
             [param: MarshalAs(UnmanagedType.I4)]
