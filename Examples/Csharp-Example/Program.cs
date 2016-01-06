@@ -26,7 +26,7 @@ namespace Csharp_Example
                 buffer2, len, true);
             Console.WriteLine(buffer2.ToString() + "\n");
 
-            int errorCode = PyoCore.PyoCore.getErrorCode();
+            PyoCore.ErrorCode errorCode = PyoCore.PyoCore.getErrorCode();
             Console.WriteLine("ErrorCode : " + errorCode);
         }
     }

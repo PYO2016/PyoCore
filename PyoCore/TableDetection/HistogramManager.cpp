@@ -427,7 +427,7 @@ namespace TableDetection
 				++itr;
 			}
 		}
-
+		
 		// apply maximum special values
 		auto itr = std::begin(this->extremumList);
 		for (const auto &ext : specialValues)
@@ -438,7 +438,7 @@ namespace TableDetection
 					this->extremumList.emplace(itr, ext.first, ext.second);
 			}
 		}
-
+		
 		// merge adjacent lines. (select middle thing)
 		for (auto itr = std::begin(this->extremumList); itr != std::end(this->extremumList); )
 		{

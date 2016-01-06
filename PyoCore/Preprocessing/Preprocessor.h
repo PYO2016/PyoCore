@@ -9,9 +9,6 @@
 
 #include "opencv2/opencv.hpp"
 
-using namespace std;
-using namespace Common;
-using namespace cv;
 
 namespace Preprocessing
 {
@@ -43,7 +40,7 @@ namespace Preprocessing
 			right = j;
 		}
 
-		void _line(Mat& img)
+		void _line(cv::Mat& img)
 		{
 			if (check)
 				return;
@@ -85,11 +82,11 @@ namespace Preprocessing
 	public:
 		Preprocessor() = delete;
 		~Preprocessor() = delete;
-		static bool process(PngImage&);
+		static bool process(Common::PngImage&);
 
 	private:
-		static void applyToOrigin(PngImage&, Mat&);
-		static void getJoints(PngImage& image, boost::geometry::index::rtree<box, boost::geometry::index::quadratic<16>>& rtree, std::list<JointNode>& l);
+		static void applyToOrigin(Common::PngImage&, cv::Mat&);
+		static void getJoints(Common::PngImage& image, boost::geometry::index::rtree<box, boost::geometry::index::quadratic<16>>& rtree, std::list<JointNode>& l);
 	};
 
 }
