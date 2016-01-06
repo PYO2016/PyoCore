@@ -8,6 +8,11 @@
 
 #include <list>
 #include <queue>
+
+using namespace cv;
+using namespace std;
+using namespace Common;
+
 namespace Preprocessing
 {
 	namespace bg = boost::geometry;
