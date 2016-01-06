@@ -38,7 +38,7 @@ namespace PyoCore
             );
 
         [DllImport("PyoCore.dll")]
-        public static extern int getErrorCode();
+        public static extern ErrorCode getErrorCode();
     }
 
     enum ImageFileType
