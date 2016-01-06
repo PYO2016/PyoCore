@@ -94,7 +94,7 @@ namespace Common
 						}
 					}
 
-					this->sparseBlocks.emplace_back(point(left, top), point(right, bottom), (right - left) * (-top + bottom));
+					this->sparseBlocks.emplace_back(point(left, top), point(right, bottom), (right - left + 1) * (-top + bottom + 1));
 					if (left < leftest)
 						leftest = left;
 					if (right > rightest)
@@ -263,6 +263,7 @@ namespace Common
 		{
 			l.push_back(p);
 		}
+
 		double kmeansboundary = 0;
 		int addedN = 0;
 		std::vector<int> v;
@@ -502,7 +503,7 @@ namespace Common
 		while (itr != std::end(this->sparseBlocks))
 		{
 			area = itr->getRealArea();
-			if (area <= 8)
+			if (area < 7)
 			{
 				offsetX = itr->getLeft();
 				offsetY = itr->getTop();
