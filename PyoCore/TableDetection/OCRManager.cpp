@@ -101,26 +101,23 @@ namespace TableDetection
 			cv::cvtColor(sub, sub, CV_BGR2GRAY);
 		}
 
-		cv::imwrite("C:/Users/JK/Desktop/hoho/sub" + std::to_string(k) + "_pre.png", sub);
-
 		cv::adaptiveThreshold(sub, sub, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 15, 3);
 		
 		cv::Mat horizontal = sub.clone();
 		cv::Mat vertical = sub.clone();
 
-		int horizontalsize = (horizontal.cols * 70) / 100;
+		int ratio = 60;
+		int horizontalsize = (horizontal.cols * ratio) / 100;
 		cv::Mat horizontalStructure = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(horizontalsize, 1));
 		cv::erode(~horizontal, horizontal, horizontalStructure, cv::Point(-1, -1));
 		cv::dilate(horizontal, horizontal, horizontalStructure, cv::Point(-1, -1), 2);
 
-		int verticalsize = (vertical.rows * 70) / 100;
+		int verticalsize = (vertical.rows * ratio) / 100;
 		cv::Mat verticalStructure = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(1, verticalsize));
 		cv::erode(~vertical, vertical, verticalStructure, cv::Point(-1, -1));
 		cv::dilate(vertical, vertical, verticalStructure, cv::Point(-1, -1), 2);
 
 		cv::Mat mask = horizontal + vertical;
 		sub = sub + mask;
-		
-		cv::imwrite("C:/Users/JK/Desktop/hoho/sub" + std::to_string(k++) + "_result.png", sub);
 	}
 }
