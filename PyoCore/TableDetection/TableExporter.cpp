@@ -87,19 +87,30 @@ namespace TableDetection
 		std::wstring html;
 		int row = -1;
 		int idx = 0;
-		html += L"<table class='PYO2016-table'>\n";
+
+		html.append(L"<table class='PYO2016-table'>\n");
 		for (const auto &cell : cells) {
 			if (row < cell.getRow()) {
-				if(row >= 0) html += L"  </tr>\n";
-				html += L"  <tr class='row-" + std::to_wstring(cell.getRow()) + L"'>\n";
+				if (row >= 0)
+					html.append(L"  </tr>\n");
+				html.append(L"  <tr class='row-");
+				html.append(std::to_wstring(cell.getRow()));
+				html.append(L"'>\n");
 				row = cell.getRow();
 			}
-			html += L"    <td rowspan=" + std::to_wstring(cell.getRowspan()) +
-				L" colspan=" + std::to_wstring(cell.getColspan()) +
-				L" class='cell-" + std::to_wstring(idx++) + L"'>" +
-				cell.getInnerString() + L"</td>\n";
+			html.append(L"    <td rowspan=");
+			html.append(std::to_wstring(cell.getRowspan()));
+			html.append(L" colspan=");
+			html.append(std::to_wstring(cell.getColspan()));
+			html.append(L" class='cell-");
+			html.append(std::to_wstring(idx++));
+			html.append(L"'>");
+
+			std::wstring cellStr = cell.getInnerString();
+			html.append(cellStr);
+			html.append(L"</td>\n");
 		}
-		html += L"</table>";
+		html.append(L"</table>");
 
 		std::wstring css(
 			L"<style type='text/css'>\n"

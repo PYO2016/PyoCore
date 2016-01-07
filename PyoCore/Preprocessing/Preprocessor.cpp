@@ -8,6 +8,11 @@
 
 #include <list>
 #include <queue>
+
+using namespace cv;
+using namespace std;
+using namespace Common;
+
 namespace Preprocessing
 {
 	namespace bg = boost::geometry;
@@ -179,8 +184,14 @@ namespace Preprocessing
 		// reverse black-white
 
 		// change apply to original image
-		bitwise_not(bw, bw);
-		applyToOrigin(image, bw);
+		Mat rrr;
+		Canny(bw, rrr, 255, 255);
+
+		bitwise_not(rrr, rrr);
+		applyToOrigin(image, rrr);
+
+		//bitwise_not(bw, bw);
+		//applyToOrigin(image, bw);
 		image.storeToFile(L"C:/Users/KGWANGMIN/Pictures/4_sparse.png");
 
 		return true;
