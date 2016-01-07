@@ -95,8 +95,8 @@ namespace TableDetection
 		DEBUG_MSG("detectTable() finish!!");
 
 		DEBUG_MSG("ocr() start!!");
-		if (!OCRManager::recognize(imgOri, table.getCells()))
-			return false;
+		//if (!OCRManager::recognize(imgOri, table.getCells()))
+		//	return false;
 		DEBUG_MSG("ocr() finish!!");
 			
 		DEBUG_MSG("exportTable() start!!");
