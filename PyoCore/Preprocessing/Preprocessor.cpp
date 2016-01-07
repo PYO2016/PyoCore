@@ -196,7 +196,7 @@ namespace Preprocessing
 
 		return true;
 	}
-
+	
 	void Preprocessor::applyToOrigin(PngImage& image, Mat& mat)
 	{
 		// mat is gray image
@@ -279,6 +279,7 @@ namespace Preprocessing
 
 		return;
 	}
+
 	JointNode::JointNode(box b)
 		: box(b), up(nullptr), down(nullptr), left(nullptr), right(nullptr), check(false)
 	{
