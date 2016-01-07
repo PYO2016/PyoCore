@@ -172,7 +172,9 @@ namespace Preprocessing
 			}
 		}
 
-		std::begin(l)->_line(bw);
+		for (auto& z : l)
+			if(!z.check)
+				z._line(bw);
 
 		Mat rrr;
 		Canny(bw, rrr, 255, 255);

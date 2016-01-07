@@ -82,8 +82,8 @@ namespace TableDetection
 			int height = sub.rows;
 			int pixelBytes = sub.channels();
 			int lineBytes = width * pixelBytes;
-
-		tessApi->SetImage(imagedata, width, height, pixelBytes, lineBytes);
+			
+			tessApi->SetImage(imagedata, width, height, pixelBytes, lineBytes);
 
 			std::string utf8(tessApi->GetUTF8Text());
 			//std::remove_if(utf8.begin(), utf8.end(), [&](char c)->bool { return !std::isprint(c, loc); });
