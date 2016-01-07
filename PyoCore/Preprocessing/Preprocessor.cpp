@@ -8,6 +8,11 @@
 
 #include <list>
 #include <queue>
+
+using namespace cv;
+using namespace std;
+using namespace Common;
+
 namespace Preprocessing
 {
 	namespace bg = boost::geometry;
@@ -24,7 +29,6 @@ namespace Preprocessing
 		boost::geometry::index::rtree<box, boost::geometry::index::quadratic<16>> rtree;
 
 		Mat src(image.getHeight(), image.getWidth(), CV_8UC3, image.getDataAsByteArray());
-		Mat dest;
 
 		// Transform source image to gray if it is not
 		Mat gray;
@@ -51,7 +55,7 @@ namespace Preprocessing
 
 		int scale = 15; // play with this variable in order to increase/decrease the amount of lines to be detected
 
-						// Specify size on horizontal axis
+		// Specify size on horizontal axis
 		int horizontalsize = horizontal.cols / scale;
 
 		// Create structure element for extracting horizontal lines through morphology operations
@@ -60,7 +64,6 @@ namespace Preprocessing
 		// Apply morphology operations
 		erode(horizontal, horizontal, horizontalStructure, Point(-1, -1));
 		dilate(horizontal, horizontal, horizontalStructure, Point(-1, -1));
-		//    dilate(horizontal, horizontal, horizontalStructure, Point(-1, -1)); // expand horizontal lines
 
 		// Show extracted horizontal lines
 		// Specify size on vertical axis
@@ -72,7 +75,6 @@ namespace Preprocessing
 		// Apply morphology operations
 		erode(vertical, vertical, verticalStructure, Point(-1, -1));
 		dilate(vertical, vertical, verticalStructure, Point(-1, -1));
-		//    dilate(vertical, vertical, verticalStructure, Point(-1, -1)); // expand vertical lines
 
 		// Show extracted vertical lines
 		// create a mask which includes the tables
@@ -170,22 +172,22 @@ namespace Preprocessing
 			}
 		}
 
-		std::begin(l)->_line(bw);
+		for (auto& z : l)
+			if(!z.check)
+				z._line(bw);
 
-		// remove horizontal and vertical line from image
-		// bitwise_and(bw, ~horizontal, bw);
-		// bitwise_and(bw, ~vertical, bw);
+		Mat rrr;
+		Canny(bw, rrr, 255, 255);
 
-		// reverse black-white
+		bitwise_not(rrr, rrr);
+		applyToOrigin(image, rrr);
 
-		// change apply to original image
-		bitwise_not(bw, bw);
-		applyToOrigin(image, bw);
-		image.storeToFile(L"C:/Users/KGWANGMIN/Pictures/4_sparse.png");
+		// for test
+		//image.storeToFile(L"C:/Users/KGWANGMIN/Pictures/4_sparse.png");
 
 		return true;
 	}
-
+	
 	void Preprocessor::applyToOrigin(PngImage& image, Mat& mat)
 	{
 		// mat is gray image
@@ -268,6 +270,7 @@ namespace Preprocessing
 
 		return;
 	}
+
 	JointNode::JointNode(box b)
 		: box(b), up(nullptr), down(nullptr), left(nullptr), right(nullptr), check(false)
 	{

@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include "opencv2\highgui\highgui.hpp"
+#include "opencv2\opencv.hpp"
 
 namespace Common
 {
@@ -44,6 +44,7 @@ namespace Common
 		inline unsigned int PngImage::getHeight() const;
 		inline unsigned char* PngImage::getDataAsByteArray();
 		inline const unsigned char* PngImage::getDataAsByteArray() const;
+		inline void setPadding(int);
 
 	private:
 		bool _isCopy;	// true if created by copy constructor.
@@ -76,6 +77,10 @@ namespace Common
 	inline const unsigned char* PngImage::getDataAsByteArray() const
 	{
 		return imageMat.data;
+	}
+
+	inline void PngImage::setPadding(int padding) {
+		cv::copyMakeBorder(this->imageMat, this->imageMat, padding, padding, padding, padding, cv::BORDER_CONSTANT, cv::Scalar::all(255));
 	}
 }
 

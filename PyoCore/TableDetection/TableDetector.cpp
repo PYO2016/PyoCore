@@ -3,6 +3,7 @@
 #include "../Preprocessing/Preprocessor.h"
 #include <iostream>
 #include "TableExporter.h"
+#include "OCRManager.h"
 #include <algorithm>
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
@@ -74,8 +75,10 @@ namespace TableDetection
 			return false;
 
 		DEBUG_MSG("registerImage() finish!!");
-
+		
 		DEBUG_MSG("preprocess() start!!");
+		this->pImage->setPadding(5);
+		Common::PngImage imgOri(*(this->pImage));
 
 		/////// preprocess()
 		if (!preprocess())
@@ -91,6 +94,11 @@ namespace TableDetection
 
 		DEBUG_MSG("detectTable() finish!!");
 
+		DEBUG_MSG("ocr() start!!");
+		if (!OCRManager::recognize(imgOri, table.getCells()))
+			return false;
+		DEBUG_MSG("ocr() finish!!");
+			
 		DEBUG_MSG("exportTable() start!!");
 
 		resultString = TableExporter::ExportTable(table);

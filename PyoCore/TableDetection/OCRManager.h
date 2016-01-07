@@ -4,6 +4,7 @@
 #include "../Common/SparseBlock.h"
 #include "../Common/Table.h"
 #include <list>
+#include <vector>
 
 namespace TableDetection
 {
@@ -14,6 +15,7 @@ namespace TableDetection
 		~OCRManager();
 
 		static bool recognize(Common::PngImage&, std::list<Common::SparseBlock>&);
-		static bool recognize(Common::PngImage&, std::list<Common::Cell>&);
+		static bool recognize(Common::PngImage&, std::vector<Common::Cell>&);
+		static void localProcess(cv::Mat&);
 	};
 }

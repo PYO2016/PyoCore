@@ -1,6 +1,8 @@
 #include "PngImage.h"
 #include "EncodingConverter.h"
 
+using namespace cv;
+
 namespace Common
 {
 	/* PixelArray */
@@ -14,11 +16,11 @@ namespace Common
 	{
 		return reinterpret_cast<const Pixel*>(this)[idx];
 	}
-
+	 
 	/* Image */
 
 	PngImage::PngImage(const PngImage& image)
-		:_isCopy(true), filename(image.filename), imageMat(image.imageMat)
+		:_isCopy(true), filename(image.filename), imageMat(image.imageMat.clone())
 	{
 	}
 
