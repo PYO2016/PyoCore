@@ -1,6 +1,8 @@
 #include "PngImage.h"
 #include "EncodingConverter.h"
 
+using namespace cv;
+
 namespace Common
 {
 	/* PixelArray */

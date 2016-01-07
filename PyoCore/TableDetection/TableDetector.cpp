@@ -73,10 +73,10 @@ namespace TableDetection
 			return false;
 
 		DEBUG_MSG("registerImage() finish!!");
-
-		Common::PngImage imgOri(*(this->pImage));
-
+		
 		DEBUG_MSG("preprocess() start!!");
+		this->pImage->setPadding(5);
+		Common::PngImage imgOri(*(this->pImage));
 
 		/////// preprocess()
 		if (!preprocess())
