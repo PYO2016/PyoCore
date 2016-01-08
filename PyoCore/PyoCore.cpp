@@ -27,27 +27,33 @@ namespace PyoCore
 		TableDetection::TableDetector tableDectector;
 		std::wstring resultString;
 
-		if (resultBufferLen == 0) {
-			errorCode = ERROR_UNKNOWN;
-			goto END;
-		}
+		try {
+			if (resultBufferLen == 0) {
+				errorCode = ERROR_UNKNOWN;
+				goto END;
+			}
 
-		if (imageFileType != IMAGE_FILE_TYPE_PNG) {
-			errorCode = ERROR_IMAGE_FILE_TYPE;
-			goto END;
-		}
+			if (imageFileType != IMAGE_FILE_TYPE_PNG) {
+				errorCode = ERROR_IMAGE_FILE_TYPE;
+				goto END;
+			}
 
-		if (!tableDectector.process(imageFileName, resultString, static_cast<bool>(isDebug))) {
-			errorCode = ERROR_UNKNOWN;
-			goto END;
-		}
+			if (!tableDectector.process(imageFileName, resultString, static_cast<bool>(isDebug))) {
+				errorCode = ERROR_UNKNOWN;
+				goto END;
+			}
 
-		if (resultString.length() + 1 >= resultBufferLen) {
-			errorCode = ERROR_UNKNOWN;
-			goto END;
-		}
+			if (resultString.length() + 1 >= resultBufferLen) {
+				errorCode = ERROR_UNKNOWN;
+				goto END;
+			}
 
-		wcscpy_s(resultBuffer, resultBufferLen, resultString.c_str());
+			wcscpy_s(resultBuffer, resultBufferLen, resultString.c_str());
+		}
+		catch (std::exception e) {
+			// when unhandled exception.
+			return FALSE;
+		}
 
 		success = true;
 	END:
