@@ -1,5 +1,6 @@
 #include "PngImage.h"
 #include "EncodingConverter.h"
+#include <vector>
 
 using namespace cv;
 
@@ -30,7 +31,19 @@ namespace Common
 		pImage->_isCopy = false;
 		//decode
 		//the pixels are now in the vector "image", 3 bytes per pixel, ordered BGRBGR...
-		pImage->imageMat = cv::imread(EncodingConverter::ws2s(filename), cv::IMREAD_COLOR);
+		Mat src = imread(EncodingConverter::ws2s(filename), IMREAD_UNCHANGED);
+		src.convertTo(src, CV_8UC4);
+
+		Mat channels[4];
+		split(src.clone(), channels);
+		
+		std::vector<Mat> newChannels(3);
+		for (size_t i = 0; i < 3; i++) {
+			newChannels[i] = Mat(src.rows, src.cols, CV_8UC1, Scalar(255));
+			channels[i].copyTo(newChannels[i], channels[3]);
+		}
+		merge(newChannels, pImage->imageMat);
+
 		bool error = (pImage->imageMat.data == nullptr);
 		if (error)
 			return nullptr;
