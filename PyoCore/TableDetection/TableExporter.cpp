@@ -116,7 +116,7 @@ namespace TableDetection
 			L"<style type='text/css'>\n"
 			L"  .PYO2016-table { \n"
 			L"    border-collapse : collapse; \n"
-			L"    text-align : center; \n"
+			L"    text-align : left; \n"
 			L"  } \n"
 			L"  .PYO2016-table table, .PYO2016-table th, .PYO2016-table td { \n"
 			L"    border : 1px gray solid; \n"

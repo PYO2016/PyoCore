@@ -5,7 +5,7 @@
 #include <opencv2\imgproc\imgproc.hpp>
 #include <string>
 #include <list>
-
+#include <boost/algorithm/string.hpp>
 
 using namespace tesseract;
 using namespace Common;
@@ -87,7 +87,9 @@ namespace TableDetection
 
 			std::string utf8(tessApi->GetUTF8Text());
 			//std::remove_if(utf8.begin(), utf8.end(), [&](char c)->bool { return !std::isprint(c, loc); });
-			std::replace_if(utf8.begin(), utf8.end(), [&](char c)->bool { return !std::isprint(c, loc); }, ' ');
+			//std::replace_if(utf8.begin(), utf8.end(), [&](char c)->bool { return c == '\n'; }, '*');
+			boost::replace_all(utf8, "\n", "<br/>");
+			std::replace_if(utf8.begin(), utf8.end(), [&](char c)->bool { return !std:: isprint(c, loc); }, ' ');
 			itr->setInnerString(std::wstring(utf8.begin(), utf8.end()));
 		}
 

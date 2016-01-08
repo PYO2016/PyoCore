@@ -95,8 +95,8 @@ namespace TableDetection
 		DEBUG_MSG("detectTable() finish!!");
 
 		DEBUG_MSG("ocr() start!!");
-		//if (!OCRManager::recognize(imgOri, table.getCells()))
-		//	return false;
+		if (!OCRManager::recognize(imgOri, table.getCells()))
+			return false;
 		DEBUG_MSG("ocr() finish!!");
 			
 		DEBUG_MSG("exportTable() start!!");
@@ -449,7 +449,10 @@ namespace TableDetection
 							int right = b.max_corner().get<0>();
 							BiasType bt, tmpBt;
 							int maxGap, minGap;
-							//int curVerMinGap = verMinGap;
+							int curVerMinGap = verMinGap;
+							int widthGapConstant = (right - left);
+							if (curVerMinGap > widthGapConstant)
+								curVerMinGap = widthGapConstant;
 							if (left - cell.getLeft() > cell.getRight() - right) {
 								maxGap = left - cell.getLeft();
 								minGap = cell.getRight() - right;
@@ -460,9 +463,9 @@ namespace TableDetection
 								minGap = left - cell.getLeft();
 								tmpBt = BiasType::BIAS_LOW;
 							}
-							if (maxGap > verMinGap && maxGap > minGap * 2.0)
+							if (maxGap > curVerMinGap && maxGap > minGap * 2.0)
 								bt = tmpBt;
-							else if (maxGap > verMinGap && minGap > verMinGap)
+							else if (maxGap > curVerMinGap && minGap > curVerMinGap)
 								bt = BiasType::BIAS_CENTER;
 							else
 								bt = BiasType::BIAS_NOT;
@@ -531,7 +534,13 @@ namespace TableDetection
 						return false;
 					}
 				}
-				//if (stateBiasType != BiasType::JUNK)
+				if (stateBiasType == BiasType::BIAS_HIGH ||
+					!firstRecursive && stateBiasType == BiasType::BIAS_NOT) {
+					while (stateIter != curIter) {
+						stateIter = verList.erase(stateIter);
+					}
+					deleted = true;
+				}
 			}
 			// delete horizontal lines by bias.
 			{
@@ -558,7 +567,10 @@ namespace TableDetection
 							int bottom = b.max_corner().get<1>();
 							BiasType bt, tmpBt;
 							int maxGap, minGap;
-							//int curVerMinGap = verMinGap;
+							int curHorMinGap = verMinGap;
+							int heightGapConstant = (bottom - top);
+							if (curHorMinGap > heightGapConstant)
+								curHorMinGap = heightGapConstant;
 							if (top - cell.getTop() > cell.getBottom() - bottom) {
 								maxGap = top - cell.getTop();
 								minGap = cell.getBottom() - bottom;
@@ -569,9 +581,9 @@ namespace TableDetection
 								minGap = top - cell.getTop();
 								tmpBt = BiasType::BIAS_LOW;
 							}
-							if (maxGap > verMinGap && maxGap > minGap * 2.0)
+							if (maxGap > curHorMinGap && maxGap > minGap * 2.0)
 								bt = tmpBt;
-							else if (maxGap > verMinGap && minGap > verMinGap)
+							else if (maxGap > curHorMinGap && minGap > curHorMinGap)
 								bt = BiasType::BIAS_CENTER;
 							else
 								bt = BiasType::BIAS_NOT;
@@ -640,7 +652,13 @@ namespace TableDetection
 						return false;
 					}
 				}
-				//if (stateBiasType != BiasType::JUNK)
+				if (stateBiasType == BiasType::BIAS_HIGH ||
+					!firstRecursive && stateBiasType == BiasType::BIAS_NOT) {
+					while (stateIter != curIter) {
+						stateIter = horList.erase(stateIter);
+					}
+					deleted = true;
+				}
 			}
 		}
 
