@@ -46,25 +46,6 @@ namespace TableDetection
 
 		/* For Debugging */
 		std::shared_ptr<Common::PngImage> pResultImage;
-		const int recColorCnt = 5;
-		const unsigned recColor[5] =
-		{
-			/* http://ha927.com.ne.kr/color.html */
-			/*
-			0xd2b48c,	// burlywood
-			0xf4a460,	// sandybrown
-			0xdaa520,	// goldenrod
-			0xb8860b,	// darkgoldenrod
-			*/
-			0xdc143c,	// crimson
-			//0xff4500,	// orangered
-			//0xffd700,	// gold
-			//0xdaa520,	// goldenrod
-			0xff8c00,	// darkorange
-			0x4169e1,	// royalblue
-			0x483d7b,	// darkslateblue
-			0x00008b	// darkblue
-		};
 
 		/* Constants for recursive table detection. */
 		/* These values is determined in preprocess(). */

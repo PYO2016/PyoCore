@@ -56,7 +56,7 @@ namespace Preprocessing
 		int scale = 15; // play with this variable in order to increase/decrease the amount of lines to be detected
 
 		// Specify size on horizontal axis
-		int horizontalsize = horizontal.cols / scale;
+		int horizontalsize = std::max(horizontal.cols / scale, 1);
 
 		// Create structure element for extracting horizontal lines through morphology operations
 		Mat horizontalStructure = getStructuringElement(MORPH_RECT, Size(horizontalsize, 1));
@@ -67,7 +67,7 @@ namespace Preprocessing
 
 		// Show extracted horizontal lines
 		// Specify size on vertical axis
-		int verticalsize = vertical.rows / scale;
+		int verticalsize = std::max(vertical.rows / scale, 1);
 
 		// Create structure element for extracting vertical lines through morphology operations
 		Mat verticalStructure = getStructuringElement(MORPH_RECT, Size(1, verticalsize));
