@@ -95,8 +95,8 @@ namespace TableDetection
 		DEBUG_MSG("detectTable() finish!!");
 
 		DEBUG_MSG("ocr() start!!");
-		//if (!OCRManager::recognize(imgOri, table.getCells()))
-		//	return false;
+		if (!OCRManager::recognize(imgOri, table.getCells()))
+			return false;
 		DEBUG_MSG("ocr() finish!!");
 			
 		DEBUG_MSG("exportTable() start!!");
@@ -201,10 +201,10 @@ namespace TableDetection
 		if (!xycut(lines, areaWidth, areaHeight, offsetWidth, offsetHeight, !firstRecursive))
 			return false;
 
-		/*
+		
 		if (!xycutPostProcess(lines, areaWidth, areaHeight, offsetWidth, offsetHeight))
 			return false;
-		*/
+		
 
 		const int adjHorLineConstant = this->pSbm->getLetterHeightAvg() * 1.2;
 		const int adjVerLineConstant = this->pSbm->getLetterWidthAvg() * 1.2;
