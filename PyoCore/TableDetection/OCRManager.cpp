@@ -6,6 +6,9 @@
 #include <string>
 #include <list>
 
+#include "../PyoCoreInternal.h"
+
+#include <boost/algorithm/string.hpp> 
 
 using namespace tesseract;
 using namespace Common;
@@ -20,47 +23,13 @@ namespace TableDetection
 	{	
 	}
 
-	bool OCRManager::recognize(PngImage & image, std::list<SparseBlock>& blocks)
-	{
-		unsigned char* data = image.getDataAsByteArray();
-		if (data == nullptr) {
-			return false;
-		}
-
-		cv::Mat src(image.getHeight(), image.getWidth(), CV_8UC3, data);
-		if (src.channels() == 3) {
-			cv::cvtColor(src, src, CV_BGR2GRAY);
-		}
-		
-		TessBaseAPI* tessApi = new TessBaseAPI();
-		if (tessApi == NULL || tessApi->Init(NULL, "eng")) {
-			return false;
-		}
-		
-		unsigned char* imagedata = src.data;
-		int width = src.cols;
-		int height = src.rows;
-		int pixelBytes = src.channels();
-		int lineBytes = width * pixelBytes;
-		
-		tessApi->SetImage(imagedata, width, height, pixelBytes, lineBytes);
-
-		for (auto itr = begin(blocks); itr != end(blocks); ++itr) {
-			tessApi->SetRectangle(itr->getLeft(), itr->getTop(), itr->getWidth(), itr->getHeight());
-			itr->setText(tessApi->GetUTF8Text());
-		}
-
-		tessApi->End();
-		return true;
-	}
-
-	bool OCRManager::recognize(PngImage & image, std::vector<Cell>& cells)
+	int OCRManager::recognize(PngImage & image, std::vector<Cell>& cells)
 	{
 		std::locale loc;
 
 		unsigned char* data = image.getDataAsByteArray();
 		if (data == nullptr) {
-			return false;
+			return 0;
 		}
 
 		cv::Mat src(image.getHeight(), image.getWidth(), CV_8UC3, data);
@@ -69,30 +38,47 @@ namespace TableDetection
 		}
 
 		TessBaseAPI* tessApi = new TessBaseAPI();
-		if (tessApi == NULL || tessApi->Init(NULL, "eng", tesseract::OEM_TESSERACT_CUBE_COMBINED)) {
-			return false;
+		if (tessApi == NULL)
+			return 0;
+		
+		try {
+			std::lock_guard<std::mutex> guard(PyoCore::tesseract_mtx);
+			int error = tessApi->Init(NULL, "eng", tesseract::OEM_TESSERACT_CUBE_COMBINED);
+			if(error)
+				return 0;
+		}
+		catch (std::exception)
+		{
+			return -2;
 		}
 
-		for (auto itr = begin(cells); itr != end(cells); ++itr) {
-			cv::Mat sub = src(cv::Rect(itr->getLeft(), itr->getTop(), itr->getWidth(), itr->getHeight())).clone();
-			localProcess(sub);
-			
-			unsigned char* imagedata = sub.data;
-			int width = sub.cols;
-			int height = sub.rows;
-			int pixelBytes = sub.channels();
-			int lineBytes = width * pixelBytes;
-			
-			tessApi->SetImage(imagedata, width, height, pixelBytes, lineBytes);
+		try {
+			for (auto itr = begin(cells); itr != end(cells); ++itr) {
+				cv::Mat sub = src(cv::Rect(itr->getLeft(), itr->getTop(), itr->getWidth(), itr->getHeight())).clone();
+				localProcess(sub);
 
-			std::string utf8(tessApi->GetUTF8Text());
-			//std::remove_if(utf8.begin(), utf8.end(), [&](char c)->bool { return !std::isprint(c, loc); });
-			std::replace_if(utf8.begin(), utf8.end(), [&](char c)->bool { return !std::isprint(c, loc); }, ' ');
-			itr->setInnerString(std::wstring(utf8.begin(), utf8.end()));
+				unsigned char* imagedata = sub.data;
+				int width = sub.cols;
+				int height = sub.rows;
+				int pixelBytes = sub.channels();
+				int lineBytes = width * pixelBytes;
+				
+				tessApi->SetImage(imagedata, width, height, pixelBytes, lineBytes);
+
+				std::string utf8(tessApi->GetUTF8Text());
+				//std::remove_if(utf8.begin(), utf8.end(), [&](char c)->bool { return !std::isprint(c, loc); });
+				boost::replace_all(utf8, "\n", "<br/>");
+				std::replace_if(utf8.begin(), utf8.end(), [&](char c)->bool { return !std::isprint(c, loc); }, ' ');
+				itr->setInnerString(std::wstring(utf8.begin(), utf8.end()));
+			}
 		}
-
+		catch (std::exception e)
+		{
+			return -3;
+		}
+		
 		tessApi->End();
-		return true;
+		return 1;
 	}
 
 	void OCRManager::localProcess(cv::Mat& sub) {

@@ -25,17 +25,7 @@ namespace OCRManagerTest
 		
 		TEST_METHOD(TestRecognize)
 		{
-			std::shared_ptr<PngImage> img = PngImage::_LoadImage(L"C:/Users/JK/Desktop/test/test006.png");
 
-			list<SparseBlock> blocks;
-			blocks.push_back(SparseBlock(point(5, 5), point(img->getWidth() - 5, img->getHeight() - 5)));
-
-			OCRManager::recognize(*img, blocks);
-			
-			wstring text = blocks.front().getText();
-			///
-			Logger::WriteMessage("fuck lib");
-			Logger::WriteMessage(text.c_str());
 		}
 
 	};

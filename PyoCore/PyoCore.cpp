@@ -1,5 +1,6 @@
 ﻿#define PYOCORE_DLL
 #include "PyoCore.h"
+#include "PyoCoreInternal.h"
 
 #include <cstdio>
 #include <cstring>
@@ -9,6 +10,8 @@
 
 namespace PyoCore
 {
+	std::mutex tesseract_mtx;
+
 	/************** Handling Error **************/
 
 	int errorCode;
@@ -20,7 +23,7 @@ namespace PyoCore
 
 	/************** Processing image file **************/
 
-	BOOL processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileType,
+	int processImageFileW(LPCWSTR imageFileName, ImageFileType imageFileType,
 		LPWSTR resultBuffer, UINT32 resultBufferLen, BOOL isDebug)
 	{
 		bool success = false;
@@ -30,35 +33,43 @@ namespace PyoCore
 		try {
 			if (resultBufferLen == 0) {
 				errorCode = ERROR_UNKNOWN;
-				goto END;
+				//goto END;
+				return -1;
 			}
 
 			if (imageFileType != IMAGE_FILE_TYPE_PNG) {
 				errorCode = ERROR_IMAGE_FILE_TYPE;
-				goto END;
+				//goto END;
+				return -2;
 			}
 
 			if (!tableDectector.process(imageFileName, resultString, static_cast<bool>(isDebug))) {
 				errorCode = ERROR_UNKNOWN;
-				goto END;
+				//goto END;
+				wcscpy_s(resultBuffer, resultBufferLen, resultString.c_str());
+				return -3;
 			}
 
 			if (resultString.length() + 1 >= resultBufferLen) {
 				errorCode = ERROR_UNKNOWN;
-				goto END;
+				//goto END;
+				return -4;
 			}
 
 			wcscpy_s(resultBuffer, resultBufferLen, resultString.c_str());
 		}
 		catch (std::exception e) {
 			// when unhandled exception.
-			return FALSE;
+			//return FALSE;
+			wcscpy_s(resultBuffer, resultBufferLen, Common::EncodingConverter::s2ws(e.what()).c_str());
+			return -5;
 		}
 
-		success = true;
-	END:
+		return 1;
+		//success = true;
+	//END:
 
-		return static_cast<BOOL>(success);
+		//return static_cast<BOOL>(success);
 	}
 
 	BOOL processImageFileA(LPCSTR imageFileName, ImageFileType imageFileType,

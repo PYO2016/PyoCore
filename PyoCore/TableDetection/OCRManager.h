@@ -14,8 +14,7 @@ namespace TableDetection
 		OCRManager();
 		~OCRManager();
 
-		static bool recognize(Common::PngImage&, std::list<Common::SparseBlock>&);
-		static bool recognize(Common::PngImage&, std::vector<Common::Cell>&);
+		static int recognize(Common::PngImage&, std::vector<Common::Cell>&);
 		static void localProcess(cv::Mat&);
 	};
 }

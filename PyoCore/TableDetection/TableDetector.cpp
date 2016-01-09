@@ -29,7 +29,7 @@ namespace TableDetection
 	typedef bg::model::point<int, 2, bg::cs::cartesian> point;
 	typedef bg::model::box<point> box;
 	typedef bg::model::segment<point> segment;
-	
+
 	/* TableDetector */
 
 	TableDetector::TableDetector()
@@ -71,38 +71,87 @@ namespace TableDetection
 		DEBUG_MSG("registerImage() start!!");
 
 		/////// registerImage()
-		if (!registerImage(imageFile))
+		try
+		{
+			if (!registerImage(imageFile))
+				return false;
+		}
+		catch (std::exception e) {
+			resultString = L"registerImage ";
+			resultString.append(Common::EncodingConverter::s2ws(e.what()));
 			return false;
+		}
 
 		DEBUG_MSG("registerImage() finish!!");
-		
+
 		DEBUG_MSG("preprocess() start!!");
 		this->pImage->setPadding(5);
 		Common::PngImage imgOri(*(this->pImage));
 
 		/////// preprocess()
-		if (!preprocess())
+		try
+		{
+			if (!preprocess())
+				return false;
+		}
+		catch (std::exception e) {
+			resultString = L"preprocess ";
+			resultString.append(Common::EncodingConverter::s2ws(e.what()));
 			return false;
+		}
 
 		DEBUG_MSG("preprocess() finish!!");
 
 		DEBUG_MSG("detectTable() start!!");
 
 		/////// detectTable()
-		if (!detectTable())
+		try
+		{
+			if (!detectTable())
+				return false;
+		}
+		catch (std::exception e) {
+			resultString = L"detectTable ";
+			resultString.append(Common::EncodingConverter::s2ws(e.what()));
 			return false;
-
+		}
 		DEBUG_MSG("detectTable() finish!!");
 
 		DEBUG_MSG("ocr() start!!");
-		if (!OCRManager::recognize(imgOri, table.getCells()))
+		try
+		{
+			int error = OCRManager::recognize(imgOri, table.getCells());
+			switch (error) {
+			case -1:
+				resultString = L"recognize: can not allocate memory";
+				return false;
+			case -2:
+				resultString = L"recognize: can not init tesseract";
+				return false;
+			case -3:
+				resultString = L"recognize: ang dae";
+				return false;
+			default:
+				break;
+			}
+		}
+		catch (std::exception e) {
+			resultString = L"recognize ";
+			resultString.append(Common::EncodingConverter::s2ws(e.what()));
 			return false;
+		}
 		DEBUG_MSG("ocr() finish!!");
-			
+
 		DEBUG_MSG("exportTable() start!!");
-
-		resultString = TableExporter::ExportTable(table);
-
+		try
+		{
+			resultString = TableExporter::ExportTable(table);
+		}
+		catch (std::exception e) {
+			resultString = L"ExportTable ";
+			resultString.append(Common::EncodingConverter::s2ws(e.what()));
+			return false;
+		}
 		DEBUG_MSG("exportTable() finish!!");
 
 		/* Do more things */
@@ -119,11 +168,11 @@ namespace TableDetection
 			return false;
 		return true;
 	}
-	
+
 	bool TableDetector::preprocess(void)
 	{
 		bool success = false;
-		
+
 		// do image pre-processing.
 		if (!Preprocessing::Preprocessor::process(*pImage))
 			goto END;
@@ -160,11 +209,11 @@ namespace TableDetection
 			// nothing to process.
 			return true;
 		}
-		
+
 		DEBUG_ACTION(pResultImage = std::make_shared<Common::PngImage>(*pImage));
-		
+
 		bool success = false;
-		
+
 		if (!recXycut(0, pImage->getWidth(), pImage->getHeight(), 0, 0))
 			goto END;
 
@@ -308,8 +357,8 @@ namespace TableDetection
 				offsetWidth, offsetWidth + areaWidth - 1);
 			return true;
 		}
-		
-		
+
+
 		int leftBoundary = verList.front().getOffset();
 		int rightBoundary = verList.back().getOffset();
 		int topBoundary = horList.front().getOffset();
@@ -404,7 +453,7 @@ namespace TableDetection
 
 			// construct rtree.
 			for (const auto &cell : cells) {
-				cellRtree.insert(box(point(cell.getLeft(), cell.getTop()), 
+				cellRtree.insert(box(point(cell.getLeft(), cell.getTop()),
 					point(cell.getRight(), cell.getBottom())));
 			}
 
@@ -428,9 +477,9 @@ namespace TableDetection
 				}
 				result_n.clear();
 
-				cellRtree.query(bgi::intersects(box(point(lb+1, tb+1),point(rb-1, bb-1))),
+				cellRtree.query(bgi::intersects(box(point(lb + 1, tb + 1), point(rb - 1, bb - 1))),
 					std::back_inserter(result_n));
-				
+
 				for (const auto &b : result_n) {
 					cellRtree.remove(b);
 				}
@@ -450,7 +499,7 @@ namespace TableDetection
 		}
 
 		/// //////////////////////////////
-		
+
 		bool success = true;
 
 		for (const auto &cell : cells) {
@@ -474,17 +523,17 @@ namespace TableDetection
 			goto END;
 		if (!pHm->makeHistogram(HistogramType::TYPE_Y))
 			goto END;
-		
+
 		if (!pHm->detectSpecialValues(HistogramType::TYPE_X))
 			goto END;
 		if (!pHm->detectSpecialValues(HistogramType::TYPE_Y))
 			goto END;
-		
+
 		if (!pHm->applyMedianFilter(HistogramType::TYPE_X))
 			goto END;
 		if (!pHm->applyMedianFilter(HistogramType::TYPE_Y))
 			goto END;
-		
+
 		if (!pHm->filterExtremum(HistogramType::TYPE_X))
 			goto END;
 		if (!pHm->filterExtremum(HistogramType::TYPE_Y))
@@ -515,7 +564,7 @@ namespace TableDetection
 			Common::LineType type = line.getType();
 			int offset = line.getOffset();
 			int top, bottom, left, right;
-			
+
 			switch (type) {
 			case Common::LineType::LINE_HORIZONTAL:
 				top = bottom = offset;
@@ -529,7 +578,7 @@ namespace TableDetection
 				bottom = offsetHeight + areaHeight - 1;
 				break;
 
-			default : 
+			default:
 				return false;
 			}
 
@@ -557,7 +606,7 @@ namespace TableDetection
 				type = Common::LineType::LINE_HORIZONTAL;
 				offset = top;
 			}
-			else{
+			else {
 				type = Common::LineType::LINE_VERTICAL;
 				offset = left;
 			}

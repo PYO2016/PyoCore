@@ -177,6 +177,7 @@
     <ClInclude Include="Common\Table.h" />
     <ClInclude Include="Preprocessing\Preprocessor.h" />
     <ClInclude Include="PyoCore.h" />
+    <ClInclude Include="PyoCoreInternal.h" />
     <ClInclude Include="TableDetection\HistogramManager.h" />
     <ClInclude Include="TableDetection\OCRManager.h" />
     <ClInclude Include="TableDetection\TableDetector.h" />
