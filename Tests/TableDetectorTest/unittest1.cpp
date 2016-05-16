@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <windows.h>
+#include <boost/algorithm/string.hpp>    
 
 #include "../../PyoCore/Common/EncodingConverter.h"
 #include "../../PyoCore/Common/PngImage.h"
@@ -34,6 +35,8 @@ namespace TableDetectorTest
 				// if comment
 				if (prefix[0] == L'#')
 					continue;
+
+				boost::algorithm::to_lower(prefix);
 
 				Logger::WriteMessage((L"---- Test for \"" + prefix + L"\" ----\n").c_str());
 
